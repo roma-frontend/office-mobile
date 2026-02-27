@@ -69,7 +69,7 @@ function parseCalendarBlock(raw: string): { text: string; calendarData: Calendar
 }
 
 const LEAVE_CONFIG: Record<string, { label: string; icon: string; gradient: [string, string] }> = {
-  paid:   { label: 'Paid Vacation',  icon: '🏖️',  gradient: [colors.primaryDark, colors.primary] },
+  paid:   { label: 'Paid Vacation',  icon: '🏖️',  gradient: ['#2563eb', '#3b82f6'] },
   sick:   { label: 'Sick Leave',     icon: '🤒',  gradient: ['#ef4444', '#f87171'] },
   family: { label: 'Family Leave',   icon: '👨‍👩‍👧', gradient: ['#10b981', '#34d399'] },
   doctor: { label: 'Doctor Visit',   icon: '🏥',  gradient: ['#06b6d4', '#22d3ee'] },
