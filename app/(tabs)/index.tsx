@@ -292,7 +292,7 @@ function EmployeeDashboard({ userId, userName, bottomOffset }: { userId: string;
       <View style={[styles.headerPro, { borderBottomColor: colors.border }]}>
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <View style={{ backgroundColor: isDark ? 'colors.primary + '22'' : colors.bgElevated, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
+            <View style={{ backgroundColor: isDark ? colors.primary + '22' : colors.bgElevated, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
               <Text style={{ fontSize: 10, fontWeight: '700', color: isDark ? colors.primary : colors.textMuted, letterSpacing: 1, textTransform: 'uppercase' }}>
                 {user?.department ?? user?.position ?? 'Employee'}
               </Text>
@@ -753,7 +753,7 @@ function AdminDashboard({ userId, userName, bottomOffset }: { userId: string; us
       <View style={[styles.headerPro, { borderBottomColor: colors.border }]}>
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <View style={{ backgroundColor: isDark ? 'colors.primary + '22'' : colors.bgElevated, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
+            <View style={{ backgroundColor: isDark ? colors.primary + '22' : colors.bgElevated, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
               <Text style={{ fontSize: 10, fontWeight: '700', color: isDark ? colors.primary : colors.textMuted, letterSpacing: 1, textTransform: 'uppercase' }}>Admin Panel</Text>
             </View>
             {pendingCount > 0 && (
