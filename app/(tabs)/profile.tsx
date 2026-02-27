@@ -20,7 +20,7 @@ const PRESENCE_OPTIONS = [
 ];
 
 const LEAVE_COLORS: Record<string, string> = {
-  paid: colors.primary, sick: '#ef4444', family: '#10b981', doctor: '#06b6d4', unpaid: '#f59e0b',
+  paid: '#3b82f6', sick: '#ef4444', family: '#10b981', doctor: '#06b6d4', unpaid: '#f59e0b',
 };
 
 // Avatar component that shows image if available, otherwise shows gradient with initials
