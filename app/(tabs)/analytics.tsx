@@ -195,9 +195,9 @@ function SmartSuggestionCard({ item, colors }: {
   colors: any;
 }) {
   const priorityColors: Record<string, string> = {
-    high: colors.error,
-    medium: colors.warning,
-    low: colors.success,
+    high: '#ef4444',
+    medium: '#f59e0b',
+    low: '#10b981',
   };
 
   return (
