@@ -17,7 +17,7 @@ type TaskStatus = 'pending' | 'in_progress' | 'review' | 'completed';
 type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 
 const PRIORITY_COLORS: Record<TaskPriority, string> = {
-  low: '#10b981', medium: '#f59e0b', high: '#ef4444', urgent: colors.primary,
+  low: '#10b981', medium: '#f59e0b', high: '#ef4444', urgent: '#3b82f6',
 };
 
 const STATUS_COLORS: Record<TaskStatus, string> = {
