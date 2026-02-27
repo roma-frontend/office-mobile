@@ -14,13 +14,13 @@ import { useTheme } from '@/context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ROLE_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
-  admin:      { label: 'Admin',      color: colors.primary, icon: 'shield'        },
+  admin:      { label: 'Admin',      color: '#3b82f6', icon: 'shield'        },
   supervisor: { label: 'Supervisor', color: '#f59e0b', icon: 'star'          },
   employee:   { label: 'Employee',   color: '#10b981', icon: 'person'        },
 };
 
 const TYPE_CONFIG: Record<string, { label: string; color: string }> = {
-  staff:      { label: 'Staff',      color: colors.primary },
+  staff:      { label: 'Staff',      color: '#3b82f6' },
   contractor: { label: 'Contractor', color: '#f59e0b' },
 };
 
