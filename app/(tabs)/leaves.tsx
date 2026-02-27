@@ -184,7 +184,7 @@ type LeaveType = 'paid' | 'sick' | 'family' | 'doctor' | 'unpaid';
 type LeaveStatus = 'pending' | 'approved' | 'rejected';
 
 const LEAVE_TYPES: { label: string; value: LeaveType; color: string; icon: string }[] = [
-  { label: 'Paid Vacation', value: 'paid', color: colors.primary, icon: 'sunny-outline' },
+  { label: 'Paid Vacation', value: 'paid', color: '#3b82f6', icon: 'sunny-outline' },
   { label: 'Sick Leave', value: 'sick', color: '#ef4444', icon: 'medkit-outline' },
   { label: 'Family Leave', value: 'family', color: '#10b981', icon: 'people-outline' },
   { label: 'Doctor Visit', value: 'doctor', color: '#06b6d4', icon: 'medical-outline' },
@@ -192,7 +192,7 @@ const LEAVE_TYPES: { label: string; value: LeaveType; color: string; icon: strin
 ];
 
 const LEAVE_TYPE_COLORS: Record<LeaveType, string> = {
-  paid: colors.primary, sick: '#ef4444', family: '#10b981', doctor: '#06b6d4', unpaid: '#f59e0b',
+  paid: '#3b82f6', sick: '#ef4444', family: '#10b981', doctor: '#06b6d4', unpaid: '#f59e0b',
 };
 
 const STATUS_ICONS: Record<LeaveStatus, string> = {
