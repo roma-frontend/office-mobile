@@ -17,11 +17,11 @@ type TaskStatus = 'pending' | 'in_progress' | 'review' | 'completed';
 type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 
 const PRIORITY_COLORS: Record<TaskPriority, string> = {
-  low: '#10b981', medium: '#f59e0b', high: '#ef4444', urgent: '#3b82f6',
+  low: '#10b981', medium: '#f59e0b', high: '#ef4444', urgent: colors.primary,
 };
 
 const STATUS_COLORS: Record<TaskStatus, string> = {
-  pending: '#3b82f6', in_progress: '#f59e0b', review: '#06b6d4', completed: '#10b981',
+  pending: colors.primary, in_progress: '#f59e0b', review: '#06b6d4', completed: '#10b981',
 };
 
 const STATUS_ICONS: Record<TaskStatus, string> = {
@@ -326,7 +326,7 @@ export default function Tasks() {
           </TouchableOpacity>
           {isAdmin && (
             <TouchableOpacity style={styles.addBtn} onPress={() => { setShowCreateModal(true); setShowAssignPicker(false); }}>
-              <LinearGradient colors={isDark ? ['#3b82f6'Dark, '#3b82f6'] : ['#3b82f6'Dark, '#3b82f6']} style={styles.addBtnGrad}>
+              <LinearGradient colors={isDark ? [colors.primaryDark, colors.primary] : [colors.primaryDark, colors.primary]} style={styles.addBtnGrad}>
                 <Ionicons name="add" size={20} color="#fff" />
               </LinearGradient>
             </TouchableOpacity>
@@ -337,11 +337,11 @@ export default function Tasks() {
       {/* Stats row */}
       <View style={styles.statsRow}>
         {[
-          { label: 'Total', value: stats.total, color: '#3b82f6' },
-          { label: 'Pending', value: stats.pending, color: '#3b82f6' },
+          { label: 'Total', value: stats.total, color: colors.primary },
+          { label: 'Pending', value: stats.pending, color: colors.primary },
           { label: 'In Progress', value: stats.in_progress, color: '#f59e0b' },
           { label: 'Review', value: stats.review, color: '#06b6d4' },
-          { label: 'Completed', value: stats.completed, color: '#10b981' },
+          { label: 'Completed', value: stats.completed, color: colors.success },
         ].map(s => (
           <View key={s.label} style={[styles.statCard, { borderColor: s.color + '44', backgroundColor: colors.bgCard }]}>
             <Text style={[styles.statValue, { color: s.color }]}>{s.value}</Text>
@@ -356,7 +356,7 @@ export default function Tasks() {
         contentContainerStyle={{ flexDirection: 'row', paddingHorizontal: 16, gap: 8, paddingRight: 8, paddingVertical: 4 }}>
         {FILTERS.map(f => (
           <TouchableOpacity key={f} onPress={() => setFilter(f)}
-            style={[styles.filterChip, { borderColor: colors.border, backgroundColor: colors.bgCard }, filter === f && [styles.filterChipActive, { backgroundColor: '#3b82f6', borderColor: '#3b82f6' }]]}>
+            style={[styles.filterChip, { borderColor: colors.border, backgroundColor: colors.bgCard }, filter === f && [styles.filterChipActive, { backgroundColor: colors.primary, borderColor: colors.primary }]]}>
             <Text style={[styles.filterText, filter === f && styles.filterTextActive, filter !== f && { color: colors.textMuted }]}>{f}</Text>
           </TouchableOpacity>
         ))}
@@ -365,7 +365,7 @@ export default function Tasks() {
       {/* Tasks list */}
       {isLoading ? (
         <View style={styles.centered}>
-          <ActivityIndicator color={'#3b82f6'} size="large" />
+          <ActivityIndicator color={colors.primary} size="large" />
         </View>
       ) : filtered.length === 0 ? (
         <View style={[styles.centered, { paddingBottom: bottomOffset }]}>
@@ -381,13 +381,13 @@ export default function Tasks() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor={'#3b82f6'}
-              colors={['#3b82f6']}
+              tintColor={colors.primary}
+              colors={[colors.primary]}
             />
           }
         >
           {filtered.map(task => {
-            const pc = PRIORITY_COLORS[task.priority as TaskPriority] ?? '#3b82f6';
+            const pc = PRIORITY_COLORS[task.priority as TaskPriority] ?? colors.primary;
             const sc = STATUS_COLORS[task.status as TaskStatus] ?? colors.textMuted;
             const si = STATUS_ICONS[task.status as TaskStatus] ?? 'help-circle';
             const isOverdue = task.deadline && task.deadline < Date.now() && task.status !== 'completed';
@@ -443,7 +443,7 @@ export default function Tasks() {
                       </Text>
                     </View>
                     {task.deadline && (
-                      <Text style={[styles.deadline, { color: isOverdue ? '#ef4444' : colors.textMuted }]}>
+                      <Text style={[styles.deadline, { color: isOverdue ? colors.error : colors.textMuted }]}>
                         {new Date(task.deadline).toLocaleDateString()}
                       </Text>
                     )}
@@ -483,7 +483,7 @@ export default function Tasks() {
                 {/* Assign To */}
                 <Text style={[styles.fieldLabel, { color: colors.textMuted }]}>Assign To *</Text>
                 <TouchableOpacity
-                  style={[styles.fieldInput, { backgroundColor: colors.bg, borderColor: taskAssignedTo ? '#3b82f6' : colors.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}
+                  style={[styles.fieldInput, { backgroundColor: colors.bg, borderColor: taskAssignedTo ? colors.primary : colors.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}
                   onPress={() => setShowAssignPicker(v => !v)}
                   activeOpacity={0.8}
                 >
@@ -492,7 +492,7 @@ export default function Tasks() {
                     const initials = user?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || '?';
                     return (
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 }}>
-                        <View style={[styles.avatarInitials, { backgroundColor: '#3b82f6' }]}>
+                        <View style={[styles.avatarInitials, { backgroundColor: colors.primary }]}>
                           <Text style={styles.avatarText}>{initials}</Text>
                         </View>
                         <View style={{ flex: 1 }}>
@@ -510,7 +510,7 @@ export default function Tasks() {
                 {showAssignPicker && (
                   <View style={[styles.assignPickerList, { backgroundColor: colors.bg, borderColor: colors.border }]}>
                     {!usersForAssignment ? (
-                      <ActivityIndicator color={'#3b82f6'} style={{ padding: 16 }} />
+                      <ActivityIndicator color={colors.primary} style={{ padding: 16 }} />
                     ) : usersForAssignment.length === 0 ? (
                       <Text style={[styles.noComments, { color: colors.textMuted }]}>No employees found</Text>
                     ) : (
@@ -520,11 +520,11 @@ export default function Tasks() {
                         return (
                           <TouchableOpacity
                             key={user._id}
-                            style={[styles.assignPickerItem, { borderBottomColor: colors.border }, isSelected && { backgroundColor: '#3b82f6' + '15' }]}
+                            style={[styles.assignPickerItem, { borderBottomColor: colors.border }, isSelected && { backgroundColor: colors.primary + '15' }]}
                             onPress={() => { setTaskAssignedTo(user._id); setShowAssignPicker(false); }}
                             activeOpacity={0.7}
                           >
-                            <View style={[styles.avatarInitials, { backgroundColor: isSelected ? '#3b82f6' : '#3b82f6' }]}>
+                            <View style={[styles.avatarInitials, { backgroundColor: isSelected ? colors.primary : colors.primary }]}>
                               <Text style={styles.avatarText}>{initials}</Text>
                             </View>
                             <View style={{ flex: 1 }}>
@@ -533,7 +533,7 @@ export default function Tasks() {
                                 <Text style={[styles.assigneeName, { color: colors.textMuted, fontSize: 11 }]}>{[user.position, user.department].filter(Boolean).join(' · ')}</Text>
                               )}
                             </View>
-                            {isSelected && <Ionicons name="checkmark-circle" size={18} color={'#3b82f6'} />}
+                            {isSelected && <Ionicons name="checkmark-circle" size={18} color={colors.primary} />}
                           </TouchableOpacity>
                         );
                       })
@@ -564,8 +564,8 @@ export default function Tasks() {
                 {/* Attachments Section */}
                 <Text style={[styles.fieldLabel, { color: colors.textMuted }]}>Attachments</Text>
                 <TouchableOpacity style={[styles.attachmentButton, { backgroundColor: colors.bg, borderColor: colors.border }]} onPress={handleAddFile} disabled={createSubmitting}>
-                  <Ionicons name="cloud-upload-outline" size={20} color={'#3b82f6'} />
-                  <Text style={[styles.attachmentButtonText, { color: '#3b82f6' }]}>Add File</Text>
+                  <Ionicons name="cloud-upload-outline" size={20} color={colors.primary} />
+                  <Text style={[styles.attachmentButtonText, { color: colors.primary }]}>Add File</Text>
                 </TouchableOpacity>
                 {attachments.length > 0 && (
                   <View style={styles.attachmentsContainer}>
@@ -581,7 +581,7 @@ export default function Tasks() {
                           <Ionicons name={getFileIcon(file.mimeType) as any} size={14} color={colors.textSecondary} />
                           <Text style={[styles.attachmentFileName, { color: colors.textMuted }]} numberOfLines={1}>{file.name}</Text>
                           {isUploading ? (
-                            <ActivityIndicator size="small" color={'#3b82f6'} />
+                            <ActivityIndicator size="small" color={colors.primary} />
                           ) : (
                             <TouchableOpacity onPress={() => handleRemoveAttachment(idx)} style={styles.attachmentRemove}>
                               <Ionicons name="close" size={16} color={colors.textMuted} />
@@ -600,7 +600,7 @@ export default function Tasks() {
                   <Text style={[styles.cancelText, { color: colors.textMuted }]}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.submitBtn} onPress={handleCreateTask} disabled={createSubmitting}>
-                  <LinearGradient colors={['#3b82f6'Dark, '#3b82f6']} style={styles.submitGrad}>
+                  <LinearGradient colors={[colors.primaryDark, colors.primary]} style={styles.submitGrad}>
                     {createSubmitting
                       ? <ActivityIndicator color="#fff" size="small" />
                       : <Text style={styles.submitText}>Create Task</Text>}
@@ -686,7 +686,7 @@ export default function Tasks() {
                                   }
                                 }}
                                 style={styles.attachmentRemove}>
-                                <Ionicons name="close" size={16} color={'#ef4444'} />
+                                <Ionicons name="close" size={16} color={colors.error} />
                               </TouchableOpacity>
                             </View>
                           );
@@ -758,8 +758,8 @@ export default function Tasks() {
                         Alert.alert('Error', e?.message ?? 'Failed to pick file'); 
                       }
                     }}>
-                    <Ionicons name={detailUploadingFiles.size > 0 ? "hourglass" : "cloud-upload-outline"} size={18} color={'#3b82f6'} />
-                    <Text style={[styles.attachmentButtonText, { color: '#3b82f6' }]}>
+                    <Ionicons name={detailUploadingFiles.size > 0 ? "hourglass" : "cloud-upload-outline"} size={18} color={colors.primary} />
+                    <Text style={[styles.attachmentButtonText, { color: colors.primary }]}>
                       {detailUploadingFiles.size > 0 ? `Uploading (${detailUploadingFiles.size})...` : 'Add File'}
                     </Text>
                   </TouchableOpacity>
@@ -791,7 +791,7 @@ export default function Tasks() {
                       <Text style={[styles.cancelText, { color: colors.textMuted }]}>Close</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.submitBtn} onPress={handleAddComment} disabled={!newComment.trim()}>
-                      <LinearGradient colors={isDark ? ['#3b82f6'Dark, '#3b82f6'] : ['#3b82f6'Dark, '#3b82f6']} style={styles.submitGrad}>
+                      <LinearGradient colors={isDark ? [colors.primaryDark, colors.primary] : [colors.primaryDark, colors.primary]} style={styles.submitGrad}>
                         <Text style={styles.submitText}>Add Comment</Text>
                       </LinearGradient>
                     </TouchableOpacity>
@@ -799,7 +799,7 @@ export default function Tasks() {
                       handleDeleteTask(selectedTask._id);
                       setShowDetailModal(false);
                     }}>
-                      <Ionicons name="trash-outline" size={18} color={'#ef4444'} />
+                      <Ionicons name="trash-outline" size={18} color={colors.error} />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -819,7 +819,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: 6, paddingBottom: 10 },
   title: { ...Typography.h1 },
   subtitle: { ...Typography.caption, marginTop: 2 },
-  addBtn: { borderRadius: Radius.md, overflow: 'hidden', shadowColor: '#3b82f6', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 8, elevation: 6 },
+  addBtn: { borderRadius: Radius.md, overflow: 'hidden', shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 8, elevation: 6 },
   iconBtn: { width: 40, height: 40, borderRadius: Radius.md, alignItems: 'center', justifyContent: 'center' },
   addBtnGrad: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
 
@@ -831,7 +831,7 @@ const styles = StyleSheet.create({
 
   // Filters
   filterChip: { height: 34, paddingHorizontal: 16, borderRadius: Radius.full, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
-  filterChipActive: { borderColor: '#3b82f6' },
+  filterChipActive: { borderColor: colors.primary },
   filterText: { ...Typography.captionMedium },
   filterTextActive: { color: '#fff', fontWeight: '600' },
 
@@ -879,7 +879,7 @@ const styles = StyleSheet.create({
   modalActions: { flexDirection: 'row', gap: 10, marginTop: 8 },
   cancelBtn: { flex: 1, height: 52, borderRadius: Radius.md, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
   cancelText: { ...Typography.bodyMedium },
-  submitBtn: { flex: 2, height: 52, borderRadius: Radius.md, overflow: 'hidden', shadowColor: '#3b82f6', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 6 },
+  submitBtn: { flex: 2, height: 52, borderRadius: Radius.md, overflow: 'hidden', shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 6 },
   submitGrad: { width: '100%', height: 52, alignItems: 'center', justifyContent: 'center' },
   submitText: { ...Typography.bodyMedium, color: '#fff', fontWeight: '700' },
   deleteBtn: { width: 52, height: 52, borderRadius: Radius.md, alignItems: 'center', justifyContent: 'center', backgroundColor: '#C84C4C' + '15', borderWidth: 1, borderColor: '#C84C4C' + '33' },
@@ -893,7 +893,7 @@ const styles = StyleSheet.create({
 
   // Assignee
   assigneeRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6, marginBottom: 6 },
-  avatarInitials: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#3b82f6', alignItems: 'center', justifyContent: 'center' },
+  avatarInitials: { width: 24, height: 24, borderRadius: 12, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   avatarText: { ...Typography.caption, color: '#fff', fontWeight: '700', fontSize: 10 },
   assigneeName: { ...Typography.caption, flex: 1 },
 
@@ -917,5 +917,4 @@ const styles = StyleSheet.create({
   commentContent: { ...Typography.caption, lineHeight: 18 },
   noComments: { ...Typography.caption, textAlign: 'center', paddingVertical: 20 },
 });
-
 

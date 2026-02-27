@@ -181,7 +181,7 @@ export default function Calendar() {
 
       {isLoading ? (
         <View style={styles.centered}>
-          <ActivityIndicator color={'#3b82f6'} size="large" />
+          <ActivityIndicator color={colors.primary} size="large" />
         </View>
       ) : (
         <ScrollView
@@ -191,8 +191,8 @@ export default function Calendar() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor={'#3b82f6'}
-              colors={['#3b82f6']}
+              tintColor={colors.primary}
+              colors={[colors.primary]}
             />
           }
         >
@@ -208,8 +208,8 @@ export default function Calendar() {
               <Ionicons name="chevron-forward" size={20} color={colors.textPrimary} />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={goToToday} style={[styles.todayBtn, { backgroundColor: '#3b82f6' + '22', borderColor: '#3b82f6' }]}>
-              <Text style={[styles.todayBtnText, { color: '#3b82f6' }]}>Today</Text>
+            <TouchableOpacity onPress={goToToday} style={[styles.todayBtn, { backgroundColor: colors.primary + '22', borderColor: colors.primary }]}>
+              <Text style={[styles.todayBtnText, { color: colors.primary }]}>Today</Text>
             </TouchableOpacity>
             
             <TouchableOpacity onPress={toggleTheme} style={[styles.iconBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
@@ -243,8 +243,8 @@ export default function Calendar() {
                     styles.dayCell,
                     { backgroundColor: colors.bgCard, borderColor: colors.border },
                     !isCurrentMonth && { backgroundColor: colors.bg, borderColor: colors.border + '44' },
-                    isToday && { borderColor: '#3b82f6', borderWidth: 2 },
-                    isSelected && { backgroundColor: '#3b82f6' + '15', borderColor: '#3b82f6', borderWidth: 2 },
+                    isToday && { borderColor: colors.primary, borderWidth: 2 },
+                    isSelected && { backgroundColor: colors.primary + '15', borderColor: colors.primary, borderWidth: 2 },
                   ]}
                 >
                   {/* Day number */}
@@ -253,7 +253,7 @@ export default function Calendar() {
                       styles.dayNumber,
                       { color: colors.textPrimary },
                       !isCurrentMonth && { color: colors.textMuted },
-                      isToday && { color: '#3b82f6' },
+                      isToday && { color: colors.primary },
                     ]}
                   >
                     {date.getDate()}
@@ -324,8 +324,8 @@ export default function Calendar() {
                           {
                             backgroundColor:
                               leave.status === 'approved'
-                                ? '#10b981' + '22'
-                                : '#f59e0b' + '22',
+                                ? colors.success + '22'
+                                : colors.warning + '22',
                           },
                         ]}
                       >
@@ -335,8 +335,8 @@ export default function Calendar() {
                             {
                               color:
                                 leave.status === 'approved'
-                                  ? '#10b981'
-                                  : '#f59e0b',
+                                  ? colors.success
+                                  : colors.warning,
                             },
                           ]}
                         >
@@ -357,8 +357,8 @@ export default function Calendar() {
               <View style={styles.onLeaveList}>
                 {todayLeaves.map((leave, idx) => (
                   <View key={idx} style={[styles.onLeaveItem, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                    <View style={[styles.avatarCircle, { backgroundColor: '#3b82f6' + '22' }]}>
-                      <Text style={[styles.avatarText, { color: '#3b82f6' }]}>{getInitials(leave.userName)}</Text>
+                    <View style={[styles.avatarCircle, { backgroundColor: colors.primary + '22' }]}>
+                      <Text style={[styles.avatarText, { color: colors.primary }]}>{getInitials(leave.userName)}</Text>
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={[styles.onLeaveName, { color: colors.textPrimary }]}>{leave.userName}</Text>
@@ -711,5 +711,4 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 });
-
 

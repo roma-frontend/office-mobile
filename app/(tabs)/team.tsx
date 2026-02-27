@@ -14,13 +14,13 @@ import { useTheme } from '@/context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ROLE_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
-  admin:      { label: 'Admin',      color: '#3b82f6', icon: 'shield'        },
+  admin:      { label: 'Admin',      color: colors.primary, icon: 'shield'        },
   supervisor: { label: 'Supervisor', color: '#f59e0b', icon: 'star'          },
   employee:   { label: 'Employee',   color: '#10b981', icon: 'person'        },
 };
 
 const TYPE_CONFIG: Record<string, { label: string; color: string }> = {
-  staff:      { label: 'Staff',      color: '#3b82f6' },
+  staff:      { label: 'Staff',      color: colors.primary },
   contractor: { label: 'Contractor', color: '#f59e0b' },
 };
 
@@ -80,7 +80,7 @@ function EmployeeProfileModal({ employee, allUsers, onClose }: {
   const leaves = useQuery(api.leaves.getUserLeaves, { userId: employee._id });
   const supervisor = allUsers.find(u => u._id === employee.supervisorId);
   const roleConf = ROLE_CONFIG[employee.role] ?? ROLE_CONFIG.employee;
-  const typeConf = TYPE_CONFIG[employee.employeeType] ?? { label: employee.employeeType, color: '#3b82f6' };
+  const typeConf = TYPE_CONFIG[employee.employeeType] ?? { label: employee.employeeType, color: colors.primary };
   const presenceConf = PRESENCE_CONFIG[employee.presenceStatus ?? 'available'] ?? PRESENCE_CONFIG.available;
 
   const approvedLeaves = (leaves ?? []).filter(l => l.status === 'approved');
@@ -96,7 +96,7 @@ function EmployeeProfileModal({ employee, allUsers, onClose }: {
 
           {/* Hero */}
           <LinearGradient
-            colors={isDark ? ['#0f172a', '#1e293b', colors.bg] : ['#3b82f6', '#3b82f6'Light, colors.bg]}
+            colors={isDark ? ['#0f172a', '#1e293b', colors.bg] : [colors.primary, colors.primaryLight, colors.bg]}
             style={profileStyles.hero}
           >
             <TouchableOpacity style={profileStyles.closeBtn} onPress={onClose}>
@@ -127,7 +127,7 @@ function EmployeeProfileModal({ employee, allUsers, onClose }: {
             <Text style={[profileStyles.sectionTitle, { color: colors.textPrimary }]}>Leave Overview</Text>
             <View style={profileStyles.statsRow}>
               {[
-                { label: "Paid Left", value: employee.paidLeaveBalance ?? 0, color: '#3b82f6' },
+                { label: "Paid Left", value: employee.paidLeaveBalance ?? 0, color: colors.primary },
                 { label: "Sick Left", value: employee.sickLeaveBalance ?? 0, color: "#ef4444" },
                 { label: "Family Left", value: employee.familyLeaveBalance ?? 0, color: "#10b981" },
                 { label: "Used Days", value: totalDays, color: "#f59e0b" },
@@ -165,12 +165,12 @@ function EmployeeProfileModal({ employee, allUsers, onClose }: {
           <View style={profileStyles.section}>
             <View style={profileStyles.sectionHeader}>
               <Text style={[profileStyles.sectionTitle, { color: colors.textPrimary }]}>Leave History</Text>
-              <View style={[profileStyles.badge, { backgroundColor: '#f59e0b' + '22' }]}>
-                <Text style={[profileStyles.badgeText, { color: '#f59e0b' }]}>{pendingLeaves.length} pending</Text>
+              <View style={[profileStyles.badge, { backgroundColor: colors.warning + '22' }]}>
+                <Text style={[profileStyles.badgeText, { color: colors.warning }]}>{pendingLeaves.length} pending</Text>
               </View>
             </View>
             {leaves === undefined ? (
-              <ActivityIndicator color={'#3b82f6'} style={{ marginTop: 12 }} />
+              <ActivityIndicator color={colors.primary} style={{ marginTop: 12 }} />
             ) : leaves.length === 0 ? (
               <View style={profileStyles.emptyLeaves}>
                 <Ionicons name="calendar-outline" size={32} color={colors.textMuted} />
@@ -179,7 +179,7 @@ function EmployeeProfileModal({ employee, allUsers, onClose }: {
             ) : (
               <View style={[profileStyles.leaveList, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
                 {leaves.slice(0, 5).map(l => {
-                  const sc = l.status === 'approved' ? '#10b981' : l.status === 'pending' ? '#f59e0b' : '#ef4444';
+                  const sc = l.status === 'approved' ? colors.success : l.status === 'pending' ? colors.warning : colors.error;
                   return (
                     <View key={l._id} style={[profileStyles.leaveItem, { borderBottomColor: colors.border }]}>
                       <View style={[profileStyles.leaveDot, { backgroundColor: sc }]} />
@@ -266,8 +266,8 @@ export default function Team() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={'#3b82f6'}
-            colors={['#3b82f6']}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
           />
         }
       >
@@ -288,10 +288,10 @@ export default function Team() {
             contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
           >
             {[
-              { label: 'Total',       value: stats.total,       color: '#3b82f6', icon: 'people-outline'  },
-              { label: 'Staff',       value: stats.staff,       color: '#10b981', icon: 'person-outline'  },
+              { label: 'Total',       value: stats.total,       color: colors.primary, icon: 'people-outline'  },
+              { label: 'Staff',       value: stats.staff,       color: colors.success, icon: 'person-outline'  },
               { label: 'Contractors', value: stats.contractors, color: '#f59e0b',      icon: 'briefcase-outline'},
-              { label: 'Supervisors', value: stats.supervisors, color: '#3b82f6',      icon: 'shield-outline'  },
+              { label: 'Supervisors', value: stats.supervisors, color: colors.primary,      icon: 'shield-outline'  },
             ].map(s => (
               <View key={s.label} style={[styles.statCard, { borderColor: s.color + '44', backgroundColor: colors.bgCard }]}>
                 <Ionicons name={s.icon as any} size={18} color={s.color} />
@@ -340,7 +340,7 @@ export default function Team() {
           contentContainerStyle={{ paddingHorizontal: 16, gap: 8, marginBottom: 12 }}>
           {['all', 'admin', 'supervisor', 'employee'].map(r => (
             <TouchableOpacity key={r} onPress={() => setFilterRole(r)}
-              style={[styles.filterChip, { backgroundColor: filterRole === r ? '#3b82f6' : colors.bgCard, borderColor: filterRole === r ? '#3b82f6' : colors.border }]}>
+              style={[styles.filterChip, { backgroundColor: filterRole === r ? colors.primary : colors.bgCard, borderColor: filterRole === r ? colors.primary : colors.border }]}>
               <Text style={[styles.filterText, { color: filterRole === r ? '#fff' : colors.textMuted }]}>
                 {r === 'all' ? 'All Roles' : ROLE_CONFIG[r]?.label ?? r}
               </Text>
@@ -351,7 +351,7 @@ export default function Team() {
         {/* List */}
         {isLoading ? (
           <View style={styles.centered}>
-            <ActivityIndicator color={'#3b82f6'} size="large" />
+            <ActivityIndicator color={colors.primary} size="large" />
           </View>
         ) : filtered.length === 0 ? (
           <View style={styles.centered}>
@@ -362,7 +362,7 @@ export default function Team() {
           <View style={styles.list}>
             {filtered.map((m: any, i: number) => {
               const roleConf = ROLE_CONFIG[m.role] ?? ROLE_CONFIG.employee;
-              const typeConf = TYPE_CONFIG[m.employeeType] ?? { label: m.employeeType, color: '#3b82f6' };
+              const typeConf = TYPE_CONFIG[m.employeeType] ?? { label: m.employeeType, color: colors.primary };
               const presConf = PRESENCE_CONFIG[m.presenceStatus ?? 'available'] ?? PRESENCE_CONFIG.available;
               const supervisor = (users as any[])?.find((u: any) => u._id === m.supervisorId);
               return (
@@ -497,6 +497,5 @@ const profileStyles = StyleSheet.create({
   emptyLeaves: { alignItems: 'center', gap: 8, paddingVertical: 24 },
   emptyText: { ...Typography.caption },
 });
-
 
 

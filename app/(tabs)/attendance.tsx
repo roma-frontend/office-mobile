@@ -117,7 +117,7 @@ function SupervisorRatingModal({ visible, employee, onClose, onSubmit, isLoading
       <View style={styles.starsContainer}>
         {[1, 2, 3, 4, 5].map(star => (
           <TouchableOpacity key={star} onPress={() => onChange(star)}>
-            <Ionicons name={star <= value ? 'star' : 'star-outline'} size={24} color={'#3b82f6'} />
+            <Ionicons name={star <= value ? 'star' : 'star-outline'} size={24} color={colors.primary} />
           </TouchableOpacity>
         ))}
       </View>
@@ -293,7 +293,7 @@ export default function Attendance() {
   if (!userId) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color={'#3b82f6'} />
+        <ActivityIndicator size="large" color={colors.primary} />
       </SafeAreaView>
     );
   }
@@ -365,13 +365,13 @@ export default function Attendance() {
           )}
 
           {todayStatus?.status === 'checked_in' ? (
-            <LinearGradient colors={['#ef4444', '#c41c3b']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.actionButton}>
+            <LinearGradient colors={[colors.error, '#c41c3b']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.actionButton}>
               <TouchableOpacity onPress={handleCheckOut} disabled={isCheckingOut}>
                 {isCheckingOut ? <ActivityIndicator color="#fff" /> : <Text style={styles.actionButtonText}>Check Out</Text>}
               </TouchableOpacity>
             </LinearGradient>
           ) : (
-            <LinearGradient colors={['#10b981', '#059669']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.actionButton}>
+            <LinearGradient colors={[colors.success, '#059669']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.actionButton}>
               <TouchableOpacity onPress={handleCheckIn} disabled={isCheckingIn}>
                 {isCheckingIn ? <ActivityIndicator color="#fff" /> : <Text style={styles.actionButtonText}>Check In</Text>}
               </TouchableOpacity>
@@ -455,7 +455,7 @@ export default function Attendance() {
                   <Text style={[styles.employeeName, { color: colors.textPrimary }]}>{employee.name}</Text>
                   <Text style={[styles.employeeRole, { color: colors.textMuted }]}>{employee.role}</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={24} color={'#3b82f6'} />
+                <Ionicons name="chevron-forward" size={24} color={colors.primary} />
               </TouchableOpacity>
             ))}
           </View>
@@ -774,5 +774,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
-
 
