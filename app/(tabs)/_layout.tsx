@@ -91,7 +91,7 @@ function ChatTabButton({ focused, colors }: { focused: boolean; colors: any }) {
             width: BTN + 10,
             height: BTN + 10,
             borderRadius: 20,
-            backgroundColor: isDark ? 'colors.primary + '33'' : 'colors.primary + '22'',
+            backgroundColor: isDark ? colors.primary + '33' : colors.primary + '22',
             transform: [{ scale: pulseAnim }],
           }} />
         )}
@@ -105,7 +105,7 @@ function ChatTabButton({ focused, colors }: { focused: boolean; colors: any }) {
             borderRadius: 20,
             borderWidth: 1.5,
             borderStyle: 'dashed',
-            borderColor: isDark ? 'colors.primary + '99'' : 'colors.primaryLight + '99'',
+            borderColor: isDark ? colors.primary + '99' : colors.primaryLight + '99',
             transform: [{ rotate: spin }],
           }} />
         )}
