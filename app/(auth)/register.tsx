@@ -21,7 +21,7 @@ function getPasswordStrength(pwd: string): number {
   if (/[^A-Za-z0-9]/.test(pwd)) score++;
   return score;
 }
-const STRENGTH_COLORS = ['#ef4444', '#f59e0b', '#10b981', colors.primary];
+const STRENGTH_COLORS = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6'];
 const STRENGTH_LABELS = ['Weak', 'Fair', 'Good', 'Strong'];
 
 export default function Register() {
