@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <!-- Dark theme gradient for mobile app -->
+    <linearGradient id="mobileBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a1a"/>
+      <stop offset="50%" stop-color="#1a1a3a"/>
+      <stop offset="100%" stop-color="#2a2a5a"/>
+    </linearGradient>
+    <!-- Accent gradient overlay -->
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#60a5fa"/>
+    </linearGradient>
+    <!-- Glow effect -->
+    <radialGradient id="mobileGlow" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#60a5fa" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="textShadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="64" height="64" rx="18" fill="url(#mobileBg)"/>
+  
+  <!-- Glow effect -->
+  <rect width="64" height="64" rx="18" fill="url(#mobileGlow)"/>
+  
+  <!-- Leave/Calendar icon background element -->
+  <g opacity="0.2">
+    <rect x="18" y="22" width="28" height="24" rx="3" fill="url(#accentGrad)"/>
+    <line x1="18" y1="28" x2="46" y2="28" stroke="white" stroke-width="2"/>
+    <circle cx="25" cy="35" r="1.5" fill="white"/>
+    <circle cx="32" cy="35" r="1.5" fill="white"/>
+    <circle cx="39" cy="35" r="1.5" fill="white"/>
+  </g>
+  
+  <!-- HR text - modern and bold -->
+  <text 
+    x="50%" 
+    y="52%" 
+    dominant-baseline="middle" 
+    text-anchor="middle"
+    font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    font-weight="900"
+    font-size="30"
+    fill="white"
+    filter="url(#textShadow)"
+    letter-spacing="-1.5">HR</text>
+  
+  <!-- Accent border highlight -->
+  <rect width="64" height="64" rx="18" fill="none" stroke="url(#accentGrad)" stroke-width="1" opacity="0.5"/>
+</svg>

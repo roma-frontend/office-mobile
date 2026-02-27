@@ -1,0 +1,65 @@
+{
+  "expo": {
+    "name": "HRLeave",
+    "slug": "hrleave",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "scheme": "hrleave",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0a0a1a"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.hrleave.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "HRLeave uses microphone for voice commands",
+        "NSSpeechRecognitionUsageDescription": "HRLeave uses speech recognition for Hey HR voice activation",
+        "NSCameraUsageDescription": "HRLeave uses camera for profile photo",
+        "UIBackgroundModes": [
+          "fetch",
+          "remote-notification",
+          "fetch",
+          "remote-notification"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0a0a1a"
+      },
+      "package": "com.hrleave.app",
+      "versionCode": 1,
+      "permissions": [
+        "RECORD_AUDIO",
+        "CAMERA",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "newArchEnabled": false,
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "84b8be99-64c2-4a59-92de-1d52360aa577"
+      }
+    },
+    "owner": "roman_92"
+  }
+}
