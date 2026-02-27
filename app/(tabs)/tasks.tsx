@@ -21,7 +21,7 @@ const PRIORITY_COLORS: Record<TaskPriority, string> = {
 };
 
 const STATUS_COLORS: Record<TaskStatus, string> = {
-  pending: colors.primary, in_progress: '#f59e0b', review: '#06b6d4', completed: '#10b981',
+  pending: '#3b82f6', in_progress: '#f59e0b', review: '#06b6d4', completed: '#10b981',
 };
 
 const STATUS_ICONS: Record<TaskStatus, string> = {
