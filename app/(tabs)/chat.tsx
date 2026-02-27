@@ -1072,9 +1072,9 @@ const styles = StyleSheet.create({
   inputRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingVertical: 8, borderTopWidth: 1 },
   inputWrap: { flex: 1, flexDirection: 'row', alignItems: 'center', borderRadius: 26, borderWidth: 1.5, paddingHorizontal: 14, paddingVertical: 0, minHeight: 48 },
   input: { flex: 1, ...Typography.body, paddingVertical: 0, maxHeight: 120 },
-  micBtn: { borderRadius: 14, overflow: 'hidden', shadowColor: colors.primary, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4 },
+  micBtn: { borderRadius: 14, overflow: 'hidden', shadowColor: '#3b82f6', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4 },
   micBtnGrad: { width: 46, height: 46, alignItems: 'center', justifyContent: 'center', borderRadius: 14 },
-  sendBtn: { borderRadius: 14, overflow: 'hidden', shadowColor: colors.primary, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4 },
+  sendBtn: { borderRadius: 14, overflow: 'hidden', shadowColor: '#3b82f6', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4 },
   sendBtnGrad: { width: 46, height: 46, alignItems: 'center', justifyContent: 'center', borderRadius: 14 },
   
   // Voice Modal Styles
