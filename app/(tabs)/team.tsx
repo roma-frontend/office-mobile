@@ -32,7 +32,7 @@ const PRESENCE_CONFIG: Record<string, { label: string; color: string; icon: stri
   busy:          { label: 'Busy',          color: '#f97316',      icon: 'ban'              },
 };
 
-const AVATAR_COLORS = [colors.primary, '#f59e0b', '#10b981', '#ef4444', '#06b6d4', colors.primaryLight];
+const AVATAR_COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#60a5fa'];
 
 function getInitials(name: string) {
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
