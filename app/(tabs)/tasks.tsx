@@ -819,7 +819,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: 6, paddingBottom: 10 },
   title: { ...Typography.h1 },
   subtitle: { ...Typography.caption, marginTop: 2 },
-  addBtn: { borderRadius: Radius.md, overflow: 'hidden', shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 8, elevation: 6 },
+  addBtn: { borderRadius: Radius.md, overflow: 'hidden', shadowColor: '#3b82f6', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 8, elevation: 6 },
   iconBtn: { width: 40, height: 40, borderRadius: Radius.md, alignItems: 'center', justifyContent: 'center' },
   addBtnGrad: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
 
@@ -831,7 +831,7 @@ const styles = StyleSheet.create({
 
   // Filters
   filterChip: { height: 34, paddingHorizontal: 16, borderRadius: Radius.full, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
-  filterChipActive: { borderColor: colors.primary },
+  filterChipActive: { borderColor: '#3b82f6' },
   filterText: { ...Typography.captionMedium },
   filterTextActive: { color: '#fff', fontWeight: '600' },
 
