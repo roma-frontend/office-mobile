@@ -73,7 +73,7 @@ function CalendarPicker({ visible, title, value, minDate, colors, isDark, onClos
     return toStr(d) < minDate;
   }
 
-  const accentColor = isDark ? colors.primary : colors.primary;
+  const accentColor = isDark ? '#3b82f6' : '#3b82f6';
   const bg = isDark ? '#1A1510' : '#ffffff';
   const headerBg = isDark ? '#211C14' : colors.bg;
   const cellBg = isDark ? '#2A2218' : colors.bgCard;
@@ -90,7 +90,7 @@ function CalendarPicker({ visible, title, value, minDate, colors, isDark, onClos
         <View style={{ width: '100%', maxWidth: 360, backgroundColor: bg, borderRadius: 24, overflow: 'hidden', elevation: 20, shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 20 }}>
 
           {/* Header */}
-          <LinearGradient colors={isDark ? [colors.primaryDark,colors.primary] : [colors.primary,colors.primaryLight]} style={{ padding: 20, paddingBottom: 16 }}>
+          <LinearGradient colors={isDark ? ['#3b82f6'Dark,'#3b82f6'] : ['#3b82f6','#3b82f6'Light]} style={{ padding: 20, paddingBottom: 16 }}>
             <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 12, fontWeight: '600', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 }}>{title}</Text>
             <Text style={{ color: '#fff', fontSize: 22, fontWeight: '700' }}>
               {selected ? (() => { const d = new Date(selected + 'T00:00:00'); return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); })() : 'Pick a date'}
@@ -167,7 +167,7 @@ function CalendarPicker({ visible, title, value, minDate, colors, isDark, onClos
               onPress={() => { if (selected) { onSelect(selected); onClose(); } }}
               disabled={!selected}
               style={{ flex: 2, height: 48, borderRadius: 14, overflow: 'hidden', opacity: selected ? 1 : 0.5 }}>
-              <LinearGradient colors={isDark ? [colors.primaryDark,colors.primary] : [colors.primary,colors.primaryLight]} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+              <LinearGradient colors={isDark ? ['#3b82f6'Dark,'#3b82f6'] : ['#3b82f6','#3b82f6'Light]} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
                 <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Confirm Date</Text>
               </LinearGradient>
             </TouchableOpacity>
@@ -184,7 +184,7 @@ type LeaveType = 'paid' | 'sick' | 'family' | 'doctor' | 'unpaid';
 type LeaveStatus = 'pending' | 'approved' | 'rejected';
 
 const LEAVE_TYPES: { label: string; value: LeaveType; color: string; icon: string }[] = [
-  { label: 'Paid Vacation', value: 'paid', color: colors.primary, icon: 'sunny-outline' },
+  { label: 'Paid Vacation', value: 'paid', color: '#3b82f6', icon: 'sunny-outline' },
   { label: 'Sick Leave', value: 'sick', color: '#ef4444', icon: 'medkit-outline' },
   { label: 'Family Leave', value: 'family', color: '#10b981', icon: 'people-outline' },
   { label: 'Doctor Visit', value: 'doctor', color: '#06b6d4', icon: 'medical-outline' },
@@ -192,7 +192,7 @@ const LEAVE_TYPES: { label: string; value: LeaveType; color: string; icon: strin
 ];
 
 const LEAVE_TYPE_COLORS: Record<LeaveType, string> = {
-  paid: colors.primary, sick: '#ef4444', family: '#10b981', doctor: '#06b6d4', unpaid: '#f59e0b',
+  paid: '#3b82f6', sick: '#ef4444', family: '#10b981', doctor: '#06b6d4', unpaid: '#f59e0b',
 };
 
 const STATUS_ICONS: Record<LeaveStatus, string> = {
@@ -418,7 +418,7 @@ export default function Leaves() {
             <Ionicons name={showSearch ? 'close' : 'search-outline'} size={20} color={colors.textSecondary} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.addBtn} onPress={() => setShowModal(true)}>
-            <LinearGradient colors={isDark ? [colors.primaryDark, colors.primary] : [colors.primaryDark, colors.primary]} style={styles.addBtnGrad}>
+            <LinearGradient colors={isDark ? ['#3b82f6'Dark, '#3b82f6'] : ['#3b82f6'Dark, '#3b82f6']} style={styles.addBtnGrad}>
               <Ionicons name="add" size={20} color="#fff" />
             </LinearGradient>
           </TouchableOpacity>
@@ -449,10 +449,10 @@ export default function Leaves() {
       {isAdmin && leaveStats && (
         <View style={styles.statsRow}>
           {[
-            { label: 'Total',    value: leaveStats.total,    color: colors.primary },
-            { label: 'Pending',  value: leaveStats.pending,  color: colors.warning },
-            { label: 'Approved', value: leaveStats.approved, color: colors.success },
-            { label: 'Rejected', value: leaveStats.rejected, color: colors.error   },
+            { label: 'Total',    value: leaveStats.total,    color: '#3b82f6' },
+            { label: 'Pending',  value: leaveStats.pending,  color: '#f59e0b' },
+            { label: 'Approved', value: leaveStats.approved, color: '#10b981' },
+            { label: 'Rejected', value: leaveStats.rejected, color: '#ef4444'   },
           ].map(s => (
             <View key={s.label} style={[styles.statCard, { borderColor: s.color + '44', backgroundColor: colors.bgCard }]}>
               <Text style={[styles.statValue, { color: s.color }]}>{s.value}</Text>
@@ -469,7 +469,7 @@ export default function Leaves() {
           contentContainerStyle={{ flexDirection: 'row', paddingHorizontal: 16, gap: 8, paddingRight: 8, paddingVertical: 4 }}>
           {FILTERS.map(f => (
             <TouchableOpacity key={f} onPress={() => setFilter(f)}
-              style={[styles.filterChip, { backgroundColor: colors.bgCard, borderColor: colors.border }, filter === f && { backgroundColor: colors.primary, borderColor: colors.primary }]}>
+              style={[styles.filterChip, { backgroundColor: colors.bgCard, borderColor: colors.border }, filter === f && { backgroundColor: '#3b82f6', borderColor: '#3b82f6' }]}>
               <Text style={[styles.filterText, { color: colors.textMuted }, filter === f && { color: '#fff' }]}>{f}</Text>
             </TouchableOpacity>
           ))}
@@ -479,7 +479,7 @@ export default function Leaves() {
       {/* List */}
       {isLoading ? (
         <View style={styles.centered}>
-          <ActivityIndicator color={colors.primary} size="large" />
+          <ActivityIndicator color={'#3b82f6'} size="large" />
         </View>
       ) : filtered.length === 0 ? (
         <View style={[styles.centered, { paddingBottom: bottomOffset }]}>
@@ -492,11 +492,11 @@ export default function Leaves() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: bottomOffset + 16, gap: 10, paddingTop: 4 }}>
           {filtered.map(l => {
             const STATUS_COLORS: Record<LeaveStatus, string> = {
-              approved: colors.success, pending: colors.warning, rejected: colors.error,
+              approved: '#10b981', pending: '#f59e0b', rejected: '#ef4444',
             };
             const sc = STATUS_COLORS[l.status as LeaveStatus] ?? colors.textMuted;
             const si = STATUS_ICONS[l.status as LeaveStatus] ?? 'help-circle';
-            const tc = LEAVE_TYPE_COLORS[l.type as LeaveType] ?? colors.primary;
+            const tc = LEAVE_TYPE_COLORS[l.type as LeaveType] ?? '#3b82f6';
             const lt = LEAVE_TYPES.find(x => x.value === l.type);
             const isExpanded = expandedId === l._id;
             return (
@@ -550,23 +550,23 @@ export default function Leaves() {
                     <View style={[styles.leaveActions, { borderColor: colors.border }]}>
                       {isAdmin && l.status === 'pending' && (
                         <>
-                          <TouchableOpacity style={[styles.approveBtn, { backgroundColor: colors.success + '20', borderColor: colors.success + '60' }]}
+                          <TouchableOpacity style={[styles.approveBtn, { backgroundColor: '#10b981' + '20', borderColor: '#10b981' + '60' }]}
                             onPress={() => handleApprove(l._id)}>
-                            <Ionicons name="checkmark-circle-outline" size={16} color={colors.success} />
-                            <Text style={[styles.actionBtnText, { color: colors.success }]}>Approve</Text>
+                            <Ionicons name="checkmark-circle-outline" size={16} color={'#10b981'} />
+                            <Text style={[styles.actionBtnText, { color: '#10b981' }]}>Approve</Text>
                           </TouchableOpacity>
-                          <TouchableOpacity style={[styles.rejectBtn, { backgroundColor: colors.error + '20', borderColor: colors.error + '60' }]}
+                          <TouchableOpacity style={[styles.rejectBtn, { backgroundColor: '#ef4444' + '20', borderColor: '#ef4444' + '60' }]}
                             onPress={() => handleReject(l._id)}>
-                            <Ionicons name="close-circle-outline" size={16} color={colors.error} />
-                            <Text style={[styles.actionBtnText, { color: colors.error }]}>Reject</Text>
+                            <Ionicons name="close-circle-outline" size={16} color={'#ef4444'} />
+                            <Text style={[styles.actionBtnText, { color: '#ef4444' }]}>Reject</Text>
                           </TouchableOpacity>
                         </>
                       )}
                       {!isAdmin && l.status === 'pending' && (
-                        <TouchableOpacity style={[styles.editBtn, { backgroundColor: colors.primary + '20', borderColor: colors.primary + '60' }]}
+                        <TouchableOpacity style={[styles.editBtn, { backgroundColor: '#3b82f6' + '20', borderColor: '#3b82f6' + '60' }]}
                           onPress={() => handleEdit(l)}>
-                          <Ionicons name="create-outline" size={16} color={colors.primary} />
-                          <Text style={[styles.actionBtnText, { color: colors.primary }]}>Edit</Text>
+                          <Ionicons name="create-outline" size={16} color={'#3b82f6'} />
+                          <Text style={[styles.actionBtnText, { color: '#3b82f6' }]}>Edit</Text>
                         </TouchableOpacity>
                       )}
                       <TouchableOpacity style={[styles.deleteBtn, { backgroundColor: colors.bgElevated, borderColor: colors.border }]}
@@ -686,9 +686,9 @@ export default function Leaves() {
 
                 {/* Days preview */}
                 {daysPreview > 0 && (
-                  <View style={[styles.daysPreview, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '33' }]}>
-                    <Ionicons name="calendar-outline" size={16} color={colors.primary} />
-                    <Text style={[styles.daysPreviewText, { color: colors.primary }]}>
+                  <View style={[styles.daysPreview, { backgroundColor: '#3b82f6' + '15', borderColor: '#3b82f6' + '33' }]}>
+                    <Ionicons name="calendar-outline" size={16} color={'#3b82f6'} />
+                    <Text style={[styles.daysPreviewText, { color: '#3b82f6' }]}>
                       {daysPreview} day{daysPreview !== 1 ? 's' : ''} requested
                       {fromDate ? ` · ${fromDate}${toDate && toDate !== fromDate ? ` → ${toDate}` : ''}` : ''}
                     </Text>
@@ -709,8 +709,8 @@ export default function Leaves() {
                   <TouchableOpacity style={[styles.cancelBtn, { backgroundColor: colors.bgElevated, borderColor: colors.border }]} onPress={resetModal}>
                     <Text style={[styles.cancelText, { color: colors.textSecondary }]}>Cancel</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.submitBtn, { shadowColor: colors.primary }]} onPress={handleSubmit} disabled={submitting}>
-                    <LinearGradient colors={isDark ? [colors.primaryDark, colors.primary] : [colors.primaryDark, colors.primary]} style={styles.submitGrad}>
+                  <TouchableOpacity style={[styles.submitBtn, { shadowColor: '#3b82f6' }]} onPress={handleSubmit} disabled={submitting}>
+                    <LinearGradient colors={isDark ? ['#3b82f6'Dark, '#3b82f6'] : ['#3b82f6'Dark, '#3b82f6']} style={styles.submitGrad}>
                       {submitting
                         ? <ActivityIndicator color="#fff" size="small" />
                         : <Text style={styles.submitText}>Submit Request</Text>}
@@ -729,7 +729,7 @@ export default function Leaves() {
           <View style={styles.centeredOverlay}>
             <View style={[styles.dialogCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               <View style={styles.dialogIconWrap}>
-                <Ionicons name="close-circle" size={32} color={colors.error} />
+                <Ionicons name="close-circle" size={32} color={'#ef4444'} />
               </View>
               <Text style={[styles.dialogTitle, { color: colors.textPrimary }]}>Reject Leave Request</Text>
               <Text style={[styles.dialogSubtitle, { color: colors.textMuted }]}>Provide a reason (optional)</Text>
@@ -747,7 +747,7 @@ export default function Leaves() {
                   onPress={() => { setRejectModalVisible(false); setRejectReason(''); }}>
                   <Text style={[styles.cancelText, { color: colors.textSecondary }]}>Cancel</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.submitBtn, { flex: 1.5, shadowColor: colors.error }]} onPress={confirmReject} disabled={rejectSubmitting}>
+                <TouchableOpacity style={[styles.submitBtn, { flex: 1.5, shadowColor: '#ef4444' }]} onPress={confirmReject} disabled={rejectSubmitting}>
                   <LinearGradient colors={['#ef4444', '#dc2626']} style={styles.submitGrad}>
                     {rejectSubmitting
                       ? <ActivityIndicator color="#fff" size="small" />
@@ -807,9 +807,9 @@ export default function Leaves() {
                 </View>
 
                 {editFromDate ? (
-                  <View style={[styles.daysPreview, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '33' }]}>
-                    <Ionicons name="calendar-outline" size={16} color={colors.primary} />
-                    <Text style={[styles.daysPreviewText, { color: colors.primary }]}>
+                  <View style={[styles.daysPreview, { backgroundColor: '#3b82f6' + '15', borderColor: '#3b82f6' + '33' }]}>
+                    <Ionicons name="calendar-outline" size={16} color={'#3b82f6'} />
+                    <Text style={[styles.daysPreviewText, { color: '#3b82f6' }]}>
                       {calcDays(editFromDate, editToDate || editFromDate)} day{calcDays(editFromDate, editToDate || editFromDate) !== 1 ? 's' : ''} requested
                     </Text>
                   </View>
@@ -825,8 +825,8 @@ export default function Leaves() {
                   <TouchableOpacity style={[styles.cancelBtn, { backgroundColor: colors.bgElevated, borderColor: colors.border }]} onPress={() => setShowEditModal(false)}>
                     <Text style={[styles.cancelText, { color: colors.textSecondary }]}>Cancel</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.submitBtn, { shadowColor: colors.primary }]} onPress={confirmEdit} disabled={editSubmitting}>
-                    <LinearGradient colors={isDark ? [colors.primaryDark, colors.primary] : [colors.primaryDark, colors.primary]} style={styles.submitGrad}>
+                  <TouchableOpacity style={[styles.submitBtn, { shadowColor: '#3b82f6' }]} onPress={confirmEdit} disabled={editSubmitting}>
+                    <LinearGradient colors={isDark ? ['#3b82f6'Dark, '#3b82f6'] : ['#3b82f6'Dark, '#3b82f6']} style={styles.submitGrad}>
                       {editSubmitting
                         ? <ActivityIndicator color="#fff" size="small" />
                         : <Text style={styles.submitText}>Save Changes</Text>}
@@ -932,6 +932,7 @@ const styles = StyleSheet.create({
   dialogSubtitle: { ...Typography.caption, textAlign: 'center' },
 
 });
+
 
 
 

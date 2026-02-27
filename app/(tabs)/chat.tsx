@@ -69,7 +69,7 @@ function parseCalendarBlock(raw: string): { text: string; calendarData: Calendar
 }
 
 const LEAVE_CONFIG: Record<string, { label: string; icon: string; gradient: [string, string] }> = {
-  paid:   { label: 'Paid Vacation',  icon: '🏖️',  gradient: [colors.primaryDark, colors.primary] },
+  paid:   { label: 'Paid Vacation',  icon: '🏖️',  gradient: ['#3b82f6'Dark, '#3b82f6'] },
   sick:   { label: 'Sick Leave',     icon: '🤒',  gradient: ['#ef4444', '#f87171'] },
   family: { label: 'Family Leave',   icon: '👨‍👩‍👧', gradient: ['#10b981', '#34d399'] },
   doctor: { label: 'Doctor Visit',   icon: '🏥',  gradient: ['#06b6d4', '#22d3ee'] },
@@ -272,12 +272,12 @@ function CalendarBoard({ data, colors, isDark }: { data: CalendarData; colors: a
             <View style={{ marginBottom: 12 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
                 <Text style={{ fontSize: 13, fontWeight: '600', color: balanceTextColor }}>🏖️ Paid Leave</Text>
-                <Text style={{ fontSize: 13, fontWeight: '700', color: colors.primary }}>
+                <Text style={{ fontSize: 13, fontWeight: '700', color: '#3b82f6' }}>
                   {data.balances.paid}d <Text style={{ fontWeight: '400', color: colors.textMuted }}>remaining</Text>
                 </Text>
               </View>
               <View style={{ height: 8, backgroundColor: isDark ? '#1e293b' : colors.border, borderRadius: 99, overflow: 'hidden' }}>
-                <View style={{ height: 8, width: `${Math.min((data.balances.paid / 20) * 100, 100)}%`, backgroundColor: colors.primary, borderRadius: 99 }} />
+                <View style={{ height: 8, width: `${Math.min((data.balances.paid / 20) * 100, 100)}%`, backgroundColor: '#3b82f6', borderRadius: 99 }} />
               </View>
             </View>
             <View style={{ marginBottom: 12 }}>
@@ -835,7 +835,7 @@ export default function Chat() {
 
   const renderMessage = ({ item }: { item: Message }) => {
     const isUser = item.role === 'user';
-    const avatarGradient: [string, string] = isDark ? [colors.primaryDark, colors.primary] : [colors.primary, colors.primaryDark];
+    const avatarGradient: [string, string] = isDark ? ['#3b82f6'Dark, '#3b82f6'] : ['#3b82f6', '#3b82f6'Dark];
     const hasCalendar = !isUser && !!item.calendarData;
 
     return (
@@ -863,7 +863,7 @@ export default function Chat() {
             styles.bubble,
             isUser ? styles.bubbleUser : styles.bubbleAI,
             isUser
-              ? { backgroundColor: colors.primary }
+              ? { backgroundColor: '#3b82f6' }
               : { backgroundColor: colors.bgCard, borderColor: colors.border },
           ]}>
             <Text style={[styles.bubbleText, isUser ? { color: '#fff' } : { color: colors.textPrimary }]}>
@@ -880,26 +880,26 @@ export default function Chat() {
       <KeyboardAvoidingView style={{ flex: 1, marginBottom: bottomOffset }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={bottomOffset}>
         {/* Header */}
         <View style={[styles.header, { borderBottomColor: colors.border, backgroundColor: colors.bgCard }]}>
-          <LinearGradient colors={isDark ? [colors.primaryDark, colors.primary] : [colors.primary, colors.primaryDark]} style={styles.headerIcon}>
+          <LinearGradient colors={isDark ? ['#3b82f6'Dark, '#3b82f6'] : ['#3b82f6', '#3b82f6'Dark]} style={styles.headerIcon}>
             <Ionicons name="sparkles" size={20} color="#fff" />
           </LinearGradient>
           <View>
             <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>HR Assistant</Text>
             <Text style={[styles.headerSub, { color: colors.textMuted }]}>Always here to help</Text>
           </View>
-          <View style={[styles.onlineDot, { backgroundColor: colors.success }]} />
+          <View style={[styles.onlineDot, { backgroundColor: '#10b981' }]} />
           {/* TTS toggle */}
           <TouchableOpacity
             onPress={() => {
               if (isSpeaking) { Speech.stop(); setIsSpeaking(false); }
               setTtsEnabled(prev => !prev);
             }}
-            style={[styles.themeToggle, ttsEnabled && { backgroundColor: colors.primary + '22', borderRadius: 10 }]}
+            style={[styles.themeToggle, ttsEnabled && { backgroundColor: '#3b82f6' + '22', borderRadius: 10 }]}
           >
             <Ionicons
               name={isSpeaking ? 'volume-high' : ttsEnabled ? 'volume-medium-outline' : 'volume-mute-outline'}
               size={20}
-              color={ttsEnabled ? colors.primary : colors.textMuted}
+              color={ttsEnabled ? '#3b82f6' : colors.textMuted}
             />
           </TouchableOpacity>
           <TouchableOpacity onPress={toggleTheme} style={styles.themeToggle}>
@@ -917,11 +917,11 @@ export default function Chat() {
           showsVerticalScrollIndicator={false}
           ListFooterComponent={loading ? (
             <View style={styles.typingWrap}>
-              <LinearGradient colors={isDark ? [colors.primaryDark, colors.primary] : [colors.primary, colors.primaryDark]} style={styles.avatar}>
+              <LinearGradient colors={isDark ? ['#3b82f6'Dark, '#3b82f6'] : ['#3b82f6', '#3b82f6'Dark]} style={styles.avatar}>
                 <Ionicons name="sparkles" size={14} color="#fff" />
               </LinearGradient>
               <View style={[styles.typingBubble, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <ActivityIndicator size="small" color={colors.primary} />
+                <ActivityIndicator size="small" color={'#3b82f6'} />
               </View>
             </View>
           ) : null}
@@ -945,7 +945,7 @@ export default function Chat() {
             // Voice transcript shown in same input wrap
             <View style={[styles.inputWrap, {
               backgroundColor: isDark ? '#12172b' : '#1a1f2e',
-              borderColor: colors.primary,
+              borderColor: '#3b82f6',
               flexDirection: 'row', alignItems: 'center',
             }]}>
               {/* Pulsing red dot */}
@@ -955,7 +955,7 @@ export default function Chat() {
                 </Animated.View>
               )}
               {autoSendCountdown !== null && !isListening && (
-                <View style={[styles.micActiveDot, { backgroundColor: colors.primary, marginRight: 8, width: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }]}>
+                <View style={[styles.micActiveDot, { backgroundColor: '#3b82f6', marginRight: 8, width: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }]}>
                   <Text style={{ color: '#fff', fontSize: 10, fontWeight: '700' }}>{autoSendCountdown}</Text>
                 </View>
               )}
@@ -989,7 +989,7 @@ export default function Chat() {
             // Normal text input
             <View style={[styles.inputWrap, {
               backgroundColor: isDark ? colors.bgElevated : colors.bgCard,
-              borderColor: colors.primary,
+              borderColor: '#3b82f6',
             }]}>
               <TextInput
                 style={[styles.input, { color: colors.textPrimary }]}
@@ -1022,7 +1022,7 @@ export default function Chat() {
             <LinearGradient
               colors={isListening
                 ? ['#ef4444', '#dc2626']
-                : isDark ? [colors.primaryDark, colors.primary] : [colors.primary, colors.primaryDark]}
+                : isDark ? ['#3b82f6'Dark, '#3b82f6'] : ['#3b82f6', '#3b82f6'Dark]}
               style={styles.micBtnGrad}
             >
               <Ionicons name={isListening ? 'stop' : 'mic'} size={18} color="#fff" />
@@ -1035,7 +1035,7 @@ export default function Chat() {
             onPress={() => voiceInput.trim() ? submitVoiceInput() : send(input)}
             disabled={!(voiceInput.trim() || input.trim()) || loading}
           >
-            <LinearGradient colors={isDark ? [colors.primaryDark, colors.primary] : [colors.primary, colors.primaryDark]} style={styles.sendBtnGrad}>
+            <LinearGradient colors={isDark ? ['#3b82f6'Dark, '#3b82f6'] : ['#3b82f6', '#3b82f6'Dark]} style={styles.sendBtnGrad}>
               <Ionicons name="send" size={18} color="#fff" />
             </LinearGradient>
           </TouchableOpacity>
@@ -1072,9 +1072,9 @@ const styles = StyleSheet.create({
   inputRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingVertical: 8, borderTopWidth: 1 },
   inputWrap: { flex: 1, flexDirection: 'row', alignItems: 'center', borderRadius: 26, borderWidth: 1.5, paddingHorizontal: 14, paddingVertical: 0, minHeight: 48 },
   input: { flex: 1, ...Typography.body, paddingVertical: 0, maxHeight: 120 },
-  micBtn: { borderRadius: 14, overflow: 'hidden', shadowColor: colors.primary, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4 },
+  micBtn: { borderRadius: 14, overflow: 'hidden', shadowColor: '#3b82f6', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4 },
   micBtnGrad: { width: 46, height: 46, alignItems: 'center', justifyContent: 'center', borderRadius: 14 },
-  sendBtn: { borderRadius: 14, overflow: 'hidden', shadowColor: colors.primary, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4 },
+  sendBtn: { borderRadius: 14, overflow: 'hidden', shadowColor: '#3b82f6', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4 },
   sendBtnGrad: { width: 46, height: 46, alignItems: 'center', justifyContent: 'center', borderRadius: 14 },
   
   // Voice Modal Styles
@@ -1102,6 +1102,7 @@ const styles = StyleSheet.create({
   // ── Inline voice UI styles ──────────────────────────────────────────────
   micActiveDot: { width: 10, height: 10, borderRadius: 5 },
 });
+
 
 
 

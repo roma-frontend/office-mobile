@@ -72,9 +72,9 @@ function ChatTabButton({ focused, colors }: { focused: boolean; colors: any }) {
   const orbit = orbitAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
 
   const isDark = colors.isDark;
-  const c1 = isDark ? colors.primary : colors.primaryLight;
-  const c2 = isDark ? colors.primaryDark : colors.primary;
-  const c3 = isDark ? colors.primaryLight : colors.primaryLight;
+  const c1 = isDark ? '#3b82f6' : '#3b82f6'Light;
+  const c2 = isDark ? '#3b82f6'Dark : '#3b82f6';
+  const c3 = isDark ? '#3b82f6'Light : '#3b82f6'Light;
 
   const BTN = 56; // matches global FAB_SIZE
   const LIFT = 20; // matches FAB_LIFT
@@ -91,7 +91,7 @@ function ChatTabButton({ focused, colors }: { focused: boolean; colors: any }) {
             width: BTN + 10,
             height: BTN + 10,
             borderRadius: 20,
-            backgroundColor: isDark ? colors.primary + '33' : colors.primary + '22',
+            backgroundColor: isDark ? '#3b82f6' + '33' : '#3b82f6' + '22',
             transform: [{ scale: pulseAnim }],
           }} />
         )}
@@ -105,7 +105,7 @@ function ChatTabButton({ focused, colors }: { focused: boolean; colors: any }) {
             borderRadius: 20,
             borderWidth: 1.5,
             borderStyle: 'dashed',
-            borderColor: isDark ? colors.primary + '99' : colors.primaryLight + '99',
+            borderColor: isDark ? '#3b82f6' + '99' : '#3b82f6'Light + '99',
             transform: [{ rotate: spin }],
           }} />
         )}
@@ -141,8 +141,8 @@ function ChatTabButton({ focused, colors }: { focused: boolean; colors: any }) {
         {/* Main button — centered */}
         <Animated.View style={{ transform: [{ scale: bounceAnim }] }}>
           <LinearGradient
-            colors={isDark ? [c1, c2] : [colors.primaryLight, colors.primary]}
-            style={[styles.chatFab, { shadowColor: isDark ? colors.primary : colors.primary }]}
+            colors={isDark ? [c1, c2] : ['#3b82f6'Light, '#3b82f6']}
+            style={[styles.chatFab, { shadowColor: isDark ? '#3b82f6' : '#3b82f6' }]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
@@ -152,7 +152,7 @@ function ChatTabButton({ focused, colors }: { focused: boolean; colors: any }) {
 
       </View>
 
-      <Text style={[styles.chatLabel, { color: focused ? (isDark ? c1 : colors.primary) : colors.textMuted }]}>
+      <Text style={[styles.chatLabel, { color: focused ? (isDark ? c1 : '#3b82f6') : colors.textMuted }]}>
         AI Chat
       </Text>
     </View>
@@ -165,8 +165,8 @@ export default function TabLayout() {
   const TAB_HEIGHT = Platform.OS === 'ios' ? 88 : 68;
   const BOTTOM_PAD = Platform.OS === 'ios' ? 28 : 8;
 
-  const darkGradient: [string, string] = [colors.primaryDark, colors.primary];
-  const lightGradient: [string, string] = [colors.primaryLight, colors.primary];
+  const darkGradient: [string, string] = ['#3b82f6'Dark, '#3b82f6'];
+  const lightGradient: [string, string] = ['#3b82f6'Light, '#3b82f6'];
 
   // Auth guard — redirect to login if no valid session
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -203,7 +203,7 @@ export default function TabLayout() {
               ? <BlurView intensity={80} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
               : <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.bgCard }]} />
           ),
-          tabBarActiveTintColor: colors.primary,
+          tabBarActiveTintColor: '#3b82f6',
           tabBarInactiveTintColor: colors.textMuted,
           tabBarShowLabel: true,
           tabBarLabelStyle: styles.tabLabel,
@@ -214,7 +214,7 @@ export default function TabLayout() {
         options={{
           title: 'Dashboard',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'grid' : 'grid-outline'} color={color} focused={focused} primaryColor={colors.primary} />
+            <TabBarIcon name={focused ? 'grid' : 'grid-outline'} color={color} focused={focused} primaryColor={'#3b82f6'} />
           ),
         }}
       />
@@ -224,9 +224,9 @@ export default function TabLayout() {
           title: 'Leaves',
           tabBarIcon: ({ color, focused }) => (
             <View>
-              <TabBarIcon name={focused ? 'calendar' : 'calendar-outline'} color={color} focused={focused} primaryColor={colors.primary} />
+              <TabBarIcon name={focused ? 'calendar' : 'calendar-outline'} color={color} focused={focused} primaryColor={'#3b82f6'} />
               {pendingCount > 0 && (
-                <View style={[styles.badge, { backgroundColor: colors.error }]}>
+                <View style={[styles.badge, { backgroundColor: '#ef4444' }]}>
                   <Text style={styles.badgeText}>{pendingCount > 9 ? '9+' : pendingCount}</Text>
                 </View>
               )}
@@ -254,7 +254,7 @@ export default function TabLayout() {
         options={{
           title: 'Team',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'people' : 'people-outline'} color={color} focused={focused} primaryColor={colors.primary} />
+            <TabBarIcon name={focused ? 'people' : 'people-outline'} color={color} focused={focused} primaryColor={'#3b82f6'} />
           ),
         }}
       />
@@ -263,7 +263,7 @@ export default function TabLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'person' : 'person-outline'} color={color} focused={focused} primaryColor={colors.primary} />
+            <TabBarIcon name={focused ? 'person' : 'person-outline'} color={color} focused={focused} primaryColor={'#3b82f6'} />
           ),
         }}
       />
@@ -346,6 +346,7 @@ const styles = StyleSheet.create({
   wakeWordModalBtn: { flex: 1, borderRadius: 12, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' },
   wakeWordModalBtnText: { fontSize: 16, fontWeight: '600' },
 });
+
 
 
 

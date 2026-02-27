@@ -71,9 +71,9 @@ function LeaveTrendsChart({ data, colors }: {
           <View key={i} style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end', height: chartH + 32 }}>
             <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 1.5, height: chartH }}>
               {[
-                { val: d.approved, color: colors.success },
-                { val: d.pending, color: colors.warning },
-                { val: d.rejected, color: colors.error },
+                { val: d.approved, color: '#10b981' },
+                { val: d.pending, color: '#f59e0b' },
+                { val: d.rejected, color: '#ef4444' },
               ].map((bar, j) => (
                 <View
                   key={j}
@@ -92,15 +92,15 @@ function LeaveTrendsChart({ data, colors }: {
       </View>
       <View style={{ flexDirection: 'row', gap: 16, marginTop: 16, justifyContent: 'center' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: colors.success }} />
+          <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: '#10b981' }} />
           <Text style={{ fontSize: 11, color: colors.textMuted }}>Approved</Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: colors.warning }} />
+          <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: '#f59e0b' }} />
           <Text style={{ fontSize: 11, color: colors.textMuted }}>Pending</Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: colors.error }} />
+          <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: '#ef4444' }} />
           <Text style={{ fontSize: 11, color: colors.textMuted }}>Rejected</Text>
         </View>
       </View>
@@ -123,7 +123,7 @@ function LeaveDistributionChart({ data, colors }: {
             <Text style={{ fontSize: 13, color: colors.textSecondary, fontWeight: '500' }}>
               {LEAVE_TYPE_LABELS[d.type as LeaveType]}
             </Text>
-            <Text style={{ fontSize: 13, color: colors.primary, fontWeight: '600' }}>{d.count}</Text>
+            <Text style={{ fontSize: 13, color: '#3b82f6', fontWeight: '600' }}>{d.count}</Text>
           </View>
           <View style={{ height: 8, backgroundColor: colors.bgElevated, borderRadius: 4, overflow: 'hidden' }}>
             <View
@@ -166,8 +166,8 @@ function DepartmentCard({ dept, colors }: {
 
       {[
         { label: 'Paid', value: Number(dept.avgPaidBalance ?? 0), color: '#3b82f6' },
-        { label: 'Sick', value: Number(dept.avgSickBalance ?? 0), color: colors.error },
-        { label: 'Family', value: Number(dept.avgFamilyBalance ?? 0), color: colors.success },
+        { label: 'Sick', value: Number(dept.avgSickBalance ?? 0), color: '#ef4444' },
+        { label: 'Family', value: Number(dept.avgFamilyBalance ?? 0), color: '#10b981' },
       ].map((bal, i) => (
         <View key={i} style={{ marginBottom: i < 2 ? 8 : 0 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
@@ -232,7 +232,7 @@ function SmartSuggestionCard({ item, colors }: {
 function SectionHeader({ title, icon, colors }: { title: string; icon: string; colors: any }) {
   return (
     <View style={styles.sectionHeader}>
-      <Ionicons name={icon as any} size={18} color={colors.primary} />
+      <Ionicons name={icon as any} size={18} color={'#3b82f6'} />
       <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{title}</Text>
     </View>
   );
@@ -244,7 +244,7 @@ function PersonalAnalyticsSection({ userId, colors }: { userId: string; colors: 
     userId: userId as Id<'users'>,
   });
 
-  if (!personalData) return <ActivityIndicator color={colors.primary} size="large" />;
+  if (!personalData) return <ActivityIndicator color={'#3b82f6'} size="large" />;
 
   const leaveData = Object.entries(personalData.leavesByType || {})
     .filter(([, count]: [any, any]) => count > 0)
@@ -278,14 +278,14 @@ function PersonalAnalyticsSection({ userId, colors }: { userId: string; colors: 
       {/* Stats */}
       <View style={{ gap: Spacing.md }}>
         <View style={{ flexDirection: 'row', gap: Spacing.md }}>
-          <KPICard icon="layers-outline" label="Total Requests" value={totalRequests} color={colors.primary} />
-          <KPICard icon="checkmark-circle-outline" label="Approved" value={approvedRequests} color={colors.success} />
+          <KPICard icon="layers-outline" label="Total Requests" value={totalRequests} color={'#3b82f6'} />
+          <KPICard icon="checkmark-circle-outline" label="Approved" value={approvedRequests} color={'#10b981'} />
         </View>
         <View style={{ flexDirection: 'row', gap: Spacing.md }}>
-          <KPICard icon="close-circle-outline" label="Rejected" value={rejectedRequests} color={colors.error} />
-          <KPICard icon="time-outline" label="Pending" value={pendingRequests} color={colors.warning} />
+          <KPICard icon="close-circle-outline" label="Rejected" value={rejectedRequests} color={'#ef4444'} />
+          <KPICard icon="time-outline" label="Pending" value={pendingRequests} color={'#f59e0b'} />
         </View>
-        <KPICard icon="trending-up-outline" label="Approval Rate" value={`${approvalRate}%`} color={colors.primary} />
+        <KPICard icon="trending-up-outline" label="Approval Rate" value={`${approvalRate}%`} color={'#3b82f6'} />
       </View>
 
       {/* Leave by Type */}
@@ -306,7 +306,7 @@ function PersonalAnalyticsSection({ userId, colors }: { userId: string; colors: 
             <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 4, height: chartH + 28 }}>
               {monthlyData.map((d: any, i: any) => (
                 <View key={i} style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end', height: chartH + 28 }}>
-                  <View style={{ width: '70%', height: Math.max(8, (d.count / maxMonthly) * chartH), backgroundColor: colors.primary, borderRadius: 4 }} />
+                  <View style={{ width: '70%', height: Math.max(8, (d.count / maxMonthly) * chartH), backgroundColor: '#3b82f6', borderRadius: 4 }} />
                   <Text style={{ fontSize: 10, color: colors.textMuted, marginTop: 6 }}>{d.month}</Text>
                 </View>
               ))}
@@ -322,7 +322,7 @@ function PersonalAnalyticsSection({ userId, colors }: { userId: string; colors: 
 function AdminOverviewTab({ userId, colors }: { userId: string; colors: any }) {
   const overviewData = useQuery(api.analytics.getAnalyticsOverview);
 
-  if (!overviewData) return <ActivityIndicator color={colors.primary} size="large" />;
+  if (!overviewData) return <ActivityIndicator color={'#3b82f6'} size="large" />;
 
   const leaveData = (overviewData.leaves || []).reduce((acc, leave) => {
     const existing = acc.find(item => item.type === leave.type);
@@ -340,12 +340,12 @@ function AdminOverviewTab({ userId, colors }: { userId: string; colors: any }) {
       {/* KPI Cards */}
       <View style={{ gap: Spacing.md }}>
         <View style={{ flexDirection: 'row', gap: Spacing.md }}>
-          <KPICard icon="people-outline" label="Total Employees" value={overviewData.totalEmployees} color={colors.primary} />
-          <KPICard icon="time-outline" label="Pending" value={overviewData.pendingApprovals} color={colors.warning} />
+          <KPICard icon="people-outline" label="Total Employees" value={overviewData.totalEmployees} color={'#3b82f6'} />
+          <KPICard icon="time-outline" label="Pending" value={overviewData.pendingApprovals} color={'#f59e0b'} />
         </View>
         <View style={{ flexDirection: 'row', gap: Spacing.md }}>
-          <KPICard icon="layers-outline" label="Total Requests" value={overviewData.totalLeaves} color={colors.primary} />
-          <KPICard icon="trending-up-outline" label="Approval Rate" value={`${Math.round((overviewData.approvedLeaves / (overviewData.totalLeaves || 1)) * 100)}%`} color={colors.success} />
+          <KPICard icon="layers-outline" label="Total Requests" value={overviewData.totalLeaves} color={'#3b82f6'} />
+          <KPICard icon="trending-up-outline" label="Approval Rate" value={`${Math.round((overviewData.approvedLeaves / (overviewData.totalLeaves || 1)) * 100)}%`} color={'#10b981'} />
         </View>
       </View>
 
@@ -366,7 +366,7 @@ function AdminOverviewTab({ userId, colors }: { userId: string; colors: any }) {
 function AdminDepartmentsTab({ userId, colors }: { userId: string; colors: any }) {
   const deptData = useQuery(api.analytics.getDepartmentStats);
 
-  if (!deptData) return <ActivityIndicator color={colors.primary} size="large" />;
+  if (!deptData) return <ActivityIndicator color={'#3b82f6'} size="large" />;
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }} contentContainerStyle={{ padding: Spacing.md, gap: Spacing.md, paddingBottom: Platform.OS === 'ios' ? 108 : 88 }}>
@@ -381,7 +381,7 @@ function AdminDepartmentsTab({ userId, colors }: { userId: string; colors: any }
 function AdminTrendsTab({ userId, colors }: { userId: string; colors: any }) {
   const trendsData = useQuery(api.analytics.getLeaveTrends);
 
-  if (!trendsData) return <ActivityIndicator color={colors.primary} size="large" />;
+  if (!trendsData) return <ActivityIndicator color={'#3b82f6'} size="large" />;
 
   const trendsByMonth = (trendsData || []).reduce((acc, leave) => {
     const monthKey = new Date(leave.createdAt).toLocaleString('en-US', { month: 'short', year: '2-digit' });
@@ -417,8 +417,8 @@ function AdminTrendsTab({ userId, colors }: { userId: string; colors: any }) {
 function TabButton({ label, active, onPress, colors }: { label: string; active: boolean; onPress: () => void; colors: any }) {
   return (
     <TouchableOpacity onPress={onPress} style={[styles.tabButton, active && { backgroundColor: colors.bgElevated + '44' }]}>
-      <Text style={[styles.tabButtonText, { color: active ? colors.primary : colors.textMuted }, active && { fontWeight: '600' }]}>{label}</Text>
-      {active && <View style={[styles.tabButtonUnderline, { backgroundColor: colors.primary }]} />}
+      <Text style={[styles.tabButtonText, { color: active ? '#3b82f6' : colors.textMuted }, active && { fontWeight: '600' }]}>{label}</Text>
+      {active && <View style={[styles.tabButtonUnderline, { backgroundColor: '#3b82f6' }]} />}
     </TouchableOpacity>
   );
 }
@@ -450,7 +450,7 @@ export default function Analytics() {
   if (!userId || !userRole) {
     return (
       <SafeAreaView style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.bg }]}>
-        <ActivityIndicator color={colors.primary} size="large" />
+        <ActivityIndicator color={'#3b82f6'} size="large" />
       </SafeAreaView>
     );
   }
@@ -600,4 +600,5 @@ const styles = StyleSheet.create({
     borderRadius: Radius.sm,
   },
 });
+
 

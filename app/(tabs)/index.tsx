@@ -73,9 +73,9 @@ function MiniBarChart({ data }: {
         <View key={i} style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end', height: chartH + 24 }}>
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 1, height: chartH }}>
             {[
-              { val: d.approved, color: colors.success },
-              { val: d.pending,  color: colors.warning },
-              { val: d.rejected, color: colors.error },
+              { val: d.approved, color: '#10b981' },
+              { val: d.pending,  color: '#f59e0b' },
+              { val: d.rejected, color: '#ef4444' },
             ].map((bar, j) => (
               <View key={j} style={{
                 width: 5,
@@ -131,12 +131,12 @@ function SectionHeader({ title, icon, onSeeAll }: { title: string; icon: string;
   return (
     <View style={styles.sectionHeader}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Ionicons name={icon as any} size={16} color={colors.primary} />
+        <Ionicons name={icon as any} size={16} color={'#3b82f6'} />
         <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{title}</Text>
       </View>
       {onSeeAll && (
         <TouchableOpacity onPress={onSeeAll}>
-          <Text style={[styles.seeAll, { color: colors.primary }]}>See all</Text>
+          <Text style={[styles.seeAll, { color: '#3b82f6' }]}>See all</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -183,7 +183,7 @@ function CheckInOutWidget({ userId }: { userId: string }) {
     }
   };
 
-  const btnColor = isCheckedOut ? colors.textMuted : isCheckedIn ? colors.error : colors.success;
+  const btnColor = isCheckedOut ? colors.textMuted : isCheckedIn ? '#ef4444' : '#10b981';
   const btnLabel = isCheckedOut ? 'Done for today' : isCheckedIn ? 'Check Out' : 'Check In';
   const btnIcon = isCheckedOut ? 'checkmark-done' : isCheckedIn ? 'log-out-outline' : 'log-in-outline';
 
@@ -191,8 +191,8 @@ function CheckInOutWidget({ userId }: { userId: string }) {
     <Card>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: colors.primary + '22', alignItems: 'center', justifyContent: 'center' }}>
-            <Ionicons name="time-outline" size={18} color={colors.primary} />
+          <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: '#3b82f6' + '22', alignItems: 'center', justifyContent: 'center' }}>
+            <Ionicons name="time-outline" size={18} color={'#3b82f6'} />
           </View>
           <View>
             <Text style={{ ...Typography.bodyMedium, color: colors.textPrimary, fontWeight: '600' }}>Attendance</Text>
@@ -200,17 +200,17 @@ function CheckInOutWidget({ userId }: { userId: string }) {
           </View>
         </View>
         {todayStatus?.isLate && (
-          <View style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: colors.error + '22', borderRadius: Radius.full }}>
-            <Text style={{ fontSize: 11, color: colors.error, fontWeight: '600' }}>Late {todayStatus.lateMinutes}m</Text>
+          <View style={{ paddingHorizontal: 8, paddingVertical: 3, backgroundColor: '#ef4444' + '22', borderRadius: Radius.full }}>
+            <Text style={{ fontSize: 11, color: '#ef4444', fontWeight: '600' }}>Late {todayStatus.lateMinutes}m</Text>
           </View>
         )}
       </View>
 
       <View style={{ flexDirection: 'row', gap: 12, marginBottom: 14 }}>
         {[
-          { label: 'Check In', value: todayStatus?.checkInTime ? fmtTime(todayStatus.checkInTime) : '—', icon: 'log-in-outline', color: colors.success },
-          { label: 'Check Out', value: (todayStatus?.checkOutTime && todayStatus.checkOutTime > 0) ? fmtTime(todayStatus.checkOutTime) : '—', icon: 'log-out-outline', color: colors.error },
-          { label: 'Hours', value: todayStatus?.totalWorkedMinutes ? `${(todayStatus.totalWorkedMinutes / 60).toFixed(1)}h` : '—', icon: 'hourglass-outline', color: colors.primary },
+          { label: 'Check In', value: todayStatus?.checkInTime ? fmtTime(todayStatus.checkInTime) : '—', icon: 'log-in-outline', color: '#10b981' },
+          { label: 'Check Out', value: (todayStatus?.checkOutTime && todayStatus.checkOutTime > 0) ? fmtTime(todayStatus.checkOutTime) : '—', icon: 'log-out-outline', color: '#ef4444' },
+          { label: 'Hours', value: todayStatus?.totalWorkedMinutes ? `${(todayStatus.totalWorkedMinutes / 60).toFixed(1)}h` : '—', icon: 'hourglass-outline', color: '#3b82f6' },
         ].map((item, i) => (
           <View key={i} style={{ flex: 1, backgroundColor: colors.bgElevated, borderRadius: Radius.md, padding: 10, alignItems: 'center' }}>
             <Ionicons name={item.icon as any} size={14} color={item.color} />
@@ -282,8 +282,8 @@ function EmployeeDashboard({ userId, userName, bottomOffset }: { userId: string;
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          tintColor={colors.primary}
-          colors={[colors.primary]}
+          tintColor={'#3b82f6'}
+          colors={['#3b82f6']}
         />
       }
     >
@@ -292,8 +292,8 @@ function EmployeeDashboard({ userId, userName, bottomOffset }: { userId: string;
       <View style={[styles.headerPro, { borderBottomColor: colors.border }]}>
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <View style={{ backgroundColor: isDark ? colors.primary + '22' : colors.bgElevated, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
-              <Text style={{ fontSize: 10, fontWeight: '700', color: isDark ? colors.primary : colors.textMuted, letterSpacing: 1, textTransform: 'uppercase' }}>
+            <View style={{ backgroundColor: isDark ? '#3b82f6' + '22' : colors.bgElevated, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
+              <Text style={{ fontSize: 10, fontWeight: '700', color: isDark ? '#3b82f6' : colors.textMuted, letterSpacing: 1, textTransform: 'uppercase' }}>
                 {user?.department ?? user?.position ?? 'Employee'}
               </Text>
             </View>
@@ -312,7 +312,7 @@ function EmployeeDashboard({ userId, userName, bottomOffset }: { userId: string;
       </View>
 
       {/* Hero leave balance */}
-      <LinearGradient colors={isDark ? ['#0f172a', '#1e293b', colors.primary] : [colors.primaryDark, colors.primary, colors.primaryLight]} style={[styles.heroCard, { shadowColor: colors.primary }]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+      <LinearGradient colors={isDark ? ['#0f172a', '#1e293b', '#3b82f6'] : ['#3b82f6'Dark, '#3b82f6', '#3b82f6'Light]} style={[styles.heroCard, { shadowColor: '#3b82f6' }]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
         <Text style={styles.heroLabel}>PAID LEAVE BALANCE</Text>
         <Text style={styles.heroValue}>{user?.paidLeaveBalance ?? 0} days</Text>
         <Text style={styles.heroSub}>remaining this year</Text>
@@ -327,8 +327,8 @@ function EmployeeDashboard({ userId, userName, bottomOffset }: { userId: string;
           </View>
           <TouchableOpacity onPress={() => router.push('/(tabs)/leaves')}
             style={{ flex: 1.2, backgroundColor: '#fff', borderRadius: Radius.md, padding: 10, alignItems: 'center', justifyContent: 'center' }}>
-            <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
-            <Text style={{ fontSize: 10, color: colors.primary, fontWeight: '700', marginTop: 2 }}>Request</Text>
+            <Ionicons name="add-circle-outline" size={18} color={'#3b82f6'} />
+            <Text style={{ fontSize: 10, color: '#3b82f6', fontWeight: '700', marginTop: 2 }}>Request</Text>
           </TouchableOpacity>
         </View>
       </LinearGradient>
@@ -343,10 +343,10 @@ function EmployeeDashboard({ userId, userName, bottomOffset }: { userId: string;
           <SectionHeader title="This Month" icon="calendar-outline" />
           <View style={{ flexDirection: 'row', gap: 10 }}>
             {[
-              { label: 'Days\nWorked', value: String(monthlyStats.totalDays), color: colors.primary },
+              { label: 'Days\nWorked', value: String(monthlyStats.totalDays), color: '#3b82f6' },
               { label: 'Total\nHours', value: `${Number(monthlyStats.totalWorkedHours ?? 0).toFixed(1)}h`, color: '#10b981' },
-              { label: 'Punctuality', value: `${monthlyStats.punctualityRate}%`, color: colors.primary },
-              { label: 'Late\nDays', value: String(monthlyStats.lateDays), color: Number(monthlyStats.lateDays) > 0 ? colors.error : colors.success },
+              { label: 'Punctuality', value: `${monthlyStats.punctualityRate}%`, color: '#3b82f6' },
+              { label: 'Late\nDays', value: String(monthlyStats.lateDays), color: Number(monthlyStats.lateDays) > 0 ? '#ef4444' : '#10b981' },
             ].map((s, i) => (
               <View key={i} style={[styles.miniStatCard, { borderColor: s.color + '44', backgroundColor: colors.bgCard }]}>
                 <Text style={{ fontSize: 16, fontWeight: '800', color: s.color }}>{s.value}</Text>
@@ -361,9 +361,9 @@ function EmployeeDashboard({ userId, userName, bottomOffset }: { userId: string;
       <SectionHeader title="My Leaves" icon="umbrella-outline" onSeeAll={() => router.push('/(tabs)/leaves')} />
       <View style={{ flexDirection: 'row', gap: 10 }}>
         {[
-          { label: 'Pending', value: pending.length, color: colors.warning, icon: 'time' },
-          { label: 'Approved', value: approved.length, color: colors.success, icon: 'checkmark-circle' },
-          { label: 'Rejected', value: rejected.length, color: colors.error, icon: 'close-circle' },
+          { label: 'Pending', value: pending.length, color: '#f59e0b', icon: 'time' },
+          { label: 'Approved', value: approved.length, color: '#10b981', icon: 'checkmark-circle' },
+          { label: 'Rejected', value: rejected.length, color: '#ef4444', icon: 'close-circle' },
         ].map((s, i) => (
           <TouchableOpacity key={i} style={[styles.leaveStatCard, { borderColor: s.color + '44', backgroundColor: colors.bgCard }]} onPress={() => router.push('/(tabs)/leaves')}>
             <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: s.color + '22', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
@@ -379,10 +379,10 @@ function EmployeeDashboard({ userId, userName, bottomOffset }: { userId: string;
       {leaves.length > 0 && (
         <Card>
           {leaves.slice(0, 5).map((l, i) => {
-            const statusColorMap: Record<LeaveStatus, string> = { approved: colors.success, pending: colors.warning, rejected: colors.error };
+            const statusColorMap: Record<LeaveStatus, string> = { approved: '#10b981', pending: '#f59e0b', rejected: '#ef4444' };
             const sc = statusColorMap[l.status as LeaveStatus] ?? colors.textMuted;
             const si = STATUS_ICONS[l.status as LeaveStatus] ?? 'help-circle';
-            const tc = LEAVE_TYPE_COLORS[l.type as LeaveType] ?? colors.primary;
+            const tc = LEAVE_TYPE_COLORS[l.type as LeaveType] ?? '#3b82f6';
             const label = LEAVE_TYPE_LABELS[l.type as LeaveType] ?? l.type;
             return (
               <View key={l._id} style={[styles.leaveRow, i > 0 && { borderTopWidth: 1, borderTopColor: colors.border }]}>
@@ -421,7 +421,7 @@ function EmployeeDashboard({ userId, userName, bottomOffset }: { userId: string;
                 </Text>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
-                <Text style={{ fontSize: 28, fontWeight: '800', color: colors.primary }}>{latestRating.overallRating.toFixed(1)}</Text>
+                <Text style={{ fontSize: 28, fontWeight: '800', color: '#3b82f6' }}>{latestRating.overallRating.toFixed(1)}</Text>
                 <Text style={{ fontSize: 11, color: colors.textMuted }}>/5.0</Text>
               </View>
             </View>
@@ -442,15 +442,15 @@ function EmployeeDashboard({ userId, userName, bottomOffset }: { userId: string;
               </View>
             ))}
             {latestRating.strengths && (
-              <View style={{ marginTop: 10, padding: 10, backgroundColor: colors.success + '15', borderRadius: Radius.md }}>
-                <Text style={{ fontSize: 11, fontWeight: '700', color: colors.success, marginBottom: 3 }}>💪 Strengths</Text>
-                <Text style={{ ...Typography.caption, color: colors.success }}>{latestRating.strengths}</Text>
+              <View style={{ marginTop: 10, padding: 10, backgroundColor: '#10b981' + '15', borderRadius: Radius.md }}>
+                <Text style={{ fontSize: 11, fontWeight: '700', color: '#10b981', marginBottom: 3 }}>💪 Strengths</Text>
+                <Text style={{ ...Typography.caption, color: '#10b981' }}>{latestRating.strengths}</Text>
               </View>
             )}
             {latestRating.areasForImprovement && (
-              <View style={{ marginTop: 8, padding: 10, backgroundColor: colors.warning + '15', borderRadius: Radius.md }}>
-                <Text style={{ fontSize: 11, fontWeight: '700', color: colors.warning, marginBottom: 3 }}>📈 Improve</Text>
-                <Text style={{ ...Typography.caption, color: colors.warning }}>{latestRating.areasForImprovement}</Text>
+              <View style={{ marginTop: 8, padding: 10, backgroundColor: '#f59e0b' + '15', borderRadius: Radius.md }}>
+                <Text style={{ fontSize: 11, fontWeight: '700', color: '#f59e0b', marginBottom: 3 }}>📈 Improve</Text>
+                <Text style={{ ...Typography.caption, color: '#f59e0b' }}>{latestRating.areasForImprovement}</Text>
               </View>
             )}
           </Card>
@@ -470,7 +470,7 @@ function EmployeeDashboard({ userId, userName, bottomOffset }: { userId: string;
         {[
           { icon: 'checkbox-outline', label: 'Tasks', subtitle: 'My assignments', color: '#06b6d4', onPress: () => router.push('/(tabs)/tasks') },
           { icon: 'time-outline', label: 'Attendance', subtitle: 'Track time', color: '#10b981', onPress: () => router.push('/(tabs)/attendance') },
-          { icon: 'bar-chart-outline', label: 'Analytics', subtitle: 'My stats', color: colors.primary, onPress: () => router.push('/(tabs)/analytics') },
+          { icon: 'bar-chart-outline', label: 'Analytics', subtitle: 'My stats', color: '#3b82f6', onPress: () => router.push('/(tabs)/analytics') },
         ].map((a, i) => (
           <TouchableOpacity key={i} style={{ flex: 1, backgroundColor: colors.bgCard, borderRadius: Radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, alignItems: 'center', gap: 6 }} onPress={a.onPress}>
             <LinearGradient colors={[`${a.color}33`, `${a.color}11`]} style={{ width: 48, height: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center' }}>
@@ -486,10 +486,10 @@ function EmployeeDashboard({ userId, userName, bottomOffset }: { userId: string;
       <SectionHeader title="Quick Actions" icon="flash-outline" />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
         {[
-          { icon: 'document-text-outline', label: 'Apply Leave',  color: colors.primary,  onPress: () => router.push('/(tabs)/leaves') },
+          { icon: 'document-text-outline', label: 'Apply Leave',  color: '#3b82f6',  onPress: () => router.push('/(tabs)/leaves') },
           { icon: 'people-outline',         label: 'Team View',    color: '#06b6d4',       onPress: () => router.push('/(tabs)/team') },
-          { icon: 'calendar-outline',        label: 'Calendar',     color: colors.success,  onPress: () => router.push('/(tabs)/calendar') },
-          { icon: 'person-outline',         label: 'My Profile',   color: colors.primary,     onPress: () => router.push('/(tabs)/profile') },
+          { icon: 'calendar-outline',        label: 'Calendar',     color: '#10b981',  onPress: () => router.push('/(tabs)/calendar') },
+          { icon: 'person-outline',         label: 'My Profile',   color: '#3b82f6',     onPress: () => router.push('/(tabs)/profile') },
         ].map((a, i) => (
           <TouchableOpacity key={i} style={styles.quickAction} onPress={a.onPress}>
             <LinearGradient colors={[`${a.color}33`, `${a.color}11`]} style={styles.quickIconWrap}>
@@ -522,12 +522,12 @@ function StatsDetailModal({
     employees: {
       title: 'All Employees',
       icon: 'people-outline',
-      color: colors.primary,
+      color: '#3b82f6',
       items: allUsers,
       renderItem: (u: any, i: number) => (
         <View key={u._id ?? i} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border, gap: 12 }}>
-          <View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: colors.primary + '22', alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ fontSize: 15, fontWeight: '700', color: colors.primary }}>
+          <View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: '#3b82f6' + '22', alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontSize: 15, fontWeight: '700', color: '#3b82f6' }}>
               {(u.name ?? '?').split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
             </Text>
           </View>
@@ -536,8 +536,8 @@ function StatsDetailModal({
             <Text style={{ fontSize: 12, color: colors.textMuted, marginTop: 2 }}>{u.department ?? ''}{u.position ? ` · ${u.position}` : ''}</Text>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
-            <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: (u.role === 'admin' ? colors.warning : u.role === 'supervisor' ? colors.success : colors.primary) + '22' }}>
-              <Text style={{ fontSize: 11, fontWeight: '700', color: u.role === 'admin' ? colors.warning : u.role === 'supervisor' ? colors.success : colors.primary }}>
+            <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: (u.role === 'admin' ? '#f59e0b' : u.role === 'supervisor' ? '#10b981' : '#3b82f6') + '22' }}>
+              <Text style={{ fontSize: 11, fontWeight: '700', color: u.role === 'admin' ? '#f59e0b' : u.role === 'supervisor' ? '#10b981' : '#3b82f6' }}>
                 {u.role ?? 'employee'}
               </Text>
             </View>
@@ -548,14 +548,14 @@ function StatsDetailModal({
     pending: {
       title: 'Pending Requests',
       icon: 'time-outline',
-      color: colors.warning,
+      color: '#f59e0b',
       items: allLeaves.filter(l => l.status === 'pending'),
       renderItem: (l: any, i: number) => (
         <View key={l._id ?? i} style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
             <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary }}>{l.userName ?? 'Unknown'}</Text>
-            <View style={{ backgroundColor: colors.warning + '22', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 }}>
-              <Text style={{ fontSize: 11, fontWeight: '700', color: colors.warning }}>⏳ Pending</Text>
+            <View style={{ backgroundColor: '#f59e0b' + '22', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 }}>
+              <Text style={{ fontSize: 11, fontWeight: '700', color: '#f59e0b' }}>⏳ Pending</Text>
             </View>
           </View>
           <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
@@ -564,21 +564,21 @@ function StatsDetailModal({
             <Text style={{ fontSize: 12, color: colors.textMuted }}>⏱ {l.days}d</Text>
           </View>
           {l.reason ? <Text style={{ fontSize: 12, color: colors.textMuted, marginTop: 4, fontStyle: 'italic' }}>"{l.reason}"</Text> : null}
-          {l.userDepartment ? <Text style={{ fontSize: 11, color: colors.primary, marginTop: 2 }}>{l.userDepartment}</Text> : null}
+          {l.userDepartment ? <Text style={{ fontSize: 11, color: '#3b82f6', marginTop: 2 }}>{l.userDepartment}</Text> : null}
         </View>
       ),
     },
     approved: {
       title: 'Approved This Month',
       icon: 'checkmark-circle-outline',
-      color: colors.success,
+      color: '#10b981',
       items: allLeaves.filter(l => l.status === 'approved' && l.startDate.startsWith(month)),
       renderItem: (l: any, i: number) => (
         <View key={l._id ?? i} style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
             <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary }}>{l.userName ?? 'Unknown'}</Text>
-            <View style={{ backgroundColor: colors.success + '22', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 }}>
-              <Text style={{ fontSize: 11, fontWeight: '700', color: colors.success }}>✅ Approved</Text>
+            <View style={{ backgroundColor: '#10b981' + '22', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 }}>
+              <Text style={{ fontSize: 11, fontWeight: '700', color: '#10b981' }}>✅ Approved</Text>
             </View>
           </View>
           <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
@@ -586,14 +586,14 @@ function StatsDetailModal({
             <Text style={{ fontSize: 12, color: colors.textMuted }}>📅 {formatShortDate(l.startDate)} → {formatShortDate(l.endDate)}</Text>
             <Text style={{ fontSize: 12, color: colors.textMuted }}>⏱ {l.days}d</Text>
           </View>
-          {l.userDepartment ? <Text style={{ fontSize: 11, color: colors.primary, marginTop: 4 }}>{l.userDepartment}</Text> : null}
+          {l.userDepartment ? <Text style={{ fontSize: 11, color: '#3b82f6', marginTop: 4 }}>{l.userDepartment}</Text> : null}
         </View>
       ),
     },
     onleave: {
       title: 'On Leave Today',
       icon: 'walk-outline',
-      color: colors.primary,
+      color: '#3b82f6',
       items: allLeaves.filter(l => l.status === 'approved' && l.startDate <= today && l.endDate >= today),
       renderItem: (l: any, i: number) => (
         <View key={l._id ?? i} style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border }}>
@@ -608,10 +608,10 @@ function StatsDetailModal({
               <Text style={{ fontSize: 12, color: colors.textMuted, marginTop: 2 }}>
                 {LEAVE_TYPE_LABELS[l.type as LeaveType] ?? l.type} · returns {formatShortDate(l.endDate)}
               </Text>
-              {l.userDepartment ? <Text style={{ fontSize: 11, color: colors.primary, marginTop: 1 }}>{l.userDepartment}</Text> : null}
+              {l.userDepartment ? <Text style={{ fontSize: 11, color: '#3b82f6', marginTop: 1 }}>{l.userDepartment}</Text> : null}
             </View>
             <View style={{ alignItems: 'flex-end' }}>
-              <Text style={{ fontSize: 12, fontWeight: '700', color: colors.primary }}>{l.days}d</Text>
+              <Text style={{ fontSize: 12, fontWeight: '700', color: '#3b82f6' }}>{l.days}d</Text>
               <Text style={{ fontSize: 10, color: colors.textMuted }}>total</Text>
             </View>
           </View>
@@ -743,8 +743,8 @@ function AdminDashboard({ userId, userName, bottomOffset }: { userId: string; us
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          tintColor={colors.primary}
-          colors={[colors.primary]}
+          tintColor={'#3b82f6'}
+          colors={['#3b82f6']}
         />
       }
     >
@@ -753,12 +753,12 @@ function AdminDashboard({ userId, userName, bottomOffset }: { userId: string; us
       <View style={[styles.headerPro, { borderBottomColor: colors.border }]}>
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <View style={{ backgroundColor: isDark ? colors.primary + '22' : colors.bgElevated, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
-              <Text style={{ fontSize: 10, fontWeight: '700', color: isDark ? colors.primary : colors.textMuted, letterSpacing: 1, textTransform: 'uppercase' }}>Admin Panel</Text>
+            <View style={{ backgroundColor: isDark ? '#3b82f6' + '22' : colors.bgElevated, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
+              <Text style={{ fontSize: 10, fontWeight: '700', color: isDark ? '#3b82f6' : colors.textMuted, letterSpacing: 1, textTransform: 'uppercase' }}>Admin Panel</Text>
             </View>
             {pendingCount > 0 && (
-              <View style={{ backgroundColor: colors.error + '22', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
-                <Text style={{ fontSize: 10, fontWeight: '700', color: colors.error, letterSpacing: 0.5 }}>{pendingCount} pending</Text>
+              <View style={{ backgroundColor: '#ef4444' + '22', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
+                <Text style={{ fontSize: 10, fontWeight: '700', color: '#ef4444', letterSpacing: 0.5 }}>{pendingCount} pending</Text>
               </View>
             )}
           </View>
@@ -771,7 +771,7 @@ function AdminDashboard({ userId, userName, bottomOffset }: { userId: string; us
           </TouchableOpacity>
           <TouchableOpacity style={[styles.notifBtn, { backgroundColor: colors.bgCard, borderColor: colors.border, position: 'relative' }]} onPress={() => router.push('/(tabs)/leaves')}>
             <Ionicons name="document-text-outline" size={20} color={colors.textPrimary} />
-            {pendingCount > 0 && <View style={[styles.notifDot, { backgroundColor: colors.error, borderColor: colors.bg }]} />}
+            {pendingCount > 0 && <View style={[styles.notifDot, { backgroundColor: '#ef4444', borderColor: colors.bg }]} />}
           </TouchableOpacity>
         </View>
       </View>
@@ -779,10 +779,10 @@ function AdminDashboard({ userId, userName, bottomOffset }: { userId: string; us
       {/* Stats grid - Compact & Responsive */}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
         {[
-          { label: 'Total Employees', value: isLoading ? '—' : String(totalEmployees), icon: 'people-outline',           color: colors.primary,  modal: 'employees' as StatModalType },
-          { label: 'Pending',         value: isLoading ? '—' : String(pendingCount),    icon: 'time-outline',             color: colors.warning,  modal: 'pending'   as StatModalType },
-          { label: 'Approved/Month',  value: isLoading ? '—' : String(approvedThisMonth), icon: 'checkmark-circle-outline', color: colors.success,  modal: 'approved'  as StatModalType },
-          { label: 'On Leave Now',    value: isLoading ? '—' : String(onLeaveNow),      icon: 'walk-outline',             color: colors.primary,     modal: 'onleave'   as StatModalType },
+          { label: 'Total Employees', value: isLoading ? '—' : String(totalEmployees), icon: 'people-outline',           color: '#3b82f6',  modal: 'employees' as StatModalType },
+          { label: 'Pending',         value: isLoading ? '—' : String(pendingCount),    icon: 'time-outline',             color: '#f59e0b',  modal: 'pending'   as StatModalType },
+          { label: 'Approved/Month',  value: isLoading ? '—' : String(approvedThisMonth), icon: 'checkmark-circle-outline', color: '#10b981',  modal: 'approved'  as StatModalType },
+          { label: 'On Leave Now',    value: isLoading ? '—' : String(onLeaveNow),      icon: 'walk-outline',             color: '#3b82f6',     modal: 'onleave'   as StatModalType },
         ].map((s, i) => {
           const cardWidth = width < 380 ? (width - 40) / 2 : (width - 44) / 2;
           return (
@@ -828,9 +828,9 @@ function AdminDashboard({ userId, userName, bottomOffset }: { userId: string; us
       <Card>
         <View style={{ flexDirection: 'row', gap: 12, marginBottom: 12 }}>
           {[
-            { label: 'Approved', color: colors.success },
-            { label: 'Pending',  color: colors.warning },
-            { label: 'Rejected', color: colors.error },
+            { label: 'Approved', color: '#10b981' },
+            { label: 'Pending',  color: '#f59e0b' },
+            { label: 'Rejected', color: '#ef4444' },
           ].map((l, i) => (
             <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
               <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: l.color }} />
@@ -839,7 +839,7 @@ function AdminDashboard({ userId, userName, bottomOffset }: { userId: string; us
           ))}
         </View>
         {isLoading
-          ? <ActivityIndicator color={colors.primary} />
+          ? <ActivityIndicator color={'#3b82f6'} />
           : <MiniBarChart data={monthlyTrend} />
         }
       </Card>
@@ -848,7 +848,7 @@ function AdminDashboard({ userId, userName, bottomOffset }: { userId: string; us
       <SectionHeader title="Leave Distribution" icon="pie-chart-outline" />
       <Card>
         {isLoading
-          ? <ActivityIndicator color={colors.primary} />
+          ? <ActivityIndicator color={'#3b82f6'} />
           : pieData.length > 0
             ? <PieLegend data={pieData} />
             : <Text style={{ ...Typography.caption, color: colors.textMuted, textAlign: 'center', padding: 16 }}>No data yet</Text>
@@ -859,16 +859,16 @@ function AdminDashboard({ userId, userName, bottomOffset }: { userId: string; us
       <SectionHeader title="Recent Leave Requests" icon="list-outline" onSeeAll={() => router.push('/(tabs)/leaves')} />
       <Card style={{ padding: 0 }}>
         {isLoading ? (
-          <View style={{ padding: 20, alignItems: 'center' }}><ActivityIndicator color={colors.primary} /></View>
+          <View style={{ padding: 20, alignItems: 'center' }}><ActivityIndicator color={'#3b82f6'} /></View>
         ) : recentLeaves.length === 0 ? (
           <View style={{ padding: 20, alignItems: 'center' }}>
             <Text style={{ ...Typography.caption, color: colors.textMuted }}>No leave requests yet</Text>
           </View>
         ) : recentLeaves.map((l, i) => {
-          const statusColorMap: Record<LeaveStatus, string> = { approved: colors.success, pending: colors.warning, rejected: colors.error };
+          const statusColorMap: Record<LeaveStatus, string> = { approved: '#10b981', pending: '#f59e0b', rejected: '#ef4444' };
           const sc = statusColorMap[l.status as LeaveStatus] ?? colors.textMuted;
           const si = STATUS_ICONS[l.status as LeaveStatus] ?? 'help-circle';
-          const tc = LEAVE_TYPE_COLORS[l.type as LeaveType] ?? colors.primary;
+          const tc = LEAVE_TYPE_COLORS[l.type as LeaveType] ?? '#3b82f6';
           const label = LEAVE_TYPE_LABELS[l.type as LeaveType] ?? l.type;
           return (
             <View key={l._id} style={[styles.recentRow, i > 0 && { borderTopWidth: 1, borderTopColor: colors.border }]}>
@@ -881,7 +881,7 @@ function AdminDashboard({ userId, userName, bottomOffset }: { userId: string; us
                   {label} · {formatShortDate(l.startDate)}{l.endDate !== l.startDate ? ` – ${formatShortDate(l.endDate)}` : ''} · {l.days}d
                 </Text>
                 {(l as any).userDepartment ? (
-                  <Text style={{ fontSize: 10, color: colors.primary, marginTop: 1 }}>{(l as any).userDepartment}</Text>
+                  <Text style={{ fontSize: 10, color: '#3b82f6', marginTop: 1 }}>{(l as any).userDepartment}</Text>
                 ) : null}
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 4, backgroundColor: sc + '22', borderRadius: Radius.full }}>
@@ -898,8 +898,8 @@ function AdminDashboard({ userId, userName, bottomOffset }: { userId: string; us
       <View style={{ flexDirection: 'row', gap: 10 }}>
         {[
           { icon: 'checkbox-outline', label: 'Tasks', subtitle: 'Manage tasks', color: '#06b6d4', onPress: () => router.push('/(tabs)/tasks') },
-          { icon: 'time-outline', label: 'Attendance', subtitle: 'Track time', color: colors.success, onPress: () => router.push('/(tabs)/attendance') },
-          { icon: 'bar-chart-outline', label: 'Analytics', subtitle: 'View stats', color: colors.primary, onPress: () => router.push('/(tabs)/analytics') },
+          { icon: 'time-outline', label: 'Attendance', subtitle: 'Track time', color: '#10b981', onPress: () => router.push('/(tabs)/attendance') },
+          { icon: 'bar-chart-outline', label: 'Analytics', subtitle: 'View stats', color: '#3b82f6', onPress: () => router.push('/(tabs)/analytics') },
         ].map((a, i) => (
           <TouchableOpacity key={i} style={{ flex: 1, backgroundColor: colors.bgCard, borderRadius: Radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, alignItems: 'center', gap: 6 }} onPress={a.onPress}>
             <LinearGradient colors={[`${a.color}33`, `${a.color}11`]} style={{ width: 48, height: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center' }}>
@@ -915,9 +915,9 @@ function AdminDashboard({ userId, userName, bottomOffset }: { userId: string; us
       <SectionHeader title="Quick Actions" icon="flash-outline" />
       <View style={{ flexDirection: 'row', gap: 10 }}>
         {[
-          { icon: 'calendar-outline',  label: 'Leave\nRequests', color: colors.primary, onPress: () => router.push('/(tabs)/leaves') },
-          { icon: 'people-outline',    label: 'Team\nView',     color: colors.success,  onPress: () => router.push('/(tabs)/team') },
-          { icon: 'calendar-outline',  label: 'Calendar',       color: colors.primary,     onPress: () => router.push('/(tabs)/calendar') },
+          { icon: 'calendar-outline',  label: 'Leave\nRequests', color: '#3b82f6', onPress: () => router.push('/(tabs)/leaves') },
+          { icon: 'people-outline',    label: 'Team\nView',     color: '#10b981',  onPress: () => router.push('/(tabs)/team') },
+          { icon: 'calendar-outline',  label: 'Calendar',       color: '#3b82f6',     onPress: () => router.push('/(tabs)/calendar') },
         ].map((a, i) => (
           <TouchableOpacity key={i} style={[styles.quickAction, { flex: 1, marginRight: 0 }]} onPress={a.onPress}>
             <LinearGradient colors={[`${a.color}33`, `${a.color}11`]} style={[styles.quickIconWrap, { width: '100%', height: 60 }]}>
@@ -958,7 +958,7 @@ export default function Dashboard() {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={['top']}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <ActivityIndicator color={colors.primary} size="large" />
+          <ActivityIndicator color={'#3b82f6'} size="large" />
         </View>
       </SafeAreaView>
     );
@@ -1049,6 +1049,7 @@ const styles = StyleSheet.create({
   },
   quickLabel: { fontSize: 11, textAlign: 'center', lineHeight: 15 },
 });
+
 
 
 

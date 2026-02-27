@@ -20,7 +20,7 @@ const PRESENCE_OPTIONS = [
 ];
 
 const LEAVE_COLORS: Record<string, string> = {
-  paid: colors.primary, sick: '#ef4444', family: '#10b981', doctor: '#06b6d4', unpaid: '#f59e0b',
+  paid: '#3b82f6', sick: '#ef4444', family: '#10b981', doctor: '#06b6d4', unpaid: '#f59e0b',
 };
 
 // Avatar component that shows image if available, otherwise shows gradient with initials
@@ -166,11 +166,11 @@ export default function Profile() {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]} edges={['top']}>
         <View style={styles.loadingWrap}>
-          <ActivityIndicator color={colors.primary} size="large" />
+          <ActivityIndicator color={'#3b82f6'} size="large" />
         </View>
-        <TouchableOpacity style={[styles.logoutBtn, { margin: 16, borderColor: colors.error + '44' }]} onPress={handleLogout}>
-          <Ionicons name="log-out-outline" size={18} color={colors.error} />
-          <Text style={[styles.logoutText, { color: colors.error }]}>Sign Out</Text>
+        <TouchableOpacity style={[styles.logoutBtn, { margin: 16, borderColor: '#ef4444' + '44' }]} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={18} color={'#ef4444'} />
+          <Text style={[styles.logoutText, { color: '#ef4444' }]}>Sign Out</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
@@ -185,8 +185,8 @@ export default function Profile() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
+            tintColor={'#3b82f6'}
+            colors={['#3b82f6']}
           />
         }
       >
@@ -196,7 +196,7 @@ export default function Profile() {
           <Text style={[styles.pageTitle, { color: colors.textPrimary }]}>Profile</Text>
           <View style={{ flexDirection: 'row', gap: 8 }}>
             <TouchableOpacity style={[styles.editHeaderBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]} onPress={openEdit}>
-              <Ionicons name="create-outline" size={20} color={colors.primary} />
+              <Ionicons name="create-outline" size={20} color={'#3b82f6'} />
             </TouchableOpacity>
             <TouchableOpacity style={[styles.editHeaderBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]} onPress={toggleTheme}>
               <Ionicons name={isDark ? 'sunny-outline' : 'moon-outline'} size={20} color={colors.textPrimary} />
@@ -205,7 +205,7 @@ export default function Profile() {
         </View>
 
         {/* Hero card */}
-        <LinearGradient colors={isDark ? [colors.bg, colors.bgCard, colors.primaryDark] : [colors.primaryDark, colors.primary, colors.primaryLight]} style={styles.heroCard}
+        <LinearGradient colors={isDark ? [colors.bg, colors.bgCard, '#3b82f6'Dark] : ['#3b82f6'Dark, '#3b82f6', '#3b82f6'Light]} style={styles.heroCard}
           start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
           {/* Avatar */}
           <Avatar avatarUrl={(user as any)?.avatarUrl} initials={initials} isDark={isDark} />
@@ -216,7 +216,7 @@ export default function Profile() {
           {/* Role & type badges */}
           <View style={styles.heroBadges}>
             <View style={styles.heroBadge}>
-              <Ionicons name="shield-checkmark-outline" size={12} color={colors.primaryLight} />
+              <Ionicons name="shield-checkmark-outline" size={12} color={'#3b82f6'Light} />
               <Text style={[styles.heroBadgeText, { color: '#fff' }]}>
                 {user.role === 'admin' ? 'Admin' : user.role === 'supervisor' ? 'Supervisor' : 'Employee'}
               </Text>
@@ -267,8 +267,8 @@ export default function Profile() {
               { icon: 'time-outline',     label: 'Last Login', value: (user as any).lastLoginAt ? new Date((user as any).lastLoginAt).toLocaleDateString() : null },
             ].filter(r => r.value).map((row, i, arr) => (
               <View key={row.label} style={[styles.infoRow, i < arr.length - 1 && { ...styles.infoRowBorder, borderBottomColor: colors.border }]}>
-                <View style={[styles.infoIconWrap, { backgroundColor: colors.primary + '22' }]}>
-                  <Ionicons name={row.icon as any} size={16} color={colors.primary} />
+                <View style={[styles.infoIconWrap, { backgroundColor: '#3b82f6' + '22' }]}>
+                  <Ionicons name={row.icon as any} size={16} color={'#3b82f6'} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.infoLabel, { color: colors.textMuted }]}>{row.label}</Text>
@@ -284,15 +284,15 @@ export default function Profile() {
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Leave Overview</Text>
           {leavesLoading ? (
             <View style={{ padding: 20, alignItems: 'center' }}>
-              <ActivityIndicator color={colors.primary} />
+              <ActivityIndicator color={'#3b82f6'} />
             </View>
           ) : (
             <View style={styles.statsGrid}>
               {[
-                { label: 'Total Requests', value: leaveStats.total,     color: colors.primary },
-                { label: 'Approved',       value: leaveStats.approved,  color: colors.success },
-                { label: 'Pending',        value: leaveStats.pending,   color: colors.warning },
-                { label: 'Days Used',      value: leaveStats.totalDays, color: colors.primary      },
+                { label: 'Total Requests', value: leaveStats.total,     color: '#3b82f6' },
+                { label: 'Approved',       value: leaveStats.approved,  color: '#10b981' },
+                { label: 'Pending',        value: leaveStats.pending,   color: '#f59e0b' },
+                { label: 'Days Used',      value: leaveStats.totalDays, color: '#3b82f6'      },
               ].map(s => (
                 <View key={s.label} style={[styles.statBox, { backgroundColor: colors.bgCard, borderColor: s.color + '44' }]}>
                   <Text style={[styles.statValue, { color: s.color }]}>{s.value}</Text>
@@ -308,7 +308,7 @@ export default function Profile() {
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Recent Leave History</Text>
           {leavesLoading ? (
             <View style={{ padding: 20, alignItems: 'center' }}>
-              <ActivityIndicator color={colors.primary} />
+              <ActivityIndicator color={'#3b82f6'} />
             </View>
           ) : recentLeaves.length === 0 ? (
             <View style={[styles.emptyLeaves, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
@@ -318,8 +318,8 @@ export default function Profile() {
           ) : (
             <View style={[styles.leaveList, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
               {recentLeaves.map((l, i) => {
-                const sc = l.status === 'approved' ? colors.success : l.status === 'pending' ? colors.warning : colors.error;
-                const tc = LEAVE_COLORS[l.type] ?? colors.primary;
+                const sc = l.status === 'approved' ? '#10b981' : l.status === 'pending' ? '#f59e0b' : '#ef4444';
+                const tc = LEAVE_COLORS[l.type] ?? '#3b82f6';
                 return (
                   <View key={l._id} style={[styles.leaveItem, i < recentLeaves.length - 1 && { ...styles.leaveItemBorder, borderBottomColor: colors.border }]}>
                     <View style={[styles.leaveDot, { backgroundColor: tc }]} />
@@ -345,17 +345,17 @@ export default function Profile() {
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Settings</Text>
           <View style={[styles.infoCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
             <View style={[styles.infoRow, styles.infoRowBorder, { borderBottomColor: colors.border }]}>
-              <View style={[styles.infoIconWrap, { backgroundColor: colors.primary + '22' }]}>
-                <Ionicons name="notifications-outline" size={16} color={colors.primary} />
+              <View style={[styles.infoIconWrap, { backgroundColor: '#3b82f6' + '22' }]}>
+                <Ionicons name="notifications-outline" size={16} color={'#3b82f6'} />
               </View>
               <Text style={[styles.infoValue, { flex: 1, color: colors.textPrimary }]}>Push Notifications</Text>
               <Switch value={notifEnabled} onValueChange={setNotifEnabled}
-                trackColor={{ false: colors.border, true: colors.primary }} thumbColor="#fff" />
+                trackColor={{ false: colors.border, true: '#3b82f6' }} thumbColor="#fff" />
             </View>
             {/* Disabled for Expo Go */}
             {/* <TouchableOpacity style={[styles.infoRow, styles.infoRowBorder, { borderBottomColor: colors.border }]} onPress={() => setShowFaceRegistration(true)}>
-              <View style={[styles.infoIconWrap, { backgroundColor: colors.primary + '22' }]}>
-                <Ionicons name="scan-outline" size={16} color={colors.primary} />
+              <View style={[styles.infoIconWrap, { backgroundColor: '#3b82f6' + '22' }]}>
+                <Ionicons name="scan-outline" size={16} color={'#3b82f6'} />
               </View>
               <Text style={[styles.infoValue, { flex: 1, color: colors.textPrimary }]}>
                 {user?.faceRegisteredAt ? 'Update Face ID' : 'Register Face ID'}
@@ -363,8 +363,8 @@ export default function Profile() {
               <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
             </TouchableOpacity> */}
             <TouchableOpacity style={styles.infoRow} onPress={openEdit}>
-              <View style={[styles.infoIconWrap, { backgroundColor: colors.primary + '22' }]}>
-                <Ionicons name="create-outline" size={16} color={colors.primary} />
+              <View style={[styles.infoIconWrap, { backgroundColor: '#3b82f6' + '22' }]}>
+                <Ionicons name="create-outline" size={16} color={'#3b82f6'} />
               </View>
               <Text style={[styles.infoValue, { flex: 1, color: colors.textPrimary }]}>Edit Profile</Text>
               <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
@@ -376,7 +376,7 @@ export default function Profile() {
         <Pressable
           style={({ pressed }) => [
             styles.logoutBtn,
-            { borderColor: colors.error + '44' },
+            { borderColor: '#ef4444' + '44' },
             pressed && { opacity: 0.7 },
           ]}
           onPress={() => {
@@ -384,8 +384,8 @@ export default function Profile() {
             handleLogout();
           }}
         >
-          <Ionicons name="log-out-outline" size={18} color={colors.error} />
-          <Text style={[styles.logoutText, { color: colors.error }]}>Sign Out</Text>
+          <Ionicons name="log-out-outline" size={18} color={'#ef4444'} />
+          <Text style={[styles.logoutText, { color: '#ef4444' }]}>Sign Out</Text>
         </Pressable>
 
         <Text style={[styles.version, { color: colors.textMuted }]}>HRLeave v1.0.0 · Made with ❤️</Text>
@@ -457,10 +457,10 @@ export default function Profile() {
                     shadowOpacity: 0.3,
                     shadowRadius: 16,
                     borderWidth: isDark ? 1 : 0,
-                    borderColor: isDark ? colors.error + '44' : 'transparent',
+                    borderColor: isDark ? '#ef4444' + '44' : 'transparent',
                   }}
                 >
-                  <Ionicons name="log-out-outline" size={34} color={colors.error} />
+                  <Ionicons name="log-out-outline" size={34} color={'#ef4444'} />
                 </LinearGradient>
 
                 {/* Title */}
@@ -521,7 +521,7 @@ export default function Profile() {
                     })}
                   >
                     <LinearGradient
-                      colors={[colors.error, '#dc2626']}
+                      colors={['#ef4444', '#dc2626']}
                       start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
                       style={{
                         ...StyleSheet.absoluteFillObject,
@@ -573,8 +573,8 @@ export default function Profile() {
             <Text style={[styles.editModalTitle, { color: colors.textPrimary }]}>Edit Profile</Text>
             <TouchableOpacity onPress={handleSave} disabled={saving}>
               {saving
-                ? <ActivityIndicator color={colors.primary} size="small" />
-                : <Text style={[styles.editModalSave, { color: colors.primary }]}>Save</Text>}
+                ? <ActivityIndicator color={'#3b82f6'} size="small" />
+                : <Text style={[styles.editModalSave, { color: '#3b82f6' }]}>Save</Text>}
             </TouchableOpacity>
           </View>
           <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
@@ -677,5 +677,6 @@ const styles = StyleSheet.create({
   fieldLabel: { ...Typography.captionMedium, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 },
   fieldInput: { borderRadius: Radius.md, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 12, ...Typography.body },
 });
+
 
 
