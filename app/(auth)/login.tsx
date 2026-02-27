@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     marginLeft: -150, marginTop: -150,
     borderRadius: 150,
     backgroundColor: 'rgba(99,102,241,0.08)',
-    shadowColor: colors.primary,
+    shadowColor: '#3b82f6',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
     shadowRadius: 80,
