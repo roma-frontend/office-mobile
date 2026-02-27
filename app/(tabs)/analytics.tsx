@@ -24,7 +24,7 @@ const LEAVE_TYPE_LABELS: Record<LeaveType, string> = {
 };
 
 const LEAVE_TYPE_COLORS: Record<LeaveType, string> = {
-  paid: colors.primary,
+  paid: '#3b82f6',
   sick: '#ef4444',
   family: '#10b981',
   doctor: '#06b6d4',
@@ -165,7 +165,7 @@ function DepartmentCard({ dept, colors }: {
       </View>
 
       {[
-        { label: 'Paid', value: Number(dept.avgPaidBalance ?? 0), color: colors.primary },
+        { label: 'Paid', value: Number(dept.avgPaidBalance ?? 0), color: '#3b82f6' },
         { label: 'Sick', value: Number(dept.avgSickBalance ?? 0), color: colors.error },
         { label: 'Family', value: Number(dept.avgFamilyBalance ?? 0), color: colors.success },
       ].map((bal, i) => (
