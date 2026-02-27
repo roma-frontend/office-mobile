@@ -879,7 +879,7 @@ const styles = StyleSheet.create({
   modalActions: { flexDirection: 'row', gap: 10, marginTop: 8 },
   cancelBtn: { flex: 1, height: 52, borderRadius: Radius.md, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
   cancelText: { ...Typography.bodyMedium },
-  submitBtn: { flex: 2, height: 52, borderRadius: Radius.md, overflow: 'hidden', shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 6 },
+  submitBtn: { flex: 2, height: 52, borderRadius: Radius.md, overflow: 'hidden', shadowColor: '#6366f1', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 6 },
   submitGrad: { width: '100%', height: 52, alignItems: 'center', justifyContent: 'center' },
   submitText: { ...Typography.bodyMedium, color: '#fff', fontWeight: '700' },
   deleteBtn: { width: 52, height: 52, borderRadius: Radius.md, alignItems: 'center', justifyContent: 'center', backgroundColor: '#C84C4C' + '15', borderWidth: 1, borderColor: '#C84C4C' + '33' },
@@ -893,7 +893,7 @@ const styles = StyleSheet.create({
 
   // Assignee
   assigneeRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6, marginBottom: 6 },
-  avatarInitials: { width: 24, height: 24, borderRadius: 12, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
+  avatarInitials: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#6366f1', alignItems: 'center', justifyContent: 'center' },
   avatarText: { ...Typography.caption, color: '#fff', fontWeight: '700', fontSize: 10 },
   assigneeName: { ...Typography.caption, flex: 1 },
 

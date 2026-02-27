@@ -179,7 +179,7 @@ function LeaveRow({ leave, colors, isDark }: { leave: LeaveEntry; colors: any; i
   );
 }
 
-function BalanceBar({ label, used, total, color, icon }: { label: string; used: number; total: number; color: string; icon: string }) {
+function BalanceBar({ label, used, total, color, icon, colors }: { label: string; used: number; total: number; color: string; icon: string; colors: any }) {
   const pct = total > 0 ? Math.min((used / total) * 100, 100) : 0;
   const remaining = total - used;
   return (

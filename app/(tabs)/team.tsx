@@ -280,42 +280,32 @@ export default function Team() {
           </View>
         </View>
 
-        {/* Stats row */}
-        <View style={{ position: 'relative', marginBottom: 16 }}>
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
-          >
+        {/* Stats grid - 2x2 */}
+        <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
+          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
             {[
               { label: 'Total',       value: stats.total,       color: colors.primary, icon: 'people-outline'  },
               { label: 'Staff',       value: stats.staff,       color: colors.success, icon: 'person-outline'  },
-              { label: 'Contractors', value: stats.contractors, color: '#f59e0b',      icon: 'briefcase-outline'},
-              { label: 'Supervisors', value: stats.supervisors, color: colors.primary,      icon: 'shield-outline'  },
             ].map(s => (
-              <View key={s.label} style={[styles.statCard, { borderColor: s.color + '44', backgroundColor: colors.bgCard }]}>
-                <Ionicons name={s.icon as any} size={18} color={s.color} />
+              <View key={s.label} style={[styles.statCardGrid, { borderColor: s.color + '44', backgroundColor: colors.bgCard, flex: 1 }]}>
+                <Ionicons name={s.icon as any} size={22} color={s.color} />
                 <Text style={[styles.statValue, { color: s.color }]}>{s.value}</Text>
                 <Text style={[styles.statLabel, { color: colors.textMuted }]}>{s.label}</Text>
               </View>
             ))}
-            {/* Spacer for scroll end */}
-            <View style={{ width: 16 }} />
-          </ScrollView>
-          {/* Gradient fade on right */}
-          <LinearGradient
-            colors={[colors.bg + '00', colors.bg]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={{
-              position: 'absolute',
-              right: 0,
-              top: 0,
-              bottom: 0,
-              width: 40,
-              pointerEvents: 'none',
-            }}
-          />
+          </View>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            {[
+              { label: 'Contractors', value: stats.contractors, color: '#f59e0b',      icon: 'briefcase-outline'},
+              { label: 'Supervisors', value: stats.supervisors, color: '#8b5cf6',      icon: 'shield-outline'  },
+            ].map(s => (
+              <View key={s.label} style={[styles.statCardGrid, { borderColor: s.color + '44', backgroundColor: colors.bgCard, flex: 1 }]}>
+                <Ionicons name={s.icon as any} size={22} color={s.color} />
+                <Text style={[styles.statValue, { color: s.color }]}>{s.value}</Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted }]}>{s.label}</Text>
+              </View>
+            ))}
+          </View>
         </View>
 
         {/* Search */}
@@ -420,6 +410,7 @@ const styles = StyleSheet.create({
 
   // Stats
   statCard: { borderRadius: Radius.md, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 10, alignItems: 'center', minWidth: 85, gap: 3 },
+  statCardGrid: { borderRadius: Radius.lg, borderWidth: 1.5, paddingVertical: 16, alignItems: 'center', gap: 6 },
   statValue: { ...Typography.h2, fontWeight: '700' },
   statLabel: { ...Typography.label },
 

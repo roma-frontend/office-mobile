@@ -11,30 +11,28 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
-const slides = [
+// Slides data - gradients will be determined dynamically based on theme
+const slidesData = [
   {
     id: '1',
     icon: 'calendar-outline',
     title: 'Manage Leaves\nEffortlessly',
     subtitle: 'Request, track and approve time off in seconds. Your team stays in sync, always.',
-    gradient: [colors.primaryDark, colors.primary] as [string, string],
-    darkGradient: [colors.primaryDark, colors.primary] as [string, string],
+    lightGradient: ['#f59e0b', '#f97316'] as [string, string],
   },
   {
     id: '2',
     icon: 'people-outline',
     title: 'Your Team,\nAt a Glance',
     subtitle: "See who's in, who's out, and plan ahead. Perfect visibility for HR professionals.",
-    gradient: ['#f59e0b', '#f97316'] as [string, string],
-    darkGradient: [colors.primaryDark, colors.primary] as [string, string],
+    lightGradient: ['#f59e0b', '#f97316'] as [string, string],
   },
   {
     id: '3',
     icon: 'sparkles-outline',
     title: 'AI-Powered\nHR Assistant',
     subtitle: 'Say "Hey HR" and let our AI handle requests, answer questions, and automate tasks.',
-    gradient: ['#10b981', '#06b6d4'] as [string, string],
-    darkGradient: [colors.primary, colors.primaryLight] as [string, string],
+    lightGradient: ['#10b981', '#06b6d4'] as [string, string],
   },
 ];
 
@@ -43,6 +41,13 @@ export default function Onboarding() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
+
+  // Create slides with theme-aware gradients
+  const slides = slidesData.map(slide => ({
+    ...slide,
+    gradient: slide.lightGradient,
+    darkGradient: [colors.primaryDark, colors.primary] as [string, string],
+  }));
 
   const handleNext = async () => {
     if (currentIndex < slides.length - 1) {

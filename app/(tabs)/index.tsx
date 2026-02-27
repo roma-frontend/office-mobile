@@ -255,6 +255,7 @@ function EmployeeDashboard({ userId, userName, bottomOffset }: { userId: string;
   const [refreshing, setRefreshing] = useState(false);
   
   const user = useQuery(api.users.getUserById, { userId: userId as Id<'users'> });
+  const organization = useQuery(api.organizations.getMyOrganization, { userId: userId as Id<'users'> });
   const myLeaves = useQuery(api.leaves.getUserLeaves, { userId: userId as Id<'users'> });
   const latestRating = useQuery(api.supervisorRatings.getLatestRating, { employeeId: userId as Id<'users'> });
   const monthlyStats = useQuery(api.timeTracking.getMonthlyStats, { userId: userId as Id<'users'>, month: new Date().toISOString().slice(0, 7) });
@@ -298,7 +299,7 @@ function EmployeeDashboard({ userId, userName, bottomOffset }: { userId: string;
               </Text>
             </View>
           </View>
-          <Text style={[styles.greeting, { color: colors.textPrimary }]}>{getGreeting()}, {firstName}</Text>
+          <Text style={[styles.organizationName, { color: isDark ? '#ffffff' : '#000000' }]}>{organization?.name ?? 'Office Management'}</Text>
           <Text style={[styles.subGreeting, { color: colors.textMuted }]}>{formatDate(today)}</Text>
         </View>
         <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -667,6 +668,7 @@ function AdminDashboard({ userId, userName, bottomOffset }: { userId: string; us
   const { colors, isDark, toggleTheme } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   
+  const organization = useQuery(api.organizations.getMyOrganization, { userId: userId as Id<'users'> });
   const allLeaves = useQuery(api.leaves.getAllLeaves, userId ? { requesterId: userId as any } : 'skip');
   const allUsers = useQuery(api.users.getAllUsers, userId ? { requesterId: userId as any } : 'skip');
   const leaveStats = useQuery(api.leaves.getLeaveStats, userId ? { requesterId: userId as any } : 'skip');
@@ -762,7 +764,7 @@ function AdminDashboard({ userId, userName, bottomOffset }: { userId: string; us
               </View>
             )}
           </View>
-          <Text style={[styles.greeting, { color: colors.textPrimary }]}>{getGreeting()}, {firstName}</Text>
+          <Text style={[styles.organizationName, { color: isDark ? '#ffffff' : '#000000' }]}>{organization?.name ?? 'Office Management'}</Text>
           <Text style={[styles.subGreeting, { color: colors.textMuted }]}>{formatDate(today)}</Text>
         </View>
         <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -986,6 +988,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1, marginBottom: 4,
   },
   greeting: { ...Typography.h2 },
+  organizationName: { 
+    fontSize: 28, 
+    fontWeight: '900', 
+    letterSpacing: -1.5, 
+    textTransform: 'uppercase',
+    lineHeight: 32,
+  },
   subGreeting: { ...Typography.caption, marginTop: 2 },
   notifBtn: {
     width: 40, height: 40, borderRadius: Radius.md,
