@@ -23,9 +23,9 @@ const LEAVE_TYPE_LABELS: Record<LeaveType, string> = {
   paid: 'Paid Vacation', sick: 'Sick Leave', family: 'Family Leave',
   doctor: 'Doctor Visit', unpaid: 'Unpaid Leave',
 };
-// Leave type colors are neutral/accent — same in both themes
+// Leave type colors are neutral/accent — hardcoded for consistency
 const LEAVE_TYPE_COLORS: Record<LeaveType, string> = {
-  paid: colors.primary, sick: '#8A9BAC', family: '#4CAF7C', doctor: '#6A9BAC', unpaid: '#7A8A7A',
+  paid: '#3b82f6', sick: '#8A9BAC', family: '#4CAF7C', doctor: '#6A9BAC', unpaid: '#7A8A7A',
 };
 const STATUS_ICONS: Record<LeaveStatus, string> = {
   approved: 'checkmark-circle', pending: 'time', rejected: 'close-circle',
