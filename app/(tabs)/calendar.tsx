@@ -13,7 +13,7 @@ type LeaveType = 'paid' | 'sick' | 'family' | 'doctor' | 'unpaid';
 type LeaveStatus = 'pending' | 'approved' | 'rejected';
 
 const LEAVE_TYPE_COLORS: Record<LeaveType, string> = {
-  paid: colors.primary,
+  paid: '#3b82f6',
   sick: '#ef4444',
   family: '#10b981',
   doctor: '#06b6d4',
