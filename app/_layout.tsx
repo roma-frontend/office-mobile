@@ -10,8 +10,16 @@ import { ToastProvider, useToast } from '@/context/ToastContext';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { api } from '../convex/_generated/api';
 import type { Id } from '../convex/_generated/dataModel';
+import { PomodoroNotificationListener } from '@/components/PomodoroNotificationListener';
+import { Platform } from 'react-native';
 
 const convex = new ConvexReactClient(CONVEX_URL);
+
+// Initialize break reminder notifications on app start (native only)
+if (Platform.OS !== 'web') {
+  const { setupNotificationListeners } = require('@/services/breakReminderService');
+  setupNotificationListeners();
+}
 
 // ── Notification watcher — shows toasts for new notifications in real-time ──
 function NotificationWatcher() {
@@ -62,11 +70,18 @@ function AppStack() {
     <>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <NotificationWatcher />
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
+      <PomodoroNotificationListener />
+      <Stack screenOptions={{ 
+        headerShown: false, 
+        contentStyle: { backgroundColor: colors.bg },
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
+        animation: 'default',
+      }}>
         <Stack.Screen name="index" />
-        <Stack.Screen name="onboarding" />
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="onboarding" options={{ gestureEnabled: true }} />
+        <Stack.Screen name="(auth)" options={{ gestureEnabled: false }} />
+        <Stack.Screen name="(tabs)" options={{ gestureEnabled: false }} />
       </Stack>
     </>
   );

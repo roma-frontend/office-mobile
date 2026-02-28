@@ -51,8 +51,17 @@ export default function Login() {
           department: data.department,
           position: data.position,
           employeeType: data.employeeType,
-          avatarUrl: data.avatarUrl,
+          avatar: data.avatar, // New field
+          avatarUrl: data.avatarUrl, // Legacy field
           travelAllowance: data.travelAllowance,
+          phone: data.phone,
+          location: data.location,
+          // Leave balances
+          paidLeaveBalance: data.paidLeaveBalance,
+          sickLeaveBalance: data.sickLeaveBalance,
+          familyLeaveBalance: data.familyLeaveBalance,
+          // Include all other fields from data
+          ...data,
         },
         sessionExpiry,
       );

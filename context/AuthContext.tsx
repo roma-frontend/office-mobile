@@ -11,8 +11,17 @@ export interface AuthUser {
   department?: string;
   position?: string;
   employeeType?: string;
-  avatarUrl?: string;
+  avatar?: string; // New field matching web version
+  avatarUrl?: string; // Legacy field
   travelAllowance?: number;
+  phone?: string;
+  location?: string;
+  // Leave balances
+  paidLeaveBalance?: number;
+  sickLeaveBalance?: number;
+  familyLeaveBalance?: number;
+  // Settings fields (will be synced from Convex)
+  [key: string]: any; // Allow dynamic fields from settings
 }
 
 interface AuthState {

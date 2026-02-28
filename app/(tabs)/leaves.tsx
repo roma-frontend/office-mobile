@@ -86,7 +86,7 @@ function CalendarPicker({ visible, title, value, minDate, colors, isDark, onClos
 
   return (
     <Modal visible={visible} transparent animationType="fade" statusBarTranslucent onRequestClose={onClose}>
-      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', alignItems: 'center', justifyContent: 'center', padding: 24, zIndex: 9999 }}>
         <View style={{ width: '100%', maxWidth: 360, backgroundColor: bg, borderRadius: 24, overflow: 'hidden', elevation: 20, shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 20 }}>
 
           {/* Header */}
@@ -582,50 +582,6 @@ export default function Leaves() {
         </ScrollView>
       )}
 
-      {/* Custom Calendar Pickers — New Leave Modal (placed BEFORE modals to avoid nesting issues) */}
-      <CalendarPicker
-        visible={showFromPicker}
-        title="Select Start Date"
-        value={fromDate}
-        minDate={today()}
-        colors={colors}
-        isDark={isDark}
-        onClose={() => setShowFromPicker(false)}
-        onSelect={(d) => { setFromDate(d); if (toDate && toDate < d) setToDate(''); }}
-      />
-      <CalendarPicker
-        visible={showToPicker}
-        title="Select End Date"
-        value={toDate}
-        minDate={fromDate || today()}
-        colors={colors}
-        isDark={isDark}
-        onClose={() => setShowToPicker(false)}
-        onSelect={(d) => setToDate(d)}
-      />
-
-      {/* Custom Calendar Pickers — Edit Leave Modal */}
-      <CalendarPicker
-        visible={showEditFromPicker}
-        title="Select Start Date"
-        value={editFromDate}
-        minDate={today()}
-        colors={colors}
-        isDark={isDark}
-        onClose={() => setShowEditFromPicker(false)}
-        onSelect={(d) => { setEditFromDate(d); if (editToDate && editToDate < d) setEditToDate(''); }}
-      />
-      <CalendarPicker
-        visible={showEditToPicker}
-        title="Select End Date"
-        value={editToDate}
-        minDate={editFromDate || today()}
-        colors={colors}
-        isDark={isDark}
-        onClose={() => setShowEditToPicker(false)}
-        onSelect={(d) => setEditToDate(d)}
-      />
-
       {/* New Leave Modal */}
       <Modal visible={showModal} animationType="slide" transparent statusBarTranslucent>
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
@@ -838,6 +794,48 @@ export default function Leaves() {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* Custom Calendar Pickers — Rendered LAST to appear on top */}
+      <CalendarPicker
+        visible={showFromPicker}
+        title="Select Start Date"
+        value={fromDate}
+        minDate={today()}
+        colors={colors}
+        isDark={isDark}
+        onClose={() => setShowFromPicker(false)}
+        onSelect={(d) => { setFromDate(d); if (toDate && toDate < d) setToDate(''); }}
+      />
+      <CalendarPicker
+        visible={showToPicker}
+        title="Select End Date"
+        value={toDate}
+        minDate={fromDate || today()}
+        colors={colors}
+        isDark={isDark}
+        onClose={() => setShowToPicker(false)}
+        onSelect={(d) => setToDate(d)}
+      />
+      <CalendarPicker
+        visible={showEditFromPicker}
+        title="Select Start Date"
+        value={editFromDate}
+        minDate={today()}
+        colors={colors}
+        isDark={isDark}
+        onClose={() => setShowEditFromPicker(false)}
+        onSelect={(d) => { setEditFromDate(d); if (editToDate && editToDate < d) setEditToDate(''); }}
+      />
+      <CalendarPicker
+        visible={showEditToPicker}
+        title="Select End Date"
+        value={editToDate}
+        minDate={editFromDate || today()}
+        colors={colors}
+        isDark={isDark}
+        onClose={() => setShowEditToPicker(false)}
+        onSelect={(d) => setEditToDate(d)}
+      />
 
     </SafeAreaView>
   );

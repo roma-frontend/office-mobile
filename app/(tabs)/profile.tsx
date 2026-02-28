@@ -9,6 +9,7 @@ import type { Id } from '../../convex/_generated/dataModel';
 import { Typography, Radius } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
+import { router } from 'expo-router';
 // import { FaceRegistration } from '@/components/FaceRegistration'; // Disabled for Expo Go
 
 const PRESENCE_OPTIONS = [
@@ -195,6 +196,12 @@ export default function Profile() {
         <View style={[styles.header, { borderBottomColor: colors.border }]}>
           <Text style={[styles.pageTitle, { color: colors.textPrimary }]}>Profile</Text>
           <View style={{ flexDirection: 'row', gap: 8 }}>
+            <TouchableOpacity 
+              style={[styles.editHeaderBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]} 
+              onPress={() => router.push('/settings')}
+            >
+              <Ionicons name="settings-outline" size={20} color={colors.primary} />
+            </TouchableOpacity>
             <TouchableOpacity style={[styles.editHeaderBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]} onPress={openEdit}>
               <Ionicons name="create-outline" size={20} color={colors.primary} />
             </TouchableOpacity>
