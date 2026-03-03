@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   backButton: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 20, fontWeight: '700' },
   scrollView: { flex: 1 },
-  scrollContent: { padding: 16, paddingBottom: 100 },
+  scrollContent: { padding: 16, paddingBottom: 32 },
   sectionTitle: { fontSize: 18, fontWeight: '600', marginBottom: 12, marginTop: 8 },
   card: { borderRadius: 12, borderWidth: 1, overflow: 'hidden', marginBottom: 16 },
   optionRow: { flexDirection: 'row', alignItems: 'center', padding: 16, justifyContent: 'space-between' },

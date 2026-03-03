@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   backButton: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 20, fontWeight: '700' },
   scrollView: { flex: 1 },
-  scrollContent: { padding: 16, paddingBottom: 100 },
+  scrollContent: { padding: 16, paddingBottom: 32 },
   subtitle: { fontSize: 14, marginBottom: 16 },
   integrationCard: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12, borderWidth: 1, marginBottom: 12 },
   iconContainer: { width: 48, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 12 },

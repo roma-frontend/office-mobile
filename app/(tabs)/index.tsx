@@ -220,29 +220,34 @@ function CheckInOutWidget({ userId }: { userId: string }) {
         ))}
       </View>
 
-      {!isCheckedOut && (
-        <TouchableOpacity
-          onPress={handlePress}
-          disabled={loading}
-          style={{ height: 46, borderRadius: Radius.md, overflow: 'hidden' }}
+      <TouchableOpacity
+        onPress={handlePress}
+        disabled={loading || isCheckedOut}
+        style={{ height: 46, borderRadius: Radius.md, overflow: 'hidden', opacity: isCheckedOut ? 0.6 : 1 }}
+      >
+        <LinearGradient
+          colors={isCheckedOut ? [colors.success + '44', colors.success + '33'] : isCheckedIn ? ['#ef4444', '#dc2626'] : ['#10b981', '#059669']}
+          style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
         >
-          <LinearGradient
-            colors={isCheckedIn ? ['#ef4444', '#dc2626'] : ['#10b981', '#059669']}
-            style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-          >
-            {loading
-              ? <ActivityIndicator color="#fff" size="small" />
-              : <>
-                  <Ionicons name={btnIcon as any} size={18} color="#fff" />
-                  <Text style={{ ...Typography.bodyMedium, color: '#fff', fontWeight: '700' }}>{btnLabel}</Text>
-                </>
-            }
-          </LinearGradient>
-        </TouchableOpacity>
-      )}
-      {isCheckedOut && (
-        <View style={{ height: 40, borderRadius: Radius.md, backgroundColor: colors.bgElevated, alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ ...Typography.captionMedium, color: colors.textMuted }}>✓ Checked out for today</Text>
+          {loading ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <>
+              <Ionicons name={btnIcon as any} size={18} color="#fff" />
+              <Text style={{ ...Typography.bodyMedium, color: '#fff', fontWeight: '700' }}>{btnLabel}</Text>
+            </>
+          )}
+        </LinearGradient>
+      </TouchableOpacity>
+      
+      {isCheckedOut && todayStatus?.totalWorkedMinutes && (
+        <View style={{ marginTop: 10, padding: 10, backgroundColor: colors.success + '11', borderRadius: Radius.md, borderWidth: 1, borderColor: colors.success + '33' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <Ionicons name="checkmark-circle" size={16} color={colors.success} />
+            <Text style={{ fontSize: 13, color: colors.success, fontWeight: '600' }}>
+              Great work today! You completed {(todayStatus.totalWorkedMinutes / 60).toFixed(1)} hours
+            </Text>
+          </View>
         </View>
       )}
     </Card>

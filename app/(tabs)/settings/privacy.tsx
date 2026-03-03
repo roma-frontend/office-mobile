@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   backButton: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 20, fontWeight: '700' },
   scrollView: { flex: 1 },
-  scrollContent: { padding: 16, paddingBottom: 100 },
+  scrollContent: { padding: 16, paddingBottom: 32 },
   subtitle: { fontSize: 14, marginBottom: 24 },
   sectionTitle: { fontSize: 18, fontWeight: '600', marginBottom: 12 },
   card: { borderRadius: 12, borderWidth: 1, overflow: 'hidden', marginBottom: 16 },
