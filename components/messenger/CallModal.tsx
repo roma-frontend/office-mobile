@@ -123,6 +123,12 @@ export default function CallModal({
 
   const initializeCall = async () => {
     try {
+      // Check if WebRTC is available
+      if (!RTCPeerConnection || !MediaStream) {
+        setCallError('WebRTC not available. Please rebuild the app with native modules.');
+        return;
+      }
+
       // Set status to in_call
       await updatePresenceStatus({ userId: currentUserId, presenceStatus: 'in_call', outOfOfficeMessage: undefined });
 
