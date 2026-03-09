@@ -413,6 +413,139 @@ function AdminTrendsTab({ userId, colors }: { userId: string; colors: any }) {
   );
 }
 
+// ── Performance Ratings Tab ───────────────────────────────────────────
+const RATING_CRITERIA = [
+  { key: 'qualityOfWork', label: 'Quality', icon: 'star-outline', color: '#3b82f6' },
+  { key: 'efficiency', label: 'Efficiency', icon: 'speedometer-outline', color: '#10b981' },
+  { key: 'teamwork', label: 'Teamwork', icon: 'people-outline', color: '#8b5cf6' },
+  { key: 'initiative', label: 'Initiative', icon: 'bulb-outline', color: '#f59e0b' },
+  { key: 'communication', label: 'Communication', icon: 'chatbubbles-outline', color: '#06b6d4' },
+  { key: 'reliability', label: 'Reliability', icon: 'shield-checkmark-outline', color: '#ef4444' },
+];
+
+function RatingsTab({ userId, colors }: { userId: string; colors: any }) {
+  const ratings = useQuery(api.supervisorRatings.getEmployeeRatings, {
+    employeeId: userId as Id<'users'>,
+    limit: 10,
+  });
+  const averages = useQuery(api.supervisorRatings.getAverageRatings, {
+    employeeId: userId as Id<'users'>,
+  });
+  const trends = useQuery(api.supervisorRatings.getRatingTrends, {
+    employeeId: userId as Id<'users'>,
+    months: 6,
+  });
+
+  if (ratings === undefined || averages === undefined) {
+    return <ActivityIndicator color={colors.primary} size="large" style={{ marginTop: 40 }} />;
+  }
+
+  const overallAvg = averages
+    ? (Object.values(averages).reduce((s: number, v: any) => s + (Number(v) || 0), 0) / Math.max(Object.values(averages).length, 1)).toFixed(1)
+    : '0.0';
+
+  return (
+    <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }} contentContainerStyle={{ padding: Spacing.md, gap: Spacing.lg, paddingBottom: Platform.OS === 'ios' ? 108 : 88 }}>
+      {/* Overall Score */}
+      <View style={[styles.card, { backgroundColor: colors.bgCard, borderColor: colors.border, alignItems: 'center', paddingVertical: 24 }]}>
+        <Text style={{ fontSize: 48, fontWeight: '800', color: colors.primary }}>{overallAvg}</Text>
+        <Text style={{ fontSize: 14, color: colors.textMuted, marginTop: 4 }}>Overall Rating</Text>
+        <View style={{ flexDirection: 'row', gap: 4, marginTop: 8 }}>
+          {[1, 2, 3, 4, 5].map(s => (
+            <Ionicons key={s} name={Number(overallAvg) >= s ? 'star' : Number(overallAvg) >= s - 0.5 ? 'star-half' : 'star-outline'} size={20} color="#f59e0b" />
+          ))}
+        </View>
+      </View>
+
+      {/* Criteria Breakdown */}
+      {averages && Object.keys(averages).length > 0 && (
+        <View>
+          <SectionHeader title="Criteria Breakdown" icon="analytics-outline" colors={colors} />
+          <View style={[styles.card, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            {RATING_CRITERIA.map((crit, i) => {
+              const val = Number((averages as any)[crit.key] ?? 0);
+              return (
+                <View key={crit.key} style={{ marginBottom: i < RATING_CRITERIA.length - 1 ? 16 : 0 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <Ionicons name={crit.icon as any} size={16} color={crit.color} />
+                      <Text style={{ fontSize: 13, color: colors.textSecondary, fontWeight: '500' }}>{crit.label}</Text>
+                    </View>
+                    <Text style={{ fontSize: 13, color: colors.primary, fontWeight: '700' }}>{val.toFixed(1)}/5</Text>
+                  </View>
+                  <View style={{ height: 8, backgroundColor: colors.bgElevated ?? (colors.border + '44'), borderRadius: 4, overflow: 'hidden' }}>
+                    <View style={{ height: '100%', width: `${(val / 5) * 100}%`, backgroundColor: crit.color, borderRadius: 4 }} />
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+      )}
+
+      {/* Trend */}
+      {trends && Array.isArray(trends) && trends.length > 0 && (
+        <View>
+          <SectionHeader title="Rating Trend" icon="trending-up-outline" colors={colors} />
+          <View style={[styles.card, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+            {(() => {
+              const maxVal = Math.max(...trends.map((t: any) => t.average ?? 0), 1);
+              const chartH = 100;
+              return (
+                <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6, height: chartH + 28 }}>
+                  {trends.map((t: any, i: number) => (
+                    <View key={i} style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end', height: chartH + 28 }}>
+                      <View style={{
+                        width: '60%', borderRadius: 4, backgroundColor: colors.primary,
+                        height: Math.max(8, ((t.average ?? 0) / 5) * chartH),
+                      }} />
+                      <Text style={{ fontSize: 9, color: colors.textMuted, marginTop: 6 }}>{t.month}</Text>
+                    </View>
+                  ))}
+                </View>
+              );
+            })()}
+          </View>
+        </View>
+      )}
+
+      {/* Rating History */}
+      <SectionHeader title="Rating History" icon="time-outline" colors={colors} />
+      {ratings && ratings.length > 0 ? (
+        ratings.map((r: any, i: number) => (
+          <View key={r._id ?? i} style={[styles.card, { backgroundColor: colors.bgCard, borderColor: colors.border, marginBottom: i < ratings.length - 1 ? 8 : 0 }]}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <View>
+                <Text style={{ fontSize: 14, fontWeight: '600', color: colors.textPrimary }}>
+                  {r.supervisorName ?? 'Supervisor'}
+                </Text>
+                <Text style={{ fontSize: 12, color: colors.textMuted }}>
+                  {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : ''}
+                </Text>
+              </View>
+              <View style={{ backgroundColor: colors.primary + '22', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }}>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: colors.primary }}>
+                  {((r.qualityOfWork + r.efficiency + r.teamwork + r.initiative + r.communication + r.reliability) / 6).toFixed(1)}
+                </Text>
+              </View>
+            </View>
+            {r.comments && (
+              <Text style={{ fontSize: 13, color: colors.textSecondary, fontStyle: 'italic', lineHeight: 19 }}>
+                "{r.comments}"
+              </Text>
+            )}
+          </View>
+        ))
+      ) : (
+        <View style={[styles.card, { backgroundColor: colors.bgCard, borderColor: colors.border, alignItems: 'center', paddingVertical: 32 }]}>
+          <Ionicons name="star-outline" size={40} color={colors.textMuted} />
+          <Text style={{ fontSize: 15, color: colors.textMuted, marginTop: 12 }}>No ratings yet</Text>
+        </View>
+      )}
+    </ScrollView>
+  );
+}
+
 // ── Tab Button ─────────────────────────────────────────────────────────
 function TabButton({ label, active, onPress, colors }: { label: string; active: boolean; onPress: () => void; colors: any }) {
   return (
@@ -429,7 +562,7 @@ export default function Analytics() {
   const { colors, toggleTheme } = useTheme();
   const [userId, setUserId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'departments' | 'trends'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'departments' | 'trends' | 'ratings'>('overview');
 
   useEffect(() => {
     const loadUser = async () => {
@@ -489,16 +622,42 @@ export default function Analytics() {
               onPress={() => setActiveTab('trends')}
               colors={colors}
             />
+            <TabButton
+              label="Ratings"
+              active={activeTab === 'ratings'}
+              onPress={() => setActiveTab('ratings')}
+              colors={colors}
+            />
           </View>
 
           {/* Tab Content */}
           {activeTab === 'overview' && <AdminOverviewTab userId={userId} colors={colors} />}
           {activeTab === 'departments' && <AdminDepartmentsTab userId={userId} colors={colors} />}
           {activeTab === 'trends' && <AdminTrendsTab userId={userId} colors={colors} />}
+          {activeTab === 'ratings' && <RatingsTab userId={userId} colors={colors} />}
         </>
       ) : (
-        /* Employee Personal Analytics */
-        <PersonalAnalyticsSection userId={userId} colors={colors} />
+        <>
+          {/* Employee Tab Switcher */}
+          <View style={[styles.tabSwitcher, { borderBottomColor: colors.border, backgroundColor: colors.bgCard }]}>
+            <TabButton
+              label="My Analytics"
+              active={activeTab === 'overview'}
+              onPress={() => setActiveTab('overview')}
+              colors={colors}
+            />
+            <TabButton
+              label="My Ratings"
+              active={activeTab === 'ratings'}
+              onPress={() => setActiveTab('ratings')}
+              colors={colors}
+            />
+          </View>
+          {activeTab === 'overview' || activeTab === 'departments' || activeTab === 'trends'
+            ? <PersonalAnalyticsSection userId={userId} colors={colors} />
+            : <RatingsTab userId={userId} colors={colors} />
+          }
+        </>
       )}
     </SafeAreaView>
   );

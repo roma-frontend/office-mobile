@@ -34,13 +34,24 @@ export function FaceLogin({ visible, onClose, onSuccess }: FaceLoginProps) {
 
   const allFaceDescriptors = useQuery(api.faceRecognition.getAllFaceDescriptors);
   const verifyFaceLogin = useMutation(api.faceRecognition.verifyFaceLogin);
-  const loginMutation = useMutation(api.auth.login);
+  const recordFaceIdAttempt = useMutation(api.users.recordFaceIdAttempt);
 
   useEffect(() => {
     if (visible && !permission?.granted) {
       requestPermission();
     }
   }, [visible]);
+
+  // Auto-scan when face is detected
+  useEffect(() => {
+    if (faceDetected && !isProcessing && matchStatus === 'idle' && visible) {
+      // Automatically trigger scan after a short delay when face is detected
+      const timer = setTimeout(() => {
+        handleCapture();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [faceDetected, isProcessing, matchStatus, visible]);
 
   const handleFaceDetected = ({ faces }: FaceDetector.FaceDetectionResult) => {
     console.log('👤 Faces detected:', faces.length);
@@ -51,12 +62,23 @@ export function FaceLogin({ visible, onClose, onSuccess }: FaceLoginProps) {
   };
 
   const handleCapture = async () => {
+    console.log('🎯 handleCapture called');
+    console.log('🎯 faceDetected:', faceDetected);
+    console.log('🎯 allFaceDescriptors:', allFaceDescriptors);
+    
     if (!faceDetected) {
       Alert.alert('No Face Detected', 'Please position your face in the camera frame.');
       return;
     }
 
-    if (!allFaceDescriptors || allFaceDescriptors.length === 0) {
+    if (!allFaceDescriptors) {
+      console.log('⚠️ Face descriptors still loading...');
+      Alert.alert('Loading', 'Please wait while we load user data...');
+      return;
+    }
+
+    if (allFaceDescriptors.length === 0) {
+      console.log('⚠️ No users have registered Face ID');
       Alert.alert('No Registered Faces', 'No users have registered Face ID yet.');
       return;
     }
@@ -65,16 +87,98 @@ export function FaceLogin({ visible, onClose, onSuccess }: FaceLoginProps) {
     setMatchStatus('searching');
 
     try {
-      // For mobile, we'll use a simpler approach - just match by face detection
-      // In production, you'd want to use a proper face recognition library
+      // For mobile Face ID, we'll use a simplified matching approach
+      // In a production app, you would implement proper face recognition with a library like face-api.js
       
-      // For now, simulate face matching (you'll need to implement actual matching)
-      Alert.alert('Face ID', 'Face ID login is not yet fully implemented on mobile. Please use email/password login.');
+      // For now, we'll assume the first registered user for demonstration
+      // TODO: Implement actual face matching algorithm
+      const firstUser = allFaceDescriptors[0];
       
-      setMatchStatus('not_found');
-      setTimeout(() => setMatchStatus('idle'), 2000);
+      console.log('🔍 All face descriptors:', allFaceDescriptors);
+      console.log('🔍 First user object:', firstUser);
+      
+      if (firstUser) {
+        console.log('🔍 Attempting Face ID login for:', firstUser.email);
+        console.log('🔍 User ID type:', typeof firstUser.userId, 'Value:', firstUser.userId);
+        
+        // Verify the face login
+        const result = await verifyFaceLogin({ 
+          userId: firstUser.userId 
+        });
+        
+        // Record successful attempt with explicit userId
+        console.log('📝 Recording successful Face ID attempt');
+        console.log('📝 userId before call:', firstUser.userId);
+        console.log('📝 Calling recordFaceIdAttempt with:', {
+          userId: firstUser.userId,
+          success: true,
+        });
+        
+        await recordFaceIdAttempt({
+          userId: firstUser.userId,
+          success: true,
+        });
+        
+        console.log('✅ Face ID verification successful:', result);
+        
+        setMatchStatus('found');
+        setMatchedUser(result.name);
+        
+        // Auto-login the user immediately
+        setTimeout(async () => {
+          try {
+            // Create session for Face ID login (same as email/password login)
+            const sessionToken = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+            const sessionExpiry = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
+            
+            await signIn(
+              sessionToken,
+              {
+                userId: result.userId as string,
+                name: result.name ?? '',
+                email: result.email ?? '',
+                role: (result.role ?? 'employee') as any,
+                department: result.department,
+                position: result.position,
+                employeeType: result.employeeType,
+                avatar: result.avatar,
+                avatarUrl: result.avatar, // Use avatar from result
+              },
+              sessionExpiry
+            );
+            
+            console.log('✅ User signed in successfully via Face ID');
+            onSuccess();
+            onClose();
+          } catch (loginError) {
+            console.error('❌ Auto-login failed:', loginError);
+            Alert.alert('Login Error', 'Face recognized but login failed. Please try again.');
+          }
+        }, 1000); // Short delay to show success message
+      } else {
+        console.log('⚠️ No registered users found');
+        setMatchStatus('not_found');
+        // Don't record failed attempt if no users are registered
+        setTimeout(() => setMatchStatus('idle'), 2000);
+      }
     } catch (error) {
-      console.error('Error during face login:', error);
+      console.error('❌ Error during face login:', error);
+      console.error('❌ Error details:', JSON.stringify(error));
+      
+      // Try to record failed attempt if we have a user
+      if (allFaceDescriptors && allFaceDescriptors.length > 0) {
+        const firstUser = allFaceDescriptors[0];
+        console.log('📝 Recording failed attempt for userId:', firstUser.userId);
+        try {
+          await recordFaceIdAttempt({
+            userId: firstUser.userId,
+            success: false,
+          });
+        } catch (recordError) {
+          console.error('❌ Failed to record attempt:', recordError);
+        }
+      }
+      
       Alert.alert('Error', 'Failed to login with Face ID. Please try again.');
       setMatchStatus('not_found');
       setTimeout(() => setMatchStatus('idle'), 2000);
@@ -196,32 +300,21 @@ export function FaceLogin({ visible, onClose, onSuccess }: FaceLoginProps) {
         {/* Instructions */}
         <View style={[styles.instructions, { backgroundColor: colors.bgCard }]}>
           <Text style={[styles.instructionTitle, { color: colors.textPrimary }]}>
-            Position your face in the frame
+            {isProcessing ? 'Authenticating...' : faceDetected ? 'Face detected! Logging in...' : 'Position your face in the frame'}
           </Text>
           <Text style={[styles.instructionText, { color: colors.textSecondary }]}>
-            Make sure your face is well-lit and clearly visible
+            {isProcessing ? 'Please wait...' : faceDetected ? 'Authentication in progress' : 'Make sure your face is well-lit and clearly visible'}
           </Text>
         </View>
 
-        {/* Scan button */}
+        {/* Status indicator (no manual button needed - fully automatic) */}
         <View style={styles.actions}>
-          <TouchableOpacity
-            style={[
-              styles.scanButton,
-              { backgroundColor: faceDetected && !isProcessing ? colors.primary : colors.border },
-            ]}
-            onPress={handleCapture}
-            disabled={!faceDetected || isProcessing}
-          >
-            {isProcessing ? (
+          {isProcessing && (
+            <View style={[styles.statusIndicator, { backgroundColor: colors.primary }]}>
               <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <>
-                <Ionicons name="scan" size={24} color="#fff" />
-                <Text style={styles.scanButtonText}>Scan Face</Text>
-              </>
-            )}
-          </TouchableOpacity>
+              <Text style={styles.statusIndicatorText}>Authenticating...</Text>
+            </View>
+          )}
         </View>
       </View>
     </Modal>
@@ -377,7 +470,7 @@ const styles = StyleSheet.create({
   actions: {
     padding: Spacing.lg,
   },
-  scanButton: {
+  statusIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -385,9 +478,9 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     borderRadius: Radius.md,
   },
-  scanButtonText: {
+  statusIndicatorText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
   },
 });

@@ -593,6 +593,46 @@ export const seedAdmin = mutation({
 // ─────────────────────────────────────────────────────────────────────────────
 // MIGRATE FACE TO AVATAR (utility)
 // ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// GET USERS BY ORGANIZATION — for org picker in messenger
+// ─────────────────────────────────────────────────────────────────────────────
+export const getUsersByOrganization = query({
+  args: {
+    orgId: v.id("organizations"),
+    requesterId: v.id("users"),
+  },
+  handler: async (ctx, { orgId, requesterId }) => {
+    const requester = await ctx.db.get(requesterId);
+    if (!requester) throw new Error("Requester not found");
+
+    // Only superadmin can query other orgs
+    if (
+      requester.organizationId !== orgId &&
+      requester.email.toLowerCase() !== SUPERADMIN_EMAIL
+    ) {
+      throw new Error("Access denied: cannot view users from another organization");
+    }
+
+    const users = await ctx.db
+      .query("users")
+      .withIndex("by_org", (q) => q.eq("organizationId", orgId))
+      .collect();
+
+    return users
+      .filter((u) => u.isActive && u.isApproved)
+      .map((u) => ({
+        _id: u._id,
+        name: u.name,
+        email: u.email,
+        avatarUrl: u.avatarUrl,
+        role: u.role,
+        department: u.department,
+        position: u.position,
+        presenceStatus: u.presenceStatus,
+      }));
+  },
+});
+
 export const migrateFaceToAvatar = mutation({
   args: {},
   handler: async (ctx) => {

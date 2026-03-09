@@ -60,6 +60,12 @@
         "projectId": "84b8be99-64c2-4a59-92de-1d52360aa577"
       }
     },
-    "owner": "roman_92"
+    "owner": "roman_92",
+    "updates": {
+      "url": "https://u.expo.dev/84b8be99-64c2-4a59-92de-1d52360aa577"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
   }
 }

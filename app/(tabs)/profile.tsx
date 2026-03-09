@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Pressable, Switch, Modal, TextInput, Platform, ActivityIndicator, Image, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Pressable, Switch, Modal, TextInput, Platform, ActivityIndicator, Image, RefreshControl, Alert, ActionSheetIOS } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,6 +10,7 @@ import { Typography, Radius } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
 import { router } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 // import { FaceRegistration } from '@/components/FaceRegistration'; // Disabled for Expo Go
 
 const PRESENCE_OPTIONS = [
@@ -73,11 +74,100 @@ export default function Profile() {
   const [editPosition, setEditPosition] = useState('');
   const [saving, setSaving] = useState(false);
 
+  const [avatarUploading, setAvatarUploading] = useState(false);
+
   const user = useQuery(api.users.getUserById, userId ? { userId: userId as Id<'users'> } : 'skip');
   const leaves = useQuery(api.leaves.getUserLeaves, userId ? { userId: userId as Id<'users'> } : 'skip');
 
   const updateUser = useMutation(api.users.updateUser);
   const updatePresence = useMutation(api.users.updatePresenceStatus);
+  const updateAvatar = useMutation(api.users.updateAvatar);
+
+  const uploadToCloudinary = async (uri: string): Promise<string> => {
+    const cloudName = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    if (!cloudName || !uploadPreset) throw new Error('Cloudinary not configured');
+
+    const formData = new FormData();
+    const filename = uri.split('/').pop() || 'avatar.jpg';
+    const match = /\.(\w+)$/.exec(filename);
+    const type = match ? `image/${match[1]}` : 'image/jpeg';
+    formData.append('file', { uri, name: filename, type } as any);
+    formData.append('upload_preset', uploadPreset);
+    formData.append('folder', 'avatars');
+
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await res.json();
+    if (!data.secure_url) throw new Error('Upload failed');
+    return data.secure_url;
+  };
+
+  const pickImage = async (useCamera: boolean) => {
+    const permissionResult = useCamera
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      Alert.alert('Permission Required', `Please allow ${useCamera ? 'camera' : 'photo library'} access in your device settings.`);
+      return;
+    }
+
+    const result = useCamera
+      ? await ImagePicker.launchCameraAsync({ allowsEditing: true, aspect: [1, 1], quality: 0.8 })
+      : await ImagePicker.launchImageLibraryAsync({ allowsEditing: true, aspect: [1, 1], quality: 0.8, mediaTypes: ['images'] });
+
+    if (result.canceled || !result.assets?.[0]) return;
+
+    setAvatarUploading(true);
+    try {
+      const url = await uploadToCloudinary(result.assets[0].uri);
+      await updateAvatar({ userId: userId as Id<'users'>, avatarUrl: url });
+    } catch {
+      Alert.alert('Upload Failed', 'Could not upload avatar. Please try again.');
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
+  const handleAvatarPress = () => {
+    const options = ['Take Photo', 'Choose from Library', 'Cancel'];
+    if ((user as any)?.avatarUrl) options.splice(2, 0, 'Remove Photo');
+
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        { options, cancelButtonIndex: options.length - 1, destructiveButtonIndex: options.indexOf('Remove Photo') },
+        async (index) => {
+          if (options[index] === 'Take Photo') pickImage(true);
+          else if (options[index] === 'Choose from Library') pickImage(false);
+          else if (options[index] === 'Remove Photo') {
+            setAvatarUploading(true);
+            try { await updateAvatar({ userId: userId as Id<'users'>, avatarUrl: '' }); }
+            catch { Alert.alert('Error', 'Could not remove avatar.'); }
+            finally { setAvatarUploading(false); }
+          }
+        }
+      );
+    } else {
+      Alert.alert('Change Avatar', 'Choose an option', [
+        { text: 'Take Photo', onPress: () => pickImage(true) },
+        { text: 'Choose from Library', onPress: () => pickImage(false) },
+        ...((user as any)?.avatarUrl ? [{
+          text: 'Remove Photo',
+          style: 'destructive' as const,
+          onPress: async () => {
+            setAvatarUploading(true);
+            try { await updateAvatar({ userId: userId as Id<'users'>, avatarUrl: '' }); }
+            catch { Alert.alert('Error', 'Could not remove avatar.'); }
+            finally { setAvatarUploading(false); }
+          }
+        }] : []),
+        { text: 'Cancel', style: 'cancel' as const },
+      ]);
+    }
+  };
 
   const leavesLoading = leaves === undefined;
 
@@ -214,8 +304,21 @@ export default function Profile() {
         {/* Hero card */}
         <LinearGradient colors={isDark ? [colors.bg, colors.bgCard, colors.primaryDark] : [colors.primaryDark, colors.primary, colors.primaryLight]} style={styles.heroCard}
           start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-          {/* Avatar */}
-          <Avatar avatarUrl={(user as any)?.avatarUrl} initials={initials} isDark={isDark} />
+          {/* Avatar with upload */}
+          <TouchableOpacity onPress={handleAvatarPress} activeOpacity={0.8} disabled={avatarUploading}>
+            <View>
+              <Avatar avatarUrl={(user as any)?.avatarUrl} initials={initials} isDark={isDark} />
+              {avatarUploading ? (
+                <View style={styles.avatarOverlay}>
+                  <ActivityIndicator size="small" color="#fff" />
+                </View>
+              ) : (
+                <View style={styles.avatarCameraBadge}>
+                  <Ionicons name="camera" size={14} color="#fff" />
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
           <Text style={[styles.userName, { color: '#fff' }]}>{user.name}</Text>
           <Text style={[styles.userPosition, { color: 'rgba(255,255,255,0.75)' }]}>{user.position ?? user.role}</Text>
           {user.email && <Text style={[styles.userEmail, { color: 'rgba(255,255,255,0.55)' }]}>{user.email}</Text>}
@@ -619,6 +722,8 @@ const styles = StyleSheet.create({
   avatarCircle: { width: 76, height: 76, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center', marginBottom: 10, borderWidth: 2, borderColor: 'rgba(255,255,255,0.4)' },
   avatarImage: { width: 76, height: 76, borderRadius: 24, marginBottom: 10, borderWidth: 2, borderColor: 'rgba(255,255,255,0.4)' },
   avatarText: { fontSize: 28, fontWeight: '700', color: '#fff' },
+  avatarOverlay: { position: 'absolute', top: 0, left: 0, width: 76, height: 76, borderRadius: 24, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center' },
+  avatarCameraBadge: { position: 'absolute', bottom: 8, right: -4, width: 28, height: 28, borderRadius: 14, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#fff' },
   userName: { ...Typography.h2, color: '#fff', marginBottom: 2, textAlign: 'center' },
   userPosition: { ...Typography.caption, color: 'rgba(255,255,255,0.75)', marginBottom: 2, textAlign: 'center' },
   userEmail: { ...Typography.caption, color: 'rgba(255,255,255,0.55)', marginBottom: 10, textAlign: 'center' },

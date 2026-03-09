@@ -93,6 +93,21 @@ export default defineSchema({
     resetPasswordExpiry: v.optional(v.number()),
     sessionToken: v.optional(v.string()),
     sessionExpiry: v.optional(v.number()),
+    location: v.optional(v.string()),
+    totpEnabled: v.optional(v.boolean()),
+    totpSecret: v.optional(v.string()),
+    workHoursStart: v.optional(v.string()),
+    workHoursEnd: v.optional(v.string()),
+    backupCodes: v.optional(v.array(v.string())),
+    breakInterval: v.optional(v.number()),
+    breakRemindersEnabled: v.optional(v.boolean()),
+    dailyTaskGoal: v.optional(v.number()),
+    faceIdBlocked: v.optional(v.boolean()),
+    faceIdFailedAttempts: v.optional(v.number()),
+    faceIdLastAttempt: v.optional(v.number()),
+    focusModeEnabled: v.optional(v.boolean()),
+    isSuspended: v.optional(v.boolean()),
+    updatedAt: v.optional(v.number()),
     createdAt: v.number(),
     lastLoginAt: v.optional(v.number()),
   })
@@ -141,6 +156,7 @@ export default defineSchema({
     reviewedBy: v.optional(v.id("users")),
     reviewComment: v.optional(v.string()),
     reviewedAt: v.optional(v.number()),
+    isRead: v.optional(v.boolean()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -149,6 +165,222 @@ export default defineSchema({
     .index("by_org_status", ["organizationId", "status"])
     .index("by_status", ["status"])
     .index("by_created", ["createdAt"]),
+
+  // ── CONVERSATIONS (legacy mobile — kept for data compat) ─────────
+  conversations: defineTable({
+    type: v.union(v.literal("personal"), v.literal("group")),
+    name: v.optional(v.string()),
+    createdBy: v.id("users"),
+    lastMessageAt: v.optional(v.number()),
+    lastMessagePreview: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_last_message", ["lastMessageAt"])
+    .index("by_created_by", ["createdBy"]),
+
+  conversationParticipants: defineTable({
+    conversationId: v.id("conversations"),
+    userId: v.id("users"),
+    role: v.union(v.literal("admin"), v.literal("member")),
+    lastReadAt: v.optional(v.number()),
+    isMuted: v.boolean(),
+    joinedAt: v.number(),
+  })
+    .index("by_conversation", ["conversationId"])
+    .index("by_user", ["userId"])
+    .index("by_conversation_user", ["conversationId", "userId"]),
+
+  messages: defineTable({
+    conversationId: v.id("conversations"),
+    senderId: v.id("users"),
+    type: v.union(
+      v.literal("text"),
+      v.literal("file"),
+      v.literal("poll"),
+      v.literal("system"),
+    ),
+    content: v.optional(v.string()),
+    mentions: v.optional(v.array(v.id("users"))),
+    fileUrl: v.optional(v.string()),
+    fileName: v.optional(v.string()),
+    fileType: v.optional(v.string()),
+    fileSize: v.optional(v.number()),
+    pollId: v.optional(v.id("polls")),
+    scheduledFor: v.optional(v.number()),
+    isDelivered: v.boolean(),
+    isDeleted: v.boolean(),
+    reactions: v.optional(v.any()),
+    parentMessageId: v.optional(v.id("messages")),
+    threadCount: v.optional(v.number()),
+    threadLastAt: v.optional(v.number()),
+    isPinned: v.optional(v.boolean()),
+    pinnedBy: v.optional(v.id("users")),
+    pinnedAt: v.optional(v.number()),
+    isEdited: v.optional(v.boolean()),
+    editedAt: v.optional(v.number()),
+    replyToId: v.optional(v.id("messages")),
+    replyToContent: v.optional(v.string()),
+    replyToSenderName: v.optional(v.string()),
+    readBy: v.optional(v.any()),
+    createdAt: v.number(),
+  })
+    .index("by_conversation", ["conversationId"])
+    .index("by_conversation_delivered", ["conversationId", "isDelivered"])
+    .index("by_sender", ["senderId"])
+    .index("by_scheduled", ["isDelivered", "scheduledFor"])
+    .index("by_parent", ["parentMessageId"]),
+
+  // ── CHAT CONVERSATIONS (shared with desktop) ───────────────────────
+  chatConversations: defineTable({
+    organizationId: v.id("organizations"),
+    type: v.union(v.literal("direct"), v.literal("group")),
+    name: v.optional(v.string()),
+    description: v.optional(v.string()),
+    avatarUrl: v.optional(v.string()),
+    createdBy: v.id("users"),
+    lastMessageAt: v.optional(v.number()),
+    lastMessageText: v.optional(v.string()),
+    lastMessageSenderId: v.optional(v.id("users")),
+    dmKey: v.optional(v.string()),
+    isPinned: v.optional(v.boolean()),
+    isArchived: v.optional(v.boolean()),
+    isDeleted: v.optional(v.boolean()),
+    deletedBy: v.optional(v.id("users")),
+    deletedAt: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_org_last", ["organizationId", "lastMessageAt"])
+    .index("by_dm_key", ["dmKey"])
+    .index("by_creator", ["createdBy"])
+    .index("by_org_not_deleted", ["organizationId", "isDeleted"])
+    .index("by_org_pinned", ["organizationId", "isPinned"])
+    .index("by_org_archived", ["organizationId", "isArchived"]),
+
+  // ── CHAT MEMBERS (shared with desktop) ─────────────────────────────
+  chatMembers: defineTable({
+    conversationId: v.id("chatConversations"),
+    userId: v.id("users"),
+    organizationId: v.id("organizations"),
+    role: v.union(v.literal("owner"), v.literal("admin"), v.literal("member")),
+    unreadCount: v.number(),
+    lastReadAt: v.optional(v.number()),
+    lastReadMessageId: v.optional(v.id("chatMessages")),
+    isMuted: v.boolean(),
+    isDeleted: v.optional(v.boolean()),
+    deletedAt: v.optional(v.number()),
+    isArchived: v.optional(v.boolean()),
+    joinedAt: v.number(),
+  })
+    .index("by_conversation", ["conversationId"])
+    .index("by_user", ["userId"])
+    .index("by_org", ["organizationId"])
+    .index("by_conversation_user", ["conversationId", "userId"]),
+
+  // ── CHAT MESSAGES (shared with desktop) ────────────────────────────
+  chatMessages: defineTable({
+    conversationId: v.id("chatConversations"),
+    organizationId: v.id("organizations"),
+    senderId: v.id("users"),
+    type: v.union(
+      v.literal("text"),
+      v.literal("image"),
+      v.literal("file"),
+      v.literal("audio"),
+      v.literal("system"),
+      v.literal("call"),
+    ),
+    content: v.string(),
+    attachments: v.optional(v.array(v.object({
+      url: v.string(),
+      name: v.string(),
+      type: v.string(),
+      size: v.number(),
+    }))),
+    replyToId: v.optional(v.id("chatMessages")),
+    replyToContent: v.optional(v.string()),
+    replyToSenderName: v.optional(v.string()),
+    reactions: v.optional(v.any()),
+    mentionedUserIds: v.optional(v.array(v.id("users"))),
+    readBy: v.optional(v.any()),
+    poll: v.optional(v.object({
+      question: v.string(),
+      options: v.array(v.object({
+        id: v.string(),
+        text: v.string(),
+        votes: v.array(v.id("users")),
+      })),
+      closedAt: v.optional(v.number()),
+    })),
+    threadCount: v.optional(v.number()),
+    threadLastAt: v.optional(v.number()),
+    scheduledFor: v.optional(v.number()),
+    isSent: v.optional(v.boolean()),
+    linkPreview: v.optional(v.object({
+      url: v.string(),
+      title: v.optional(v.string()),
+      description: v.optional(v.string()),
+      image: v.optional(v.string()),
+      siteName: v.optional(v.string()),
+    })),
+    parentMessageId: v.optional(v.id("chatMessages")),
+    isEdited: v.optional(v.boolean()),
+    editedAt: v.optional(v.number()),
+    isDeleted: v.optional(v.boolean()),
+    deletedAt: v.optional(v.number()),
+    deletedForUsers: v.optional(v.array(v.id("users"))),
+    isPinned: v.optional(v.boolean()),
+    pinnedBy: v.optional(v.id("users")),
+    pinnedAt: v.optional(v.number()),
+    callDuration: v.optional(v.number()),
+    callType: v.optional(v.union(v.literal("audio"), v.literal("video"))),
+    callStatus: v.optional(v.union(v.literal("missed"), v.literal("answered"), v.literal("declined"))),
+    isServiceBroadcast: v.optional(v.boolean()),
+    broadcastTitle: v.optional(v.string()),
+    broadcastIcon: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_conversation", ["conversationId"])
+    .index("by_conversation_created", ["conversationId", "createdAt"])
+    .index("by_org", ["organizationId"])
+    .index("by_sender", ["senderId"])
+    .index("by_pinned", ["conversationId", "isPinned"]),
+
+  // ── CHAT TYPING (shared with desktop) ──────────────────────────────
+  chatTyping: defineTable({
+    conversationId: v.id("chatConversations"),
+    userId: v.id("users"),
+    organizationId: v.id("organizations"),
+    updatedAt: v.number(),
+  })
+    .index("by_conversation", ["conversationId"])
+    .index("by_conversation_user", ["conversationId", "userId"]),
+
+  // ── POLLS ─────────────────────────────────────────────────────────
+  polls: defineTable({
+    conversationId: v.id("conversations"),
+    createdBy: v.id("users"),
+    question: v.string(),
+    options: v.array(v.object({
+      id: v.string(),
+      text: v.string(),
+    })),
+    isClosed: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_conversation", ["conversationId"]),
+
+  // ── POLL VOTES ────────────────────────────────────────────────────
+  pollVotes: defineTable({
+    pollId: v.id("polls"),
+    userId: v.id("users"),
+    optionId: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_poll", ["pollId"])
+    .index("by_poll_user", ["pollId", "userId"]),
 
   // ── NOTIFICATIONS ────────────────────────────────────────────────────
   notifications: defineTable({
@@ -162,6 +394,8 @@ export default defineSchema({
       v.literal("join_request"),
       v.literal("join_approved"),
       v.literal("join_rejected"),
+      v.literal("message_mention"),
+      v.literal("status_change"),
       v.literal("system"),
     ),
     title: v.string(),

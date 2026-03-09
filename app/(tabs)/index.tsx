@@ -311,6 +311,9 @@ function EmployeeDashboard({ userId, userName, bottomOffset }: { userId: string;
           <TouchableOpacity style={[styles.notifBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]} onPress={toggleTheme}>
             <Ionicons name={isDark ? 'sunny-outline' : 'moon-outline'} size={20} color={colors.textPrimary} />
           </TouchableOpacity>
+          <TouchableOpacity style={[styles.notifBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]} onPress={() => router.push('/(tabs)/notifications')}>
+            <Ionicons name="notifications-outline" size={20} color={colors.textPrimary} />
+          </TouchableOpacity>
           <TouchableOpacity style={[styles.notifBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]} onPress={() => router.push('/(tabs)/profile')}>
             <Ionicons name="person-outline" size={20} color={colors.textPrimary} />
           </TouchableOpacity>
@@ -495,6 +498,8 @@ function EmployeeDashboard({ userId, userName, bottomOffset }: { userId: string;
           { icon: 'document-text-outline', label: 'Apply Leave',  color: colors.primary,  onPress: () => router.push('/(tabs)/leaves') },
           { icon: 'people-outline',         label: 'Team View',    color: '#06b6d4',       onPress: () => router.push('/(tabs)/team') },
           { icon: 'calendar-outline',        label: 'Calendar',     color: colors.success,  onPress: () => router.push('/(tabs)/calendar') },
+          { icon: 'timer-outline',          label: 'Pomodoro',     color: '#f59e0b',       onPress: () => router.push('/(tabs)/pomodoro') },
+          { icon: 'bar-chart-outline',      label: 'Analytics',    color: '#8b5cf6',       onPress: () => router.push('/(tabs)/analytics') },
           { icon: 'person-outline',         label: 'My Profile',   color: colors.primary,     onPress: () => router.push('/(tabs)/profile') },
         ].map((a, i) => (
           <TouchableOpacity key={i} style={styles.quickAction} onPress={a.onPress}>
@@ -776,6 +781,10 @@ function AdminDashboard({ userId, userName, bottomOffset }: { userId: string; us
           <TouchableOpacity style={[styles.notifBtn, { backgroundColor: colors.bgCard, borderColor: colors.border }]} onPress={toggleTheme}>
             <Ionicons name={isDark ? 'sunny-outline' : 'moon-outline'} size={20} color={colors.textPrimary} />
           </TouchableOpacity>
+          <TouchableOpacity style={[styles.notifBtn, { backgroundColor: colors.bgCard, borderColor: colors.border, position: 'relative' }]} onPress={() => router.push('/(tabs)/notifications')}>
+            <Ionicons name="notifications-outline" size={20} color={colors.textPrimary} />
+            {pendingCount > 0 && <View style={[styles.notifDot, { backgroundColor: colors.error, borderColor: colors.bg }]} />}
+          </TouchableOpacity>
           <TouchableOpacity style={[styles.notifBtn, { backgroundColor: colors.bgCard, borderColor: colors.border, position: 'relative' }]} onPress={() => router.push('/(tabs)/leaves')}>
             <Ionicons name="document-text-outline" size={20} color={colors.textPrimary} />
             {pendingCount > 0 && <View style={[styles.notifDot, { backgroundColor: colors.error, borderColor: colors.bg }]} />}
@@ -902,13 +911,17 @@ function AdminDashboard({ userId, userName, bottomOffset }: { userId: string; us
 
       {/* More Features */}
       <SectionHeader title="More Features" icon="apps-outline" />
-      <View style={{ flexDirection: 'row', gap: 10 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
         {[
           { icon: 'checkbox-outline', label: 'Tasks', subtitle: 'Manage tasks', color: '#06b6d4', onPress: () => router.push('/(tabs)/tasks') },
           { icon: 'time-outline', label: 'Attendance', subtitle: 'Track time', color: colors.success, onPress: () => router.push('/(tabs)/attendance') },
           { icon: 'bar-chart-outline', label: 'Analytics', subtitle: 'View stats', color: colors.primary, onPress: () => router.push('/(tabs)/analytics') },
+          { icon: 'timer-outline', label: 'Pomodoro', subtitle: 'Focus timer', color: '#f97316', onPress: () => router.push('/(tabs)/pomodoro') },
+          { icon: 'document-text-outline', label: 'Reports', subtitle: 'Leave reports', color: '#f59e0b', onPress: () => router.push('/(tabs)/reports') },
+          { icon: 'shield-checkmark-outline', label: 'Admin', subtitle: 'User mgmt', color: '#8b5cf6', onPress: () => router.push('/(tabs)/admin') },
+          { icon: 'speedometer-outline', label: 'SLA', subtitle: 'Metrics', color: '#06b6d4', onPress: () => router.push('/(tabs)/sla') },
         ].map((a, i) => (
-          <TouchableOpacity key={i} style={{ flex: 1, backgroundColor: colors.bgCard, borderRadius: Radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, alignItems: 'center', gap: 6 }} onPress={a.onPress}>
+          <TouchableOpacity key={i} style={{ width: '31%', flexGrow: 1, backgroundColor: colors.bgCard, borderRadius: Radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, alignItems: 'center', gap: 6 }} onPress={a.onPress}>
             <LinearGradient colors={[`${a.color}33`, `${a.color}11`]} style={{ width: 48, height: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center' }}>
               <Ionicons name={a.icon as any} size={24} color={a.color} />
             </LinearGradient>

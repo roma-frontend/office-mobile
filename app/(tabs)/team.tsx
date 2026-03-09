@@ -12,6 +12,8 @@ import type { Id } from '../../convex/_generated/dataModel';
 import { Typography, Radius } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ConversationList from '@/components/messenger/ConversationList';
+import OrgPicker from '@/components/messenger/OrgPicker';
 
 const ROLE_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
   admin:      { label: 'Admin',      color: '#3b82f6', icon: 'shield'        },
@@ -219,6 +221,8 @@ export default function Team() {
   const [filterRole, setFilterRole] = useState('all');
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'team' | 'messages'>('team');
+  const [selectedOrgId, setSelectedOrgId] = useState<Id<"organizations"> | null>(null);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -229,12 +233,19 @@ export default function Team() {
     AsyncStorage.getItem('user_id').then(id => setUserId(id));
   }, []);
 
-  const users = useQuery(api.users.getAllUsers, userId ? { requesterId: userId as any } : 'skip');
+  const allUsers = useQuery(api.users.getAllUsers, userId ? { requesterId: userId as any } : 'skip');
+  const orgUsers = useQuery(
+    api.users.getUsersByOrganization,
+    userId && selectedOrgId ? { orgId: selectedOrgId, requesterId: userId as any } : 'skip'
+  );
+  const users = selectedOrgId ? orgUsers : allUsers;
+  const unreadCount = useQuery(api.messenger.getUnreadMessageCount, userId ? { userId: userId as any } : 'skip');
   const isLoading = users === undefined;
 
   const stats = useMemo(() => {
     if (!users) return { total: 0, staff: 0, contractors: 0, admins: 0, supervisors: 0 };
-    const active = (users as any[]).filter((u: any) => u.isActive);
+    // getUsersByOrganization already filters isActive, getAllUsers doesn't — handle both
+    const active = (users as any[]).filter((u: any) => u.isActive !== false);
     return {
       total: active.length,
       staff: active.filter((u: any) => u.employeeType === 'staff').length,
@@ -253,13 +264,53 @@ export default function Team() {
         (u.department ?? '').toLowerCase().includes(search.toLowerCase()) ||
         (u.position ?? '').toLowerCase().includes(search.toLowerCase());
       const matchRole = filterRole === 'all' || u.role === filterRole;
-      return matchSearch && matchRole && u.isActive;
+      return matchSearch && matchRole && u.isActive !== false;
     });
   }, [users, search, filterRole]);
 
+  const isMessages = activeTab === 'messages';
+  const isTeamTab = activeTab === 'team';
+
+  const SegmentControl = () => (
+    <View style={[styles.segmentWrap, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
+      <TouchableOpacity
+        style={[styles.segmentBtn, isTeamTab && { backgroundColor: colors.primary }]}
+        onPress={() => setActiveTab('team')}
+      >
+        <Ionicons name="people-outline" size={16} color={isTeamTab ? '#fff' : colors.textMuted} />
+        <Text style={[styles.segmentText, { color: isTeamTab ? '#fff' : colors.textMuted }]}>Team</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.segmentBtn, isMessages && { backgroundColor: colors.primary }]}
+        onPress={() => setActiveTab('messages')}
+      >
+        <Ionicons name="chatbubbles-outline" size={16} color={isMessages ? '#fff' : colors.textMuted} />
+        <Text style={[styles.segmentText, { color: isMessages ? '#fff' : colors.textMuted }]}>Messages</Text>
+        {(unreadCount ?? 0) > 0 && (
+          <View style={styles.unreadBadge}>
+            <Text style={styles.unreadBadgeText}>{(unreadCount ?? 0) > 99 ? '99+' : unreadCount}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    </View>
+  );
+
+  // Messages tab
+  if (isMessages) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]} edges={['top']}>
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>Team</Text>
+        </View>
+        <SegmentControl />
+        <ConversationList userId={userId as Id<"users">} bottomOffset={bottomOffset} />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]} edges={['top']}>
-      <ScrollView 
+      <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: bottomOffset + 16 }}
         refreshControl={
@@ -279,6 +330,9 @@ export default function Team() {
             <Text style={[styles.subtitle, { color: colors.textMuted }]}>{stats.total} members · {stats.staff} staff · {stats.contractors} contractors</Text>
           </View>
         </View>
+
+        {/* Segment Control */}
+        <SegmentControl />
 
         {/* Stats grid - 2x2 */}
         <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
@@ -307,6 +361,13 @@ export default function Team() {
             ))}
           </View>
         </View>
+
+        {/* Org picker */}
+        {userId && (
+          <View style={{ paddingHorizontal: 16, marginBottom: 10, zIndex: 10 }}>
+            <OrgPicker userId={userId as Id<"users">} selectedOrgId={selectedOrgId} onSelect={setSelectedOrgId} />
+          </View>
+        )}
 
         {/* Search */}
         <View style={[styles.searchWrap, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
@@ -404,9 +465,16 @@ export default function Team() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12 },
+  header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 8 },
   title: { ...Typography.h1 },
   subtitle: { ...Typography.caption, marginTop: 2 },
+
+  // Segment control
+  segmentWrap: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 12, borderRadius: Radius.lg, borderWidth: 1, padding: 3, gap: 3 },
+  segmentBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 8, borderRadius: Radius.md },
+  segmentText: { ...Typography.captionMedium },
+  unreadBadge: { backgroundColor: '#ef4444', borderRadius: 10, minWidth: 20, height: 20, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5 },
+  unreadBadgeText: { color: '#fff', fontSize: 10, fontWeight: '700' },
 
   // Stats
   statCard: { borderRadius: Radius.md, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 10, alignItems: 'center', minWidth: 85, gap: 3 },

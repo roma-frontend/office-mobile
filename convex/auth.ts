@@ -403,6 +403,36 @@ export const verifyResetToken = query({
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// CHANGE PASSWORD — authenticated user changes their own password
+// ─────────────────────────────────────────────────────────────────────────────
+export const changePassword = mutation({
+  args: {
+    userId: v.id("users"),
+    currentPassword: v.string(),
+    newPassword: v.string(),
+  },
+  handler: async (ctx, { userId, currentPassword, newPassword }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) throw new Error("User not found");
+
+    if (user.passwordHash !== currentPassword) {
+      throw new Error("Current password is incorrect");
+    }
+
+    if (newPassword.length < 6) {
+      throw new Error("New password must be at least 6 characters");
+    }
+
+    await ctx.db.patch(userId, {
+      passwordHash: newPassword,
+      sessionToken: undefined, // force re-login on other devices
+    });
+
+    return { success: true };
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // REGISTER WEBAUTHN CREDENTIAL
 // ─────────────────────────────────────────────────────────────────────────────
 export const registerWebauthn = mutation({
