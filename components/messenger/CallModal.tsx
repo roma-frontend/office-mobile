@@ -125,7 +125,7 @@ export default function CallModal({
     try {
       // Check if WebRTC is available
       if (!RTCPeerConnection || !MediaStream) {
-        setCallError('WebRTC not available. Please rebuild the app with native modules.');
+        setError('WebRTC not available. Please rebuild the app with native modules.');
         return;
       }
 
