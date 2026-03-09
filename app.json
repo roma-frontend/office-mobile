@@ -15,25 +15,6 @@
     "assetBundlePatterns": [
       "**/*"
     ],
-    "ios": {
-      "supportsTablet": false,
-      "bundleIdentifier": "com.hrleave.app",
-      "buildNumber": "1",
-      "infoPlist": {
-        "NSMicrophoneUsageDescription": "HRLeave uses microphone for voice commands and audio/video calls",
-        "NSSpeechRecognitionUsageDescription": "HRLeave uses speech recognition for Hey HR voice activation",
-        "NSCameraUsageDescription": "HRLeave uses camera for profile photo and video calls",
-        "UIBackgroundModes": [
-          "fetch",
-          "remote-notification",
-          "voip"
-        ],
-        "ITSAppUsesNonExemptEncryption": false
-      },
-      "requireFullScreen": true,
-      "supportsCocoaPods": true,
-      "googleServicesFile": "./GoogleService-Info.plist"
-    },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -52,9 +33,25 @@
         "FOREGROUND_SERVICE"
       ],
       "allowBackup": false,
-      "enableHermes": true,
-      "jsEngine": "hermes",
       "softwareKeyboardLayoutMode": "pan"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.hrleave.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "HRLeave uses microphone for voice commands and audio/video calls",
+        "NSSpeechRecognitionUsageDescription": "HRLeave uses speech recognition for Hey HR voice activation",
+        "NSCameraUsageDescription": "HRLeave uses camera for profile photo and video calls",
+        "UIBackgroundModes": [
+          "fetch",
+          "remote-notification",
+          "voip"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "requireFullScreen": true,
+      "supportsCocoaPods": true
     },
     "plugins": [
       "expo-router",
