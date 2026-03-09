@@ -41,7 +41,7 @@ export default function PollView({ pollId, userId }: PollViewProps) {
         <View style={[styles.iconContainer, { backgroundColor: colors.primary + '15' }]}>
           <Ionicons name="stats-chart-outline" size={16} color={colors.primary} />
         </View>
-        <Text style={[styles.question, { color: colors.textPrimary }]}>{poll.question}</Text>
+        <Text style={[styles.question, { color: colors.textPrimary }]} numberOfLines={2}>{poll.question}</Text>
       </View>
 
       {/* Options */}
@@ -50,6 +50,7 @@ export default function PollView({ pollId, userId }: PollViewProps) {
           const pct = poll.totalVotes > 0 ? Math.round((option.voteCount / poll.totalVotes) * 100) : 0;
           const isMyVote = option.voterIds.includes(userId);
           const isSelected = hasVoted && isMyVote;
+          const showProgress = pct > 0;
 
           return (
             <TouchableOpacity
@@ -59,6 +60,7 @@ export default function PollView({ pollId, userId }: PollViewProps) {
                 {
                   borderColor: isSelected ? colors.primary : colors.border,
                   backgroundColor: isSelected ? colors.primary + '08' : colors.background,
+                  minHeight: 44,
                 }
               ]}
               onPress={() => !poll.isClosed && handleVote(option.id)}
@@ -66,20 +68,24 @@ export default function PollView({ pollId, userId }: PollViewProps) {
               activeOpacity={poll.isClosed ? 1 : 0.7}
             >
               {/* Background progress bar */}
-              <View
-                style={[
-                  styles.optionFill,
-                  {
-                    width: `${pct}%`,
-                    backgroundColor: isSelected ? colors.primary + '20' : colors.primary + '10',
-                  }
-                ]}
-              />
+              {showProgress && (
+                <View
+                  style={[
+                    styles.optionFill,
+                    {
+                      width: `${pct}%`,
+                      backgroundColor: isSelected ? colors.primary + '25' : colors.primary + '15',
+                    }
+                  ]}
+                />
+              )}
               {/* Content */}
               <View style={styles.optionContent}>
                 <View style={styles.optionLeft}>
-                  {isSelected && <Ionicons name="checkmark-circle" size={16} color={colors.primary} />}
-                  <Text style={[styles.optionText, { color: colors.textPrimary }]}>{option.text}</Text>
+                  {isSelected && <Ionicons name="checkmark-circle" size={18} color={colors.primary} style={styles.checkIcon} />}
+                  <Text style={[styles.optionText, { color: colors.textPrimary, fontWeight: isSelected ? '600' : '400' }]} numberOfLines={2}>
+                    {option.text}
+                  </Text>
                 </View>
                 {hasVoted && (
                   <Text style={[styles.optionPct, { color: isSelected ? colors.primary : colors.textMuted }]}>
@@ -93,7 +99,7 @@ export default function PollView({ pollId, userId }: PollViewProps) {
       </View>
 
       {/* Footer */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, { borderTopColor: colors.border + '40' }]}>
         <View style={styles.footerLeft}>
           <Ionicons name="people-outline" size={12} color={colors.textMuted} />
           <Text style={[styles.voteCount, { color: colors.textMuted }]}>
@@ -123,20 +129,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: Spacing.sm,
     gap: Spacing.sm,
-    minWidth: 220,
+    minWidth: 240,
     maxWidth: '100%',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
+    paddingRight: 4,
   },
   iconContainer: {
-    width: 28,
-    height: 28,
+    width: 32,
+    height: 32,
     borderRadius: Radius.sm,
     alignItems: 'center',
     justifyContent: 'center',
+    shrink: 0,
   },
   question: {
     ...Typography.bodySemiBold,
@@ -153,7 +161,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: 40,
+    position: 'relative',
   },
   optionFill: {
     position: 'absolute',
@@ -166,35 +174,41 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     flex: 1,
     zIndex: 1,
   },
   optionLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     flex: 1,
+    paddingRight: 8,
+  },
+  checkIcon: {
+    shrink: 0,
   },
   optionText: {
     ...Typography.caption,
     fontSize: 13,
+    lineHeight: 18,
+    flex: 1,
   },
   optionPct: {
     ...Typography.label,
-    fontSize: 12,
-    fontWeight: '600',
-    minWidth: 32,
+    fontSize: 13,
+    fontWeight: '700',
+    minWidth: 36,
     textAlign: 'right',
+    shrink: 0,
   },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingTop: Spacing.xs,
-    borderTopWidth: 1,
-    borderTopColor: 'transparent',
+    borderTopWidth: StyleSheet.hairlineWidth,
   },
   footerLeft: {
     flexDirection: 'row',
