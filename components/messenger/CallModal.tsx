@@ -124,7 +124,7 @@ export default function CallModal({
   const initializeCall = async () => {
     try {
       // Set status to in_call
-      await updatePresenceStatus({ userId: currentUserId, status: 'in_call', outOfOfficeMessage: undefined });
+      await updatePresenceStatus({ userId: currentUserId, presenceStatus: 'in_call', outOfOfficeMessage: undefined });
 
       // Start the call record
       await startCall({
@@ -273,7 +273,7 @@ export default function CallModal({
     }
 
     // Reset status
-    await updatePresenceStatus({ userId: currentUserId, status: 'available', outOfOfficeMessage: undefined });
+    await updatePresenceStatus({ userId: currentUserId, presenceStatus: 'available', outOfOfficeMessage: undefined });
   }, [localStream, currentUserId, updatePresenceStatus]);
 
   const handleEnd = async () => {

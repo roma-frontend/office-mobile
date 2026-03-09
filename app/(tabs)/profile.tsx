@@ -220,7 +220,7 @@ export default function Profile() {
   const handlePresenceChange = async (status: string) => {
     if (!userId) return;
     try {
-      await updatePresence({ userId: userId as Id<'users'>, status: status as any, outOfOfficeMessage: undefined });
+      await updatePresence({ userId: userId as Id<'users'>, presenceStatus: status as any, outOfOfficeMessage: undefined });
       setShowPresenceModal(false);
     } catch (e: any) {
       Alert.alert('Error', e?.message ?? 'Failed to update status');
