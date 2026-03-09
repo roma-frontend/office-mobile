@@ -44,7 +44,7 @@ export default function NewConversationModal({ visible, onClose, userId, onConve
   // Use getUsersByOrganization for single org selection
   const singleOrgUsers = useQuery(
     api.users.getUsersByOrganization,
-    selectedOrgId && !showAllOrgs ? { orgId: selectedOrgId, requesterId: userId } : 'skip'
+    selectedOrgId && !showAllOrgs ? { organizationId: selectedOrgId, requesterId: userId } : 'skip'
   );
 
   const orgs = useQuery(api.organizations.getOrganizationsForPicker, { userId });

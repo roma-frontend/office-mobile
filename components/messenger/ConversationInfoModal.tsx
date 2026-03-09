@@ -32,7 +32,7 @@ export default function ConversationInfoModal({ visible, onClose, conversationId
   const convInfo = useQuery(api.messenger.getConversationInfo, { conversationId, userId });
   const orgUsers = useQuery(
     api.users.getUsersByOrganization,
-    selectedOrgId ? { orgId: selectedOrgId, requesterId: userId } : 'skip'
+    selectedOrgId ? { organizationId: selectedOrgId, requesterId: userId } : 'skip'
   );
 
   const addParticipants = useMutation(api.messenger.addParticipants);

@@ -236,7 +236,7 @@ export default function Team() {
   const allUsers = useQuery(api.users.getAllUsers, userId ? { requesterId: userId as any } : 'skip');
   const orgUsers = useQuery(
     api.users.getUsersByOrganization,
-    userId && selectedOrgId ? { orgId: selectedOrgId, requesterId: userId as any } : 'skip'
+    userId && selectedOrgId ? { organizationId: selectedOrgId, requesterId: userId as any } : 'skip'
   );
   const users = selectedOrgId ? orgUsers : allUsers;
   const unreadCount = useQuery(api.messenger.getUnreadMessageCount, userId ? { userId: userId as any } : 'skip');
