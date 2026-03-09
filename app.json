@@ -29,7 +29,10 @@
           "voip"
         ],
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "requireFullScreen": true,
+      "supportsCocoaPods": true,
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
@@ -47,29 +50,56 @@
         "RECEIVE_BOOT_COMPLETED",
         "VIBRATE",
         "FOREGROUND_SERVICE"
-      ]
+      ],
+      "allowBackup": false,
+      "enableHermes": true,
+      "jsEngine": "hermes",
+      "softwareKeyboardLayoutMode": "pan"
     },
     "plugins": [
       "expo-router",
       "expo-font",
-      "expo-camera"
+      "expo-camera",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0a0a1a",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
     },
     "newArchEnabled": false,
     "extra": {
-      "router": {},
+      "router": {
+        "origin": false
+      },
       "eas": {
         "projectId": "84b8be99-64c2-4a59-92de-1d52360aa577"
       }
     },
     "owner": "roman_92",
     "updates": {
-      "url": "https://u.expo.dev/84b8be99-64c2-4a59-92de-1d52360aa577"
+      "url": "https://u.expo.dev/84b8be99-64c2-4a59-92de-1d52360aa577",
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
     },
     "runtimeVersion": {
       "policy": "appVersion"
+    },
+    "hooks": {
+      "postPublish": [
+        {
+          "file": "sentry-expo/upload-sourcemaps",
+          "config": {
+            "organization": "hrleave",
+            "project": "mobile"
+          }
+        }
+      ]
     }
   }
 }
