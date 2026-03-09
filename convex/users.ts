@@ -647,3 +647,15 @@ export const migrateFaceToAvatar = mutation({
     return { migrated: count };
   },
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET CURRENT USER — get authenticated user's profile
+// ─────────────────────────────────────────────────────────────────────────────
+export const getCurrentUser = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) return null;
+    return user;
+  },
+});

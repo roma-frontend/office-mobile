@@ -20,14 +20,13 @@
       "bundleIdentifier": "com.hrleave.app",
       "buildNumber": "1",
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "HRLeave uses microphone for voice commands",
+        "NSMicrophoneUsageDescription": "HRLeave uses microphone for voice commands and audio/video calls",
         "NSSpeechRecognitionUsageDescription": "HRLeave uses speech recognition for Hey HR voice activation",
-        "NSCameraUsageDescription": "HRLeave uses camera for profile photo",
+        "NSCameraUsageDescription": "HRLeave uses camera for profile photo and video calls",
         "UIBackgroundModes": [
           "fetch",
           "remote-notification",
-          "fetch",
-          "remote-notification"
+          "voip"
         ],
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -42,13 +41,18 @@
       "permissions": [
         "RECORD_AUDIO",
         "CAMERA",
+        "MODIFY_AUDIO_SETTINGS",
+        "BLUETOOTH",
+        "BLUETOOTH_CONNECT",
         "RECEIVE_BOOT_COMPLETED",
-        "VIBRATE"
+        "VIBRATE",
+        "FOREGROUND_SERVICE"
       ]
     },
     "plugins": [
       "expo-router",
-      "expo-font"
+      "expo-font",
+      "expo-camera"
     ],
     "experiments": {
       "typedRoutes": true

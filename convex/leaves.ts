@@ -49,6 +49,28 @@ export const getUserLeaves = query({
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// GET UNREAD COUNT — count of pending leave requests for a user
+// ─────────────────────────────────────────────────────────────────────────────
+export const getUnreadCount = query({
+  args: { 
+    userId: v.optional(v.id("users")),
+    requesterId: v.optional(v.id("users"))
+  },
+  handler: async (ctx, { userId, requesterId }) => {
+    const targetUserId = userId || requesterId;
+    if (!targetUserId) throw new Error("userId or requesterId is required");
+    
+    const pendingLeaves = await ctx.db
+      .query("leaveRequests")
+      .withIndex("by_user", (q) => q.eq("userId", targetUserId))
+      .filter((q) => q.eq(q.field("status"), "pending"))
+      .collect();
+    
+    return pendingLeaves.length;
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // GET PENDING LEAVES — scoped to org
 // ─────────────────────────────────────────────────────────────────────────────
 export const getPendingLeaves = query({

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, TextInput, Modal,
   ScrollView, ActivityIndicator, Alert, Image,
@@ -29,15 +29,28 @@ export default function NewConversationModal({ visible, onClose, userId, onConve
   const [groupName, setGroupName] = useState('');
   const [selectedOrgId, setSelectedOrgId] = useState<Id<"organizations"> | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showAllOrgs, setShowAllOrgs] = useState(false);
 
-  const orgUsers = useQuery(
+  // Get current user to check if superadmin
+  const currentUser = useQuery(api.users.getUserById, { userId, requesterId: userId });
+  const isSuperadmin = currentUser?.email === 'romangulanyan@gmail.com';
+
+  // Use getUsersAcrossOrganizations for superadmin when "All Organizations" is selected
+  const allOrgUsers = useQuery(
+    api.organizations.getUsersAcrossOrganizations,
+    showAllOrgs && isSuperadmin ? { userId, orgId: undefined } : 'skip'
+  );
+  
+  // Use getUsersByOrganization for single org selection
+  const singleOrgUsers = useQuery(
     api.users.getUsersByOrganization,
-    selectedOrgId ? { orgId: selectedOrgId, requesterId: userId } : 'skip'
+    selectedOrgId && !showAllOrgs ? { orgId: selectedOrgId, requesterId: userId } : 'skip'
   );
 
   const orgs = useQuery(api.organizations.getOrganizationsForPicker, { userId });
 
-  // Auto-select org if only one — OrgPicker handles this via useEffect now
+  // Determine which user list to use
+  const orgUsers = showAllOrgs && isSuperadmin ? allOrgUsers : singleOrgUsers;
 
   const createPersonal = useMutation(api.messenger.getOrCreatePersonalConversation);
   const createGroup = useMutation(api.messenger.createGroupConversation);
@@ -101,7 +114,14 @@ export default function NewConversationModal({ visible, onClose, userId, onConve
     setSelectedUsers([]);
     setGroupName('');
     setMode('personal');
+    setShowAllOrgs(false);
+    setSelectedOrgId(null);
     onClose();
+  };
+
+  const handleOrgSelect = (orgId: Id<"organizations"> | null) => {
+    setSelectedOrgId(orgId);
+    setShowAllOrgs(orgId === null);
   };
 
   return (
@@ -151,9 +171,14 @@ export default function NewConversationModal({ visible, onClose, userId, onConve
             </View>
           )}
 
-          {/* Org picker */}
+          {/* Org picker with "All Organizations" option for superadmin */}
           <View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
-            <OrgPicker userId={userId} selectedOrgId={selectedOrgId} onSelect={setSelectedOrgId} />
+            <OrgPicker 
+              userId={userId} 
+              selectedOrgId={selectedOrgId} 
+              onSelect={handleOrgSelect}
+              showAllOption={isSuperadmin}
+            />
           </View>
 
           {/* Selected users badges */}
@@ -184,10 +209,12 @@ export default function NewConversationModal({ visible, onClose, userId, onConve
           </View>
 
           {/* User list */}
-          {!selectedOrgId ? (
+          {!selectedOrgId && !showAllOrgs ? (
             <View style={styles.emptyState}>
               <Ionicons name="business-outline" size={36} color={colors.textMuted} />
-              <Text style={[styles.emptyText, { color: colors.textMuted }]}>Select an organization to see members</Text>
+              <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+                {isSuperadmin ? 'Select an organization or "All Organizations" to see members' : 'Select an organization to see members'}
+              </Text>
             </View>
           ) : !orgUsers ? (
             <ActivityIndicator color={colors.primary} style={{ marginTop: 24 }} />
@@ -197,6 +224,8 @@ export default function NewConversationModal({ visible, onClose, userId, onConve
                 const selected = selectedUsers.includes(user._id);
                 const avatarColor = AVATAR_COLORS[(user.name?.charCodeAt(0) ?? 0) % AVATAR_COLORS.length];
                 const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                const orgName = showAllOrgs && isSuperadmin ? 
+                  orgs?.find(o => o._id === (user as any).organizationId)?.name : null;
 
                 return (
                   <TouchableOpacity
@@ -216,6 +245,7 @@ export default function NewConversationModal({ visible, onClose, userId, onConve
                       <Text style={[styles.userName, { color: colors.textPrimary }]}>{user.name}</Text>
                       <Text style={[styles.userInfo, { color: colors.textMuted }]}>
                         {user.position ?? user.role}{user.department ? ` · ${user.department}` : ''}
+                        {orgName && ` · ${orgName}`}
                       </Text>
                     </View>
                     {mode === 'group' && (

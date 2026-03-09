@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
-import { Typography, Radius } from '@/constants/theme';
+import { Typography, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 
 interface PollViewProps {
@@ -35,45 +35,82 @@ export default function PollView({ pollId, userId }: PollViewProps) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.backgroundElevated, borderColor: colors.border }]}>
+      {/* Header */}
       <View style={styles.header}>
-        <Ionicons name="stats-chart-outline" size={14} color={colors.primary} />
+        <View style={[styles.iconContainer, { backgroundColor: colors.primary + '15' }]}>
+          <Ionicons name="stats-chart-outline" size={16} color={colors.primary} />
+        </View>
         <Text style={[styles.question, { color: colors.textPrimary }]}>{poll.question}</Text>
       </View>
 
-      {poll.results.map((option) => {
-        const pct = poll.totalVotes > 0 ? Math.round((option.voteCount / poll.totalVotes) * 100) : 0;
-        const isMyVote = option.voterIds.includes(userId);
+      {/* Options */}
+      <View style={styles.optionsContainer}>
+        {poll.results.map((option, index) => {
+          const pct = poll.totalVotes > 0 ? Math.round((option.voteCount / poll.totalVotes) * 100) : 0;
+          const isMyVote = option.voterIds.includes(userId);
+          const isSelected = hasVoted && isMyVote;
 
-        return (
-          <TouchableOpacity
-            key={option.id}
-            style={[styles.option, { borderColor: isMyVote ? colors.primary : colors.border }]}
-            onPress={() => !poll.isClosed && handleVote(option.id)}
-            disabled={poll.isClosed}
-          >
-            {/* Background fill */}
-            <View
-              style={[styles.optionFill, { width: `${pct}%`, backgroundColor: isMyVote ? colors.primary + '33' : colors.primary + '11' }]}
-            />
-            <Text style={[styles.optionText, { color: colors.textPrimary }]}>{option.text}</Text>
-            {hasVoted && (
-              <Text style={[styles.optionPct, { color: colors.textMuted }]}>{pct}%</Text>
-            )}
-            {isMyVote && <Ionicons name="checkmark-circle" size={14} color={colors.primary} />}
-          </TouchableOpacity>
-        );
-      })}
+          return (
+            <TouchableOpacity
+              key={option.id}
+              style={[
+                styles.option,
+                {
+                  borderColor: isSelected ? colors.primary : colors.border,
+                  backgroundColor: isSelected ? colors.primary + '08' : colors.background,
+                }
+              ]}
+              onPress={() => !poll.isClosed && handleVote(option.id)}
+              disabled={poll.isClosed}
+              activeOpacity={poll.isClosed ? 1 : 0.7}
+            >
+              {/* Background progress bar */}
+              <View
+                style={[
+                  styles.optionFill,
+                  {
+                    width: `${pct}%`,
+                    backgroundColor: isSelected ? colors.primary + '20' : colors.primary + '10',
+                  }
+                ]}
+              />
+              {/* Content */}
+              <View style={styles.optionContent}>
+                <View style={styles.optionLeft}>
+                  {isSelected && <Ionicons name="checkmark-circle" size={16} color={colors.primary} />}
+                  <Text style={[styles.optionText, { color: colors.textPrimary }]}>{option.text}</Text>
+                </View>
+                {hasVoted && (
+                  <Text style={[styles.optionPct, { color: isSelected ? colors.primary : colors.textMuted }]}>
+                    {pct}%
+                  </Text>
+                )}
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
 
+      {/* Footer */}
       <View style={styles.footer}>
-        <Text style={[styles.voteCount, { color: colors.textMuted }]}>
-          {poll.totalVotes} vote{poll.totalVotes !== 1 ? 's' : ''}
-          {poll.isClosed ? ' · Closed' : ''}
-        </Text>
+        <View style={styles.footerLeft}>
+          <Ionicons name="people-outline" size={12} color={colors.textMuted} />
+          <Text style={[styles.voteCount, { color: colors.textMuted }]}>
+            {poll.totalVotes} {poll.totalVotes === 1 ? 'vote' : 'votes'}
+          </Text>
+        </View>
         {!poll.isClosed && poll.createdBy === userId && (
-          <TouchableOpacity onPress={handleClose}>
-            <Text style={[styles.closeBtn, { color: colors.error }]}>Close Poll</Text>
+          <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+            <Ionicons name="lock-closed-outline" size={12} color={colors.error} />
+            <Text style={[styles.closeBtn, { color: colors.error }]}>Close</Text>
           </TouchableOpacity>
+        )}
+        {poll.isClosed && (
+          <View style={styles.closedBadge}>
+            <Ionicons name="lock-closed" size={10} color={colors.textMuted} />
+            <Text style={[styles.closedText, { color: colors.textMuted }]}>Closed</Text>
+          </View>
         )}
       </View>
     </View>
@@ -81,17 +118,119 @@ export default function PollView({ pollId, userId }: PollViewProps) {
 }
 
 const styles = StyleSheet.create({
-  container: { gap: 6, minWidth: 200 },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  question: { ...Typography.bodySemiBold, flex: 1 },
-  option: {
-    borderRadius: Radius.sm, borderWidth: 1, overflow: 'hidden',
-    flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 8, gap: 6,
+  container: {
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    padding: Spacing.sm,
+    gap: Spacing.sm,
+    minWidth: 220,
+    maxWidth: '100%',
   },
-  optionFill: { position: 'absolute', left: 0, top: 0, bottom: 0, borderRadius: Radius.sm },
-  optionText: { ...Typography.caption, flex: 1, zIndex: 1 },
-  optionPct: { ...Typography.label, zIndex: 1 },
-  footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 2 },
-  voteCount: { ...Typography.label },
-  closeBtn: { ...Typography.label },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  iconContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: Radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  question: {
+    ...Typography.bodySemiBold,
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 18,
+  },
+  optionsContainer: {
+    gap: Spacing.xs,
+  },
+  option: {
+    borderRadius: Radius.sm,
+    borderWidth: 1.5,
+    overflow: 'hidden',
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 40,
+  },
+  optionFill: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    borderRadius: Radius.sm,
+  },
+  optionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    flex: 1,
+    zIndex: 1,
+  },
+  optionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flex: 1,
+  },
+  optionText: {
+    ...Typography.caption,
+    fontSize: 13,
+  },
+  optionPct: {
+    ...Typography.label,
+    fontSize: 12,
+    fontWeight: '600',
+    minWidth: 32,
+    textAlign: 'right',
+  },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: Spacing.xs,
+    borderTopWidth: 1,
+    borderTopColor: 'transparent',
+  },
+  footerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  voteCount: {
+    ...Typography.label,
+    fontSize: 11,
+  },
+  closeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: Radius.xs,
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+  },
+  closeBtn: {
+    ...Typography.label,
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  closedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: Radius.xs,
+    backgroundColor: 'rgba(156, 163, 175, 0.1)',
+  },
+  closedText: {
+    ...Typography.label,
+    fontSize: 11,
+    fontWeight: '500',
+  },
 });

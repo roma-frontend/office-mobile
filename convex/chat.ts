@@ -1,5 +1,8 @@
 import { httpAction } from "./_generated/server";
 import { api } from "./_generated/api";
+import { v } from "convex/values";
+import { query } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
@@ -328,4 +331,44 @@ ${langInstruction}`;
       { status: 500, headers: { "Content-Type": "application/json", ...CORS_HEADERS } }
     );
   }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONVERSATION QUERIES — expose messenger functions through chat module
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Get my conversations (for compatibility with client expectations)
+ * Calls messenger.getMyConversations internally
+ */
+export const getMyConversations = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const result = await ctx.runQuery(api.messenger.getMyConversations, { userId });
+    return result;
+  },
+});
+
+/**
+ * Get incoming calls (for compatibility with client expectations)
+ * Calls messenger.getIncomingCalls internally
+ */
+export const getIncomingCalls = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const result = await ctx.runQuery(api.messenger.getIncomingCalls, { userId });
+    return result;
+  },
+});
+
+/**
+ * Get total unread count (for compatibility with client expectations)
+ * Calls messenger.getTotalUnread internally
+ */
+export const getTotalUnread = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const result = await ctx.runQuery(api.messenger.getTotalUnread, { userId });
+    return result;
+  },
 });

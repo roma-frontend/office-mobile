@@ -33,6 +33,7 @@ import type * as sla from "../sla.js";
 import type * as supervisorRatings from "../supervisorRatings.js";
 import type * as tasks from "../tasks.js";
 import type * as timeTracking from "../timeTracking.js";
+import type * as userStats from "../userStats.js";
 import type * as users from "../users.js";
 
 import type {
@@ -67,6 +68,7 @@ declare const fullApi: ApiFromModules<{
   supervisorRatings: typeof supervisorRatings;
   tasks: typeof tasks;
   timeTracking: typeof timeTracking;
+  userStats: typeof userStats;
   users: typeof users;
 }>;
 

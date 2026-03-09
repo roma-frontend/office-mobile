@@ -330,3 +330,39 @@ export const getCalendarExportData = query({
     });
   },
 });
+
+/**
+ * Get maintenance mode status
+ */
+export const getMaintenanceMode = query({
+  args: {
+    organizationId: v.optional(v.id("organizations"))
+  },
+  handler: async (ctx, { organizationId }) => {
+    // Check if maintenance mode is enabled (store as a setting in config or admin setting)
+    // For now, return false as default
+    try {
+      const settings = await ctx.db
+        .query("adminSettings")
+        .first();
+      
+      if (settings && settings.maintenanceMode) {
+        return {
+          enabled: true,
+          message: settings.maintenanceModeMessage || "System is under maintenance. Please try again later.",
+          startedAt: settings.maintenanceModeStartedAt,
+          estimatedEndTime: settings.maintenanceModeEndTime,
+        };
+      }
+    } catch (err) {
+      // adminSettings table might not exist, continue
+    }
+    
+    return {
+      enabled: false,
+      message: null,
+      startedAt: null,
+      estimatedEndTime: null,
+    };
+  },
+});

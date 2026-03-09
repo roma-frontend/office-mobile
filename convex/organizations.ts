@@ -562,6 +562,86 @@ export const getOrganizationsForPicker = query({
   },
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// GET ALL ORGANIZATIONS — for superadmin to view all employees
+// ─────────────────────────────────────────────────────────────────────────────
+export const getAllOrganizationsForPicker = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) throw new Error("User not found");
+
+    if (user.email.toLowerCase() !== SUPERADMIN_EMAIL) {
+      throw new Error("Only superadmin can view all organizations");
+    }
+
+    const orgs = await ctx.db
+      .query("organizations")
+      .withIndex("by_active", (q) => q.eq("isActive", true))
+      .collect();
+    return orgs.map((o) => ({ _id: o._id, name: o.name, slug: o.slug }));
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET USERS ACROSS ALL ORGANIZATIONS — for superadmin
+// ─────────────────────────────────────────────────────────────────────────────
+export const getUsersAcrossOrganizations = query({
+  args: { 
+    userId: v.id("users"),
+    orgId: v.optional(v.id("organizations")),
+  },
+  handler: async (ctx, { userId, orgId }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) throw new Error("User not found");
+
+    // Superadmin can see all users or filter by org
+    if (user.email.toLowerCase() === SUPERADMIN_EMAIL) {
+      let users;
+      if (orgId) {
+        users = await ctx.db
+          .query("users")
+          .withIndex("by_org", (q) => q.eq("organizationId", orgId))
+          .collect();
+      } else {
+        users = await ctx.db.query("users").collect();
+      }
+      return users
+        .filter((u) => u.isActive && u.isApproved)
+        .map((u) => ({
+          _id: u._id,
+          name: u.name,
+          email: u.email,
+          avatarUrl: u.avatarUrl,
+          role: u.role,
+          department: u.department,
+          position: u.position,
+          presenceStatus: u.presenceStatus,
+          organizationId: u.organizationId,
+        }));
+    }
+
+    // Regular users: only their own org
+    if (!user.organizationId) return [];
+    const users = await ctx.db
+      .query("users")
+      .withIndex("by_org", (q) => q.eq("organizationId", user.organizationId))
+      .collect();
+    return users
+      .filter((u) => u.isActive && u.isApproved)
+      .map((u) => ({
+        _id: u._id,
+        name: u.name,
+        email: u.email,
+        avatarUrl: u.avatarUrl,
+        role: u.role,
+        department: u.department,
+        position: u.position,
+        presenceStatus: u.presenceStatus,
+      }));
+  },
+});
+
 export const getPendingJoinRequestCount = query({
   args: { adminId: v.id("users") },
   handler: async (ctx, { adminId }) => {

@@ -45,6 +45,9 @@ interface MessageBubbleProps {
     replyToSenderName?: string;
     readBy?: Array<{ userId: string; readAt: number }>;
     parentMessageId?: Id<"chatMessages">;
+    isServiceBroadcast?: boolean;
+    broadcastTitle?: string;
+    broadcastIcon?: string;
   };
   isOwn: boolean;
   showSender: boolean;
@@ -119,6 +122,34 @@ export default function MessageBubble({
   const [showMenu, setShowMenu] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
+  // Service broadcast: official company-wide announcement
+  if (message.type === 'system' && message.isServiceBroadcast) {
+    const icon = message.broadcastIcon || 'ℹ️';
+    const title = message.broadcastTitle || 'СЕРВИСНОЕ ОБЪЯВЛЕНИЕ';
+
+    // Remove sender name prefix (e.g., "Roman: ") from content for system announcements
+    let cleanContent = message.content || '';
+    if (message.senderName && cleanContent.startsWith(message.senderName + ':')) {
+      cleanContent = cleanContent.substring(message.senderName.length + 1).trim();
+    }
+
+    return (
+      <View style={styles.serviceBroadcastWrap}>
+        <View style={[styles.serviceBroadcastCard, { backgroundColor: colors.bgCard, borderLeftColor: colors.warning }]}>
+          <View style={styles.serviceBroadcastHeader}>
+            <Text style={{ fontSize: 16 }}>{icon}</Text>
+            <Text style={[styles.serviceBroadcastTitle, { color: colors.warning }]}>{title}</Text>
+          </View>
+          <Text style={[styles.serviceBroadcastContent, { color: colors.textPrimary }]}>{cleanContent}</Text>
+          <Text style={[styles.serviceBroadcastTime, { color: colors.textMuted }]}>
+            {new Date(message.createdAt).toLocaleString()}
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  // Regular system message (e.g., "John joined the chat")
   if (message.type === 'system') {
     return (
       <View style={styles.systemWrap}>
@@ -137,6 +168,8 @@ export default function MessageBubble({
   const totalReactions = Object.values(reactions).reduce((sum, arr) => sum + (arr as string[]).length, 0);
 
   const handleLongPress = () => {
+    // Disable menu for service broadcasts - no replies allowed
+    if (message.isServiceBroadcast) return;
     if (!message.isDeleted) setShowMenu(true);
   };
 
@@ -295,10 +328,13 @@ export default function MessageBubble({
                   <Ionicons name="happy-outline" size={18} color={colors.textPrimary} />
                   <Text style={[styles.menuText, { color: colors.textPrimary }]}>React</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.menuItem} onPress={() => { onReply?.(message); setShowMenu(false); }}>
-                  <Ionicons name="arrow-undo-outline" size={18} color={colors.textPrimary} />
-                  <Text style={[styles.menuText, { color: colors.textPrimary }]}>Reply</Text>
-                </TouchableOpacity>
+                {/* Reply - DISABLED for service broadcasts (system announcements) */}
+                {!message.isServiceBroadcast && (
+                  <TouchableOpacity style={styles.menuItem} onPress={() => { onReply?.(message); setShowMenu(false); }}>
+                    <Ionicons name="arrow-undo-outline" size={18} color={colors.textPrimary} />
+                    <Text style={[styles.menuText, { color: colors.textPrimary }]}>Reply</Text>
+                  </TouchableOpacity>
+                )}
                 <TouchableOpacity style={styles.menuItem} onPress={() => { onOpenThread?.(message._id, message.content ?? '', message.senderName); setShowMenu(false); }}>
                   <Ionicons name="chatbubbles-outline" size={18} color={colors.textPrimary} />
                   <Text style={[styles.menuText, { color: colors.textPrimary }]}>Thread</Text>
@@ -372,4 +408,12 @@ const styles = StyleSheet.create({
   menuText: { ...Typography.bodyMedium },
   emojiRow: { flexDirection: 'row', gap: 8, justifyContent: 'center', paddingVertical: 8, paddingHorizontal: 12 },
   emojiBtn: { padding: 4 },
+
+  // Service broadcast
+  serviceBroadcastWrap: { alignItems: 'center', paddingVertical: 12, paddingHorizontal: 16, marginBottom: 8 },
+  serviceBroadcastCard: { borderRadius: Radius.lg, padding: 12, borderWidth: 1, borderLeftWidth: 4, width: '100%', maxWidth: 500 },
+  serviceBroadcastHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
+  serviceBroadcastTitle: { ...Typography.label, fontWeight: '700', fontSize: 13 },
+  serviceBroadcastContent: { ...Typography.body, lineHeight: 20, marginBottom: 6 },
+  serviceBroadcastTime: { ...Typography.caption, fontSize: 11 },
 });

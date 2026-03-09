@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator,
-  KeyboardAvoidingView, Platform, Modal, TextInput,
+  KeyboardAvoidingView, Platform, Modal, TextInput, Alert,
 } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +14,7 @@ import MessageBubble from './MessageBubble';
 import MessageInput from './MessageInput';
 import ConversationInfoModal from './ConversationInfoModal';
 import ThreadModal from './ThreadModal';
+import CallModal from './CallModal';
 
 interface ConversationScreenProps {
   visible: boolean;
@@ -29,6 +30,8 @@ export default function ConversationScreen({ visible, conversationId, userId, on
   const [searchQuery, setSearchQuery] = useState('');
   const [replyTo, setReplyTo] = useState<any>(null);
   const [threadParent, setThreadParent] = useState<{ id: Id<"chatMessages">; content: string; senderName: string } | null>(null);
+  const [showCallModal, setShowCallModal] = useState(false);
+  const [callType, setCallType] = useState<'audio' | 'video'>('audio');
   const flatListRef = useRef<FlatList>(null);
 
   const messages = useQuery(
@@ -58,6 +61,7 @@ export default function ConversationScreen({ visible, conversationId, userId, on
   const deleteMsg = useMutation(api.messenger.deleteMessage);
   const toggleReaction = useMutation(api.messenger.toggleReaction);
   const pinMessage = useMutation(api.messenger.pinMessage);
+  const startCall = useMutation(api.messenger.startCall);
 
   // Mark as read when opening
   useEffect(() => {
@@ -76,6 +80,16 @@ export default function ConversationScreen({ visible, conversationId, userId, on
   const subtitle = isGroup
     ? `${convInfo?.participants?.length ?? 0} members`
     : undefined;
+
+  const handleStartCall = async (type: 'audio' | 'video') => {
+    try {
+      await startCall({ conversationId, initiatorId: userId, callType: type });
+      setCallType(type);
+      setShowCallModal(true);
+    } catch (e: any) {
+      Alert.alert('Error', e.message);
+    }
+  };
 
   const handleDeleteMessage = (messageId: Id<"chatMessages">) => {
     deleteMsg({ messageId, userId });
@@ -133,6 +147,23 @@ export default function ConversationScreen({ visible, conversationId, userId, on
                 <Text style={[styles.headerTitle, { color: colors.textPrimary }]} numberOfLines={1}>{title}</Text>
                 {subtitle && <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>{subtitle}</Text>}
               </TouchableOpacity>
+              {/* Call buttons for direct chats */}
+              {isDirect && (
+                <>
+                  <TouchableOpacity 
+                    onPress={() => handleStartCall('audio')} 
+                    style={styles.iconBtn}
+                  >
+                    <Ionicons name="call-outline" size={20} color={colors.primary} />
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    onPress={() => handleStartCall('video')} 
+                    style={styles.iconBtn}
+                  >
+                    <Ionicons name="videocam-outline" size={20} color={colors.primary} />
+                  </TouchableOpacity>
+                </>
+              )}
               <TouchableOpacity onPress={() => setShowSearch(!showSearch)} style={styles.iconBtn}>
                 <Ionicons name="search-outline" size={20} color={colors.textMuted} />
               </TouchableOpacity>
@@ -297,6 +328,17 @@ export default function ConversationScreen({ visible, conversationId, userId, on
             conversationId={conversationId}
             userId={userId}
           />
+
+          {/* Call Modal - WebRTC integration */}
+          {showCallModal && (
+            <CallModal
+              visible={showCallModal}
+              callType={callType}
+              conversationId={conversationId}
+              currentUserId={userId}
+              onClose={() => setShowCallModal(false)}
+            />
+          )}
         </SafeAreaView>
       </SafeAreaProvider>
     </Modal>
