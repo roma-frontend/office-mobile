@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from 'convex/react';
@@ -19,17 +19,18 @@ export default function OrgPicker({ userId, selectedOrgId, onSelect, showAllOpti
   const [modalOpen, setModalOpen] = useState(false);
   const orgs = useQuery(api.organizations.getOrganizationsForPicker, { userId });
 
-  // Show placeholder if no orgs
-  if (!orgs || orgs.length === 0) {
-    return (
-      <View style={[styles.picker, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-        <Ionicons name="business-outline" size={16} color={colors.textMuted} />
-        <Text style={[styles.pickerText, { color: colors.textMuted }]} numberOfLines={1}>
-          No organizations available
-        </Text>
-      </View>
-    );
+  // Auto-select if only one org
+  useEffect(() => {
+    if (orgs && orgs.length === 1 && selectedOrgId !== orgs[0]._id) {
+      onSelect(orgs[0]._id);
+    }
+  }, [orgs, selectedOrgId, onSelect]);
+
+  // Hide if 0 or 1 org (no choice to make)
+  if (!orgs || orgs.length <= 1) {
+    return null;
   }
+
 
   const selected = orgs.find((o) => o._id === selectedOrgId);
 

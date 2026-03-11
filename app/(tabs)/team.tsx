@@ -1,12 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput,
-  Modal, ActivityIndicator, Platform, Image, RefreshControl,
+  Modal, ActivityIndicator, Platform, Image, RefreshControl, Alert,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets, SafeAreaProvider } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useQuery } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import { Typography, Radius } from '@/constants/theme';
@@ -223,6 +223,13 @@ export default function Team() {
   const [userId, setUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'team' | 'messages'>('team');
   const [selectedOrgId, setSelectedOrgId] = useState<Id<"organizations"> | null>(null);
+  const [editEmployee, setEditEmployee] = useState<any>(null);
+  const [editFields, setEditFields] = useState({ name: '', department: '', position: '', phone: '' });
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const updateUserMut = useMutation(api.users.updateUser);
+  const deleteUserMut = useMutation(api.users.deleteUser);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -234,6 +241,8 @@ export default function Team() {
   }, []);
 
   const allUsers = useQuery(api.users.getAllUsers, userId ? { requesterId: userId as any } : 'skip');
+  const currentUser = useQuery(api.users.getCurrentUser, userId ? { userId: userId as any } : 'skip');
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'superadmin';
   const orgUsers = useQuery(
     api.users.getUsersByOrganization,
     userId && selectedOrgId ? { organizationId: selectedOrgId, requesterId: userId as any } : 'skip'
@@ -245,7 +254,8 @@ export default function Team() {
   const stats = useMemo(() => {
     if (!users) return { total: 0, staff: 0, contractors: 0, admins: 0, supervisors: 0 };
     // getUsersByOrganization already filters isActive, getAllUsers doesn't — handle both
-    const active = (users as any[]).filter((u: any) => u.isActive !== false);
+    // Exclude superadmin from stats — they're not part of any organization
+    const active = (users as any[]).filter((u: any) => u.isActive !== false && u.role !== 'superadmin');
     return {
       total: active.length,
       staff: active.filter((u: any) => u.employeeType === 'staff').length,
@@ -264,7 +274,7 @@ export default function Team() {
         (u.department ?? '').toLowerCase().includes(search.toLowerCase()) ||
         (u.position ?? '').toLowerCase().includes(search.toLowerCase());
       const matchRole = filterRole === 'all' || u.role === filterRole;
-      return matchSearch && matchRole && u.isActive !== false;
+      return matchSearch && matchRole && u.isActive !== false && u.role !== 'superadmin';
     });
   }, [users, search, filterRole]);
 
@@ -418,7 +428,58 @@ export default function Team() {
               const supervisor = (users as any[])?.find((u: any) => u._id === m.supervisorId);
               return (
                 <TouchableOpacity key={m._id} style={[styles.memberCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
-                  activeOpacity={0.75} onPress={() => setSelectedEmployee(m)}>
+                  activeOpacity={0.75} onPress={() => setSelectedEmployee(m)}
+                  onLongPress={() => {
+                    if (!isAdmin) return;
+                    // Cannot edit/delete superadmin or yourself
+                    if (m.role === 'superadmin' || m._id === userId) return;
+                    
+                    Alert.alert(
+                      m.name,
+                      'Choose an action',
+                      [
+                        {
+                          text: 'Edit',
+                          onPress: () => {
+                            setEditEmployee(m);
+                            setEditFields({
+                              name: m.name || '',
+                              department: m.department || '',
+                              position: m.position || '',
+                              phone: m.phone || '',
+                            });
+                            setShowEditModal(true);
+                          },
+                        },
+                        {
+                          text: 'Delete',
+                          style: 'destructive',
+                          onPress: () => {
+                            Alert.alert(
+                              'Delete Employee',
+                              `Are you sure you want to deactivate ${m.name}?`,
+                              [
+                                { text: 'Cancel', style: 'cancel' },
+                                {
+                                  text: 'Delete',
+                                  style: 'destructive',
+                                  onPress: async () => {
+                                    try {
+                                      await deleteUserMut({ adminId: userId as Id<'users'>, userId: m._id });
+                                      Alert.alert('Done', `${m.name} has been deactivated.`);
+                                    } catch (e: any) {
+                                      Alert.alert('Error', e?.message || 'Failed to delete');
+                                    }
+                                  },
+                                },
+                              ]
+                            );
+                          },
+                        },
+                        { text: 'Cancel', style: 'cancel' },
+                      ]
+                    );
+                  }}>
                   {/* Avatar */}
                   <Avatar name={m.name} avatarUrl={m.avatarUrl} size={46} index={i} />
 
@@ -459,6 +520,58 @@ export default function Team() {
           onClose={() => setSelectedEmployee(null)}
         />
       )}
+
+      {/* Admin Edit Employee Modal */}
+      <Modal visible={showEditModal} animationType="slide" transparent onRequestClose={() => setShowEditModal(false)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
+          <View style={[editStyles.sheet, { backgroundColor: colors.bg }]}>
+            <View style={editStyles.sheetHeader}>
+              <Text style={[editStyles.sheetTitle, { color: colors.textPrimary }]}>Edit Employee</Text>
+              <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                <Ionicons name="close" size={22} color={colors.textMuted} />
+              </TouchableOpacity>
+            </View>
+            {(['name', 'department', 'position', 'phone'] as const).map((field) => (
+              <View key={field} style={{ marginBottom: 12 }}>
+                <Text style={[editStyles.fieldLabel, { color: colors.textMuted }]}>{field.charAt(0).toUpperCase() + field.slice(1)}</Text>
+                <TextInput
+                  style={[editStyles.fieldInput, { color: colors.textPrimary, backgroundColor: colors.bgCard, borderColor: colors.border }]}
+                  value={editFields[field]}
+                  onChangeText={(v) => setEditFields(prev => ({ ...prev, [field]: v }))}
+                  placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                  placeholderTextColor={colors.textMuted}
+                />
+              </View>
+            ))}
+            <TouchableOpacity
+              style={[editStyles.saveBtn, { backgroundColor: colors.primary, opacity: saving ? 0.6 : 1 }]}
+              disabled={saving}
+              onPress={async () => {
+                if (!editEmployee || !userId) return;
+                setSaving(true);
+                try {
+                  await updateUserMut({
+                    adminId: userId as Id<'users'>,
+                    userId: editEmployee._id,
+                    name: editFields.name.trim() || undefined,
+                    department: editFields.department.trim() || undefined,
+                    position: editFields.position.trim() || undefined,
+                    phone: editFields.phone.trim() || undefined,
+                  });
+                  setShowEditModal(false);
+                  Alert.alert('Saved', 'Employee updated successfully.');
+                } catch (e: any) {
+                  Alert.alert('Error', e?.message || 'Failed to update');
+                } finally {
+                  setSaving(false);
+                }
+              }}
+            >
+              {saving ? <ActivityIndicator color="#fff" size="small" /> : <Text style={editStyles.saveBtnText}>Save Changes</Text>}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -509,6 +622,16 @@ const styles = StyleSheet.create({
   statusText: { ...Typography.label, fontSize: 10 },
   typePill: { paddingHorizontal: 7, paddingVertical: 3, borderRadius: Radius.full },
   typeText: { ...Typography.label, fontSize: 10 },
+});
+
+const editStyles = StyleSheet.create({
+  sheet: { borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, paddingBottom: 40 },
+  sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
+  sheetTitle: { ...Typography.h3 },
+  fieldLabel: { ...Typography.label, marginBottom: 4 },
+  fieldInput: { borderWidth: 1, borderRadius: Radius.md, paddingHorizontal: 12, paddingVertical: 10, ...Typography.body },
+  saveBtn: { borderRadius: Radius.md, paddingVertical: 14, alignItems: 'center', marginTop: 8 },
+  saveBtnText: { color: '#fff', ...Typography.bodyMedium, fontWeight: '600' },
 });
 
 const profileStyles = StyleSheet.create({

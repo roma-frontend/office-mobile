@@ -1,17 +1,23 @@
-import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { useEffect } from 'react';
 
-// Configure notification handler
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+// Lazy-load expo-notifications only on native — it crashes on web
+const Notifications: typeof import('expo-notifications') | null =
+  Platform.OS !== 'web' ? require('expo-notifications') : null;
+
+// Configure notification handler (native only)
+if (Notifications) {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+    }),
+  });
+}
 
 export async function registerForPushNotifications(): Promise<string | null> {
+  if (!Notifications) return null;
   try {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
@@ -26,11 +32,9 @@ export async function registerForPushNotifications(): Promise<string | null> {
       return null;
     }
 
-    // Get push token (for remote notifications)
     const token = (await Notifications.getExpoPushTokenAsync()).data;
     console.log('Push notification token:', token);
 
-    // Android-specific channel setup
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync('pomodoro', {
         name: 'Pomodoro Timer',
@@ -48,11 +52,12 @@ export async function registerForPushNotifications(): Promise<string | null> {
 }
 
 export async function scheduleLocalNotification(
-  title: string, 
-  body: string, 
+  title: string,
+  body: string,
   seconds = 1,
   data?: any
 ) {
+  if (!Notifications) return;
   try {
     await Notifications.scheduleNotificationAsync({
       content: {
@@ -78,6 +83,7 @@ export async function sendImmediateNotification(
   body: string,
   data?: any
 ) {
+  if (!Notifications) return;
   try {
     await Notifications.scheduleNotificationAsync({
       content: {
@@ -87,7 +93,7 @@ export async function sendImmediateNotification(
         sound: true,
         priority: Notifications.AndroidNotificationPriority.HIGH,
       },
-      trigger: null, // Send immediately
+      trigger: null,
     });
     console.log('Immediate notification sent:', title);
   } catch (error) {
@@ -96,10 +102,11 @@ export async function sendImmediateNotification(
 }
 
 export function useNotificationObserver(
-  onNotification: (notification: Notifications.Notification) => void,
-  onResponse: (response: Notifications.NotificationResponse) => void,
+  onNotification: (notification: any) => void,
+  onResponse: (response: any) => void,
 ) {
   useEffect(() => {
+    if (!Notifications) return;
     const notificationListener = Notifications.addNotificationReceivedListener(onNotification);
     const responseListener = Notifications.addNotificationResponseReceivedListener(onResponse);
 

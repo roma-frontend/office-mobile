@@ -74,6 +74,7 @@ export default function ConversationScreen({ visible, conversationId, userId, on
 
   const isGroup = convInfo?.type === 'group';
   const isDirect = convInfo?.type === 'personal';
+  const isReadOnly = !!(convInfo as any)?.isReadOnly;
   const title = isGroup
     ? convInfo?.name ?? 'Group'
     : convInfo?.participants?.find((p) => p.userId !== userId)?.userName ?? 'Chat';
@@ -283,7 +284,7 @@ export default function ConversationScreen({ visible, conversationId, userId, on
             )}
 
             {/* Reply-to preview */}
-            {replyTo && (
+            {!isReadOnly && replyTo && (
               <View style={[styles.replyBar, { backgroundColor: colors.primary + '11', borderTopColor: colors.border }]}>
                 <View style={[styles.replyBarLine, { backgroundColor: colors.primary }]} />
                 <View style={{ flex: 1 }}>
@@ -298,14 +299,21 @@ export default function ConversationScreen({ visible, conversationId, userId, on
               </View>
             )}
 
-            {/* Input */}
-            <MessageInput
-              conversationId={conversationId}
-              userId={userId}
-              participants={participants}
-              replyTo={replyTo}
-              onClearReply={() => setReplyTo(null)}
-            />
+            {/* Input — hidden for read-only channels like Service Maintenance */}
+            {isReadOnly ? (
+              <View style={[styles.readOnlyBar, { backgroundColor: colors.bgCard, borderTopColor: colors.border }]}>
+                <Ionicons name="lock-closed-outline" size={16} color={colors.textMuted} />
+                <Text style={[styles.readOnlyText, { color: colors.textMuted }]}>This channel is read-only</Text>
+              </View>
+            ) : (
+              <MessageInput
+                conversationId={conversationId}
+                userId={userId}
+                participants={participants}
+                replyTo={replyTo}
+                onClearReply={() => setReplyTo(null)}
+              />
+            )}
           </KeyboardAvoidingView>
 
           {/* Conversation Info Modal */}
@@ -391,6 +399,13 @@ const styles = StyleSheet.create({
   typingDots: { flexDirection: 'row', gap: 3 },
   dot: { width: 5, height: 5, borderRadius: 2.5 },
   typingText: { ...Typography.caption, fontSize: 11 },
+
+  // Read-only bar
+  readOnlyBar: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    paddingVertical: 14, borderTopWidth: 1,
+  },
+  readOnlyText: { ...Typography.caption, fontSize: 13 },
 
   // Reply bar
   replyBar: {

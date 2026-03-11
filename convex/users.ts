@@ -192,11 +192,11 @@ export const createUser = mutation({
 // ─────────────────────────────────────────────────────────────────────────────
 export const updateUser = mutation({
   args: {
-    adminId: v.id("users"),
+    adminId: v.optional(v.id("users")),
     userId: v.id("users"),
     name: v.optional(v.string()),
     email: v.optional(v.string()),
-    role: v.optional(v.union(v.literal("admin"), v.literal("supervisor"), v.literal("employee"))),
+    role: v.optional(v.union(v.literal("admin"), v.literal("supervisor"), v.literal("employee"), v.literal("driver"))),
     employeeType: v.optional(v.union(v.literal("staff"), v.literal("contractor"))),
     department: v.optional(v.string()),
     position: v.optional(v.string()),
@@ -207,15 +207,35 @@ export const updateUser = mutation({
     paidLeaveBalance: v.optional(v.number()),
     sickLeaveBalance: v.optional(v.number()),
     familyLeaveBalance: v.optional(v.number()),
+    location: v.optional(v.string()),
   },
   handler: async (ctx, { adminId, userId, ...updates }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) throw new Error("User not found");
+
+    // Self-edit: user editing their own profile (limited fields)
+    const isSelfEdit = !adminId || adminId === userId;
+    if (isSelfEdit) {
+      const SELF_EDITABLE = ["name", "phone", "department", "position", "avatarUrl", "location"] as const;
+      const selfUpdates: Record<string, unknown> = {};
+      for (const key of SELF_EDITABLE) {
+        if ((updates as any)[key] !== undefined) {
+          selfUpdates[key] = (updates as any)[key];
+        }
+      }
+      await ctx.db.patch(userId, selfUpdates);
+      return userId;
+    }
+
+    // Admin edit: full control - adminId is required here
+    if (!adminId) {
+      throw new Error("Admin ID is required for updating other users");
+    }
+    
     const admin = await ctx.db.get(adminId);
     if (!admin || (admin.role !== "admin" && admin.email.toLowerCase() !== SUPERADMIN_EMAIL)) {
       throw new Error("Only org admins can update users");
     }
-
-    const user = await ctx.db.get(userId);
-    if (!user) throw new Error("User not found");
 
     // Verify same organization
     if (
@@ -258,8 +278,14 @@ export const deleteUser = mutation({
       throw new Error("Access denied: cannot delete users from another organization");
     }
 
-    if (user.role === "admin" && user.email.toLowerCase() === admin.email.toLowerCase()) {
-      throw new Error("Cannot delete your own admin account");
+    // Cannot delete yourself
+    if (user.email.toLowerCase() === admin.email.toLowerCase()) {
+      throw new Error("Cannot delete your own account");
+    }
+    
+    // Cannot delete superadmin
+    if (user.role === "superadmin") {
+      throw new Error("Cannot delete superadmin account");
     }
 
     await ctx.db.patch(userId, { isActive: false });

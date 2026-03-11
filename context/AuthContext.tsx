@@ -45,6 +45,7 @@ export const AUTH_KEYS = {
   NAME:     'user_name',
   ROLE:     'user_role',
   EMAIL:    'user_email',
+  ORG_ID:   'organization_id',
 } as const;
 
 // ── Context ───────────────────────────────────────────────────────────────────
@@ -69,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
-        const [[, token], [, expiry], [, userId], [, name], [, role], [, email]] =
+        const [[, token], [, expiry], [, userId], [, name], [, role], [, email], [, orgId]] =
           await AsyncStorage.multiGet([
             AUTH_KEYS.TOKEN,
             AUTH_KEYS.EXPIRY,
@@ -77,6 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             AUTH_KEYS.NAME,
             AUTH_KEYS.ROLE,
             AUTH_KEYS.EMAIL,
+            AUTH_KEYS.ORG_ID,
           ]);
 
         // Session expired?
@@ -99,6 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             name: name ?? '',
             email: email ?? '',
             role: (role ?? 'employee') as AuthUser['role'],
+            organizationId: orgId ?? undefined,
           },
         });
       } catch {
@@ -109,14 +112,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // ── signIn ────────────────────────────────────────────────────────────────
   const signIn = useCallback(async (token: string, user: AuthUser, expiry: number) => {
-    await AsyncStorage.multiSet([
+    const pairs: [string, string][] = [
       [AUTH_KEYS.TOKEN,   token],
       [AUTH_KEYS.EXPIRY,  String(expiry)],
       [AUTH_KEYS.USER_ID, user.userId],
       [AUTH_KEYS.NAME,    user.name],
       [AUTH_KEYS.ROLE,    user.role],
       [AUTH_KEYS.EMAIL,   user.email],
-    ]);
+    ];
+    if (user.organizationId) {
+      pairs.push([AUTH_KEYS.ORG_ID, user.organizationId]);
+    }
+    await AsyncStorage.multiSet(pairs);
     setState({ user, token, isLoading: false, isAuthenticated: true });
   }, []);
 
@@ -163,6 +170,7 @@ const AUTH_STORAGE_KEYS: string[] = [
   AUTH_KEYS.NAME,
   AUTH_KEYS.ROLE,
   AUTH_KEYS.EMAIL,
+  AUTH_KEYS.ORG_ID,
 ];
 
 async function _clearStorage() {

@@ -100,11 +100,13 @@ export default defineSchema({
     name: v.string(),
     email: v.string(),
     passwordHash: v.string(),
+    googleId: v.optional(v.string()),     // Google OAuth sub ID
     role: v.union(
       v.literal("superadmin"),   // platform owner (you) — sees all orgs
       v.literal("admin"),        // org admin — sees only their org
       v.literal("supervisor"),
       v.literal("employee"),
+      v.literal("driver"),       // employee with driver privileges
     ),
     employeeType: v.union(v.literal("staff"), v.literal("contractor")),
     department: v.optional(v.string()),
@@ -250,6 +252,9 @@ export default defineSchema({
       v.literal("leave_request"),
       v.literal("leave_approved"),
       v.literal("leave_rejected"),
+      v.literal("driver_request"),           // new: driver booking request
+      v.literal("driver_request_approved"),  // new: driver request approved
+      v.literal("driver_request_rejected"),  // new: driver request rejected
       v.literal("employee_added"),
       v.literal("join_request"),             // new: employee wants to join
       v.literal("join_approved"),            // new: join request approved
@@ -739,6 +744,7 @@ export default defineSchema({
     // For direct chats: sorted pair of userIds for uniqueness
     dmKey: v.optional(v.string()),  // e.g. "userId1_userId2" (sorted)
     // Conversation management
+    isReadOnly: v.optional(v.boolean()),    // read-only channel (e.g. Service Maintenance)
     isPinned: v.optional(v.boolean()),      // закреплена ли переписка
     isArchived: v.optional(v.boolean()),    // архивирована ли
     isDeleted: v.optional(v.boolean()),     // мягкое удаление (soft delete)
@@ -966,95 +972,219 @@ export default defineSchema({
     .index("by_org", ["organizationId"])
     .index("by_active", ["isActive"]),
 
-  // ── LEGACY MOBILE TABLES (kept for data compatibility) ───────────────────
-  // These are deprecated but kept for existing mobile data
-
-  // ── CONVERSATIONS (legacy mobile — kept for data compat) ─────────
-  conversations: defineTable({
-    type: v.union(v.literal("personal"), v.literal("group")),
-    name: v.optional(v.string()),
-    createdBy: v.id("users"),
-    lastMessageAt: v.optional(v.number()),
-    lastMessagePreview: v.optional(v.string()),
+  // ── DRIVER MANAGEMENT ──────────────────────────────────────────────────────
+  // Employees who can drive (designated drivers in the organization)
+  drivers: defineTable({
+    organizationId: v.id("organizations"),
+    userId: v.id("users"),              // the employee who is a driver
+    vehicleInfo: v.object({
+      model: v.string(),                // e.g., "Mercedes Sprinter"
+      plateNumber: v.string(),          // e.g., "34-AB-123"
+      capacity: v.number(),             // number of seats
+      color: v.optional(v.string()),
+      year: v.optional(v.number()),
+    }),
+    isAvailable: v.boolean(),           // currently available for bookings
+    workingHours: v.object({
+      startTime: v.string(),            // "09:00"
+      endTime: v.string(),              // "18:00"
+      workingDays: v.array(v.number()), // [1,2,3,4,5] (Monday-Friday)
+    }),
+    maxTripsPerDay: v.number(),         // maximum trips per day
+    currentTripsToday: v.number(),      // trips completed today
+    rating: v.number(),                 // average rating (1-5)
+    totalTrips: v.number(),             // lifetime trips
     createdAt: v.number(),
     updatedAt: v.number(),
   })
-    .index("by_last_message", ["lastMessageAt"])
-    .index("by_created_by", ["createdBy"]),
-
-  conversationParticipants: defineTable({
-    conversationId: v.id("conversations"),
-    userId: v.id("users"),
-    role: v.union(v.literal("admin"), v.literal("member")),
-    lastReadAt: v.optional(v.number()),
-    isMuted: v.boolean(),
-    joinedAt: v.number(),
-  })
-    .index("by_conversation", ["conversationId"])
+    .index("by_org", ["organizationId"])
     .index("by_user", ["userId"])
-    .index("by_conversation_user", ["conversationId", "userId"]),
+    .index("by_org_available", ["organizationId", "isAvailable"]),
 
-  messages: defineTable({
-    conversationId: v.id("conversations"),
-    senderId: v.id("users"),
+  // ── DRIVER SCHEDULE ────────────────────────────────────────────────────────
+  // Driver's schedule/availability (blocked times, existing trips)
+  driverSchedules: defineTable({
+    organizationId: v.id("organizations"),
+    driverId: v.id("drivers"),
+    userId: v.id("users"),              // employee who booked this slot
+    startTime: v.number(),              // timestamp
+    endTime: v.number(),                // timestamp
     type: v.union(
-      v.literal("text"),
-      v.literal("file"),
-      v.literal("poll"),
-      v.literal("system"),
+      v.literal("trip"),                // booked trip
+      v.literal("blocked"),             // blocked by driver
+      v.literal("maintenance"),         // vehicle maintenance
+      v.literal("time_off"),            // vacation/sick leave
     ),
-    content: v.optional(v.string()),
-    mentions: v.optional(v.array(v.id("users"))),
-    fileUrl: v.optional(v.string()),
-    fileName: v.optional(v.string()),
-    fileType: v.optional(v.string()),
-    fileSize: v.optional(v.number()),
-    pollId: v.optional(v.id("polls")),
-    scheduledFor: v.optional(v.number()),
-    isDelivered: v.boolean(),
-    isDeleted: v.boolean(),
-    reactions: v.optional(v.any()),
-    parentMessageId: v.optional(v.id("messages")),
-    threadCount: v.optional(v.number()),
-    threadLastAt: v.optional(v.number()),
-    isPinned: v.optional(v.boolean()),
-    pinnedBy: v.optional(v.id("users")),
-    pinnedAt: v.optional(v.number()),
-    isEdited: v.optional(v.boolean()),
-    editedAt: v.optional(v.number()),
-    replyToId: v.optional(v.id("messages")),
-    replyToContent: v.optional(v.string()),
-    replyToSenderName: v.optional(v.string()),
-    readBy: v.optional(v.any()),
-    createdAt: v.number(),
-  })
-    .index("by_conversation", ["conversationId"])
-    .index("by_conversation_delivered", ["conversationId", "isDelivered"])
-    .index("by_sender", ["senderId"])
-    .index("by_scheduled", ["isDelivered", "scheduledFor"])
-    .index("by_parent", ["parentMessageId"]),
-
-  // ── POLLS ─────────────────────────────────────────────────────────
-  polls: defineTable({
-    conversationId: v.id("conversations"),
-    createdBy: v.id("users"),
-    question: v.string(),
-    options: v.array(v.object({
-      id: v.string(),
-      text: v.string(),
+    status: v.union(
+      v.literal("scheduled"),
+      v.literal("in_progress"),
+      v.literal("completed"),
+      v.literal("cancelled"),
+    ),
+    // Trip details
+    tripInfo: v.optional(v.object({
+      from: v.string(),                 // pickup location
+      to: v.string(),                   // destination
+      purpose: v.string(),              // e.g., "Airport transfer", "Client meeting"
+      passengerCount: v.number(),
+      notes: v.optional(v.string()),
+      distanceKm: v.optional(v.number()), // distance in km (from Google Maps)
+      durationMinutes: v.optional(v.number()), // estimated duration
+      passengerPhone: v.optional(v.string()), // passenger phone for driver
+      pickupCoords: v.optional(v.object({
+        lat: v.number(),
+        lng: v.number(),
+      })),
+      dropoffCoords: v.optional(v.object({
+        lat: v.number(),
+        lng: v.number(),
+      })),
     })),
-    isClosed: v.boolean(),
+    // For blocked/maintenance/time_off
+    reason: v.optional(v.string()),
+    // Driver feedback after trip
+    driverFeedback: v.optional(v.object({
+      rating: v.number(),               // 1-5 rating from driver
+      comment: v.optional(v.string()),
+      completedAt: v.number(),
+    })),
+    // Google Maps data
+    mapData: v.optional(v.object({
+      distanceMeters: v.number(),
+      durationSeconds: v.number(),
+      polyline: v.optional(v.string()), // encoded polyline for route
+    })),
+    // Driver notes (Feature #7)
+    driverNotes: v.optional(v.string()),  // e.g., "traffic jam on Lenin st", "passenger was 10min late"
+    // Wait time tracking (Feature #8)
+    arrivedAt: v.optional(v.number()),    // timestamp when driver marked "I've arrived"
+    passengerPickedUpAt: v.optional(v.number()), // timestamp when passenger got in
+    waitTimeMinutes: v.optional(v.number()), // calculated wait time
+    // ETA (Feature #9)
+    etaMinutes: v.optional(v.number()),   // estimated time of arrival to pickup
+    etaUpdatedAt: v.optional(v.number()), // when ETA was last updated
     createdAt: v.number(),
+    updatedAt: v.number(),
   })
-    .index("by_conversation", ["conversationId"]),
+    .index("by_org", ["organizationId"])
+    .index("by_driver", ["driverId"])
+    .index("by_driver_time", ["driverId", "startTime"])
+    .index("by_user", ["userId"])
+    .index("by_status", ["status"]),
 
-  // ── POLL VOTES ────────────────────────────────────────────────────
-  pollVotes: defineTable({
-    pollId: v.id("polls"),
-    userId: v.id("users"),
-    optionId: v.string(),
+  // ── DRIVER BOOKING REQUESTS ───────────────────────────────────────────────
+  // When employee requests a driver
+  driverRequests: defineTable({
+    organizationId: v.id("organizations"),
+    requesterId: v.id("users"),         // employee requesting driver
+    driverId: v.id("drivers"),          // requested driver
+    startTime: v.number(),
+    endTime: v.number(),
+    tripInfo: v.object({
+      from: v.string(),
+      to: v.string(),
+      purpose: v.string(),
+      passengerCount: v.number(),
+      notes: v.optional(v.string()),
+      pickupCoords: v.optional(v.object({
+        lat: v.number(),
+        lng: v.number(),
+      })),
+      dropoffCoords: v.optional(v.object({
+        lat: v.number(),
+        lng: v.number(),
+      })),
+    }),
+    status: v.union(
+      v.literal("pending"),             // waiting for driver approval
+      v.literal("approved"),            // driver accepted
+      v.literal("declined"),            // driver declined
+      v.literal("cancelled"),           // requester cancelled
+    ),
+    declineReason: v.optional(v.string()), // e.g., "Already booked", "Not available"
+    reviewedAt: v.optional(v.number()),
+    passengerRated: v.optional(v.boolean()), // whether passenger has rated this trip
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_requester", ["requesterId"])
+    .index("by_driver", ["driverId"])
+    .index("by_status", ["status"])
+    .index("by_org_status", ["organizationId", "status"]),
+
+  // ── CALENDAR ACCESS PERMISSIONS ───────────────────────────────────────────
+  // Who can see whose calendar (driver calendar visibility)
+  calendarAccess: defineTable({
+    organizationId: v.id("organizations"),
+    ownerId: v.id("users"),             // calendar owner (driver)
+    viewerId: v.id("users"),            // who can view
+    accessLevel: v.union(
+      v.literal("full"),                // see all details
+      v.literal("busy_only"),           // see only busy/free slots
+      v.literal("none"),                // revoked access
+    ),
+    grantedAt: v.number(),
+    expiresAt: v.optional(v.number()),  // optional expiry
+    isActive: v.boolean(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_owner", ["ownerId"])
+    .index("by_viewer", ["viewerId"])
+    .index("by_owner_viewer", ["ownerId", "viewerId"]),
+
+  // ── FAVORITE DRIVERS ──────────────────────────────────────────────────────
+  // Employees can save preferred drivers for quick booking
+  favoriteDrivers: defineTable({
+    organizationId: v.id("organizations"),
+    userId: v.id("users"),              // employee who favorited
+    driverId: v.id("drivers"),          // favorited driver
     createdAt: v.number(),
   })
-    .index("by_poll", ["pollId"])
-    .index("by_poll_user", ["pollId", "userId"]),
+    .index("by_user", ["userId"])
+    .index("by_user_driver", ["userId", "driverId"]),
+
+  // ── RECURRING TRIPS ───────────────────────────────────────────────────────
+  // Scheduled recurring trip templates
+  recurringTrips: defineTable({
+    organizationId: v.id("organizations"),
+    userId: v.id("users"),              // employee who created
+    driverId: v.id("drivers"),          // preferred driver
+    tripInfo: v.object({
+      from: v.string(),
+      to: v.string(),
+      purpose: v.string(),
+      passengerCount: v.number(),
+      notes: v.optional(v.string()),
+      pickupCoords: v.optional(v.object({ lat: v.number(), lng: v.number() })),
+      dropoffCoords: v.optional(v.object({ lat: v.number(), lng: v.number() })),
+    }),
+    schedule: v.object({
+      daysOfWeek: v.array(v.number()),  // [1,2,3,4,5] Mon-Fri
+      startTime: v.string(),            // "08:30"
+      endTime: v.string(),              // "09:00"
+    }),
+    isActive: v.boolean(),
+    lastGeneratedAt: v.optional(v.number()), // last time requests were auto-generated
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_org_active", ["organizationId", "isActive"]),
+
+  // ── PASSENGER RATINGS ─────────────────────────────────────────────────────
+  // Passengers rate drivers after completed trips
+  passengerRatings: defineTable({
+    organizationId: v.id("organizations"),
+    scheduleId: v.id("driverSchedules"),  // the completed trip
+    requestId: v.optional(v.id("driverRequests")), // original request
+    passengerId: v.id("users"),           // who rated
+    driverId: v.id("drivers"),            // rated driver
+    rating: v.number(),                   // 1-5
+    comment: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_schedule", ["scheduleId"])
+    .index("by_passenger", ["passengerId"])
+    .index("by_driver", ["driverId"]),
 });

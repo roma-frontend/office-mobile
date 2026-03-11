@@ -60,6 +60,10 @@ export default function Tasks() {
     api.tasks.getTasksForEmployee,
     userId ? { userId: userId as Id<'users'> } : 'skip'
   );
+  const allTasks = useQuery(
+    api.tasks.getAllTasks,
+    isAdmin && userId ? { requesterId: userId as Id<'users'> } : 'skip'
+  );
   const teamTasks = useQuery(
     api.tasks.getTeamTasks,
     isAdmin && userId ? { supervisorId: userId as Id<'users'> } : 'skip'
@@ -100,7 +104,7 @@ export default function Tasks() {
 
   const usersForAssignment = useQuery(api.tasks.getUsersForAssignment);
 
-  const tasksSource = isAdmin ? (teamTasks ?? []) : (myTasks ?? []);
+  const tasksSource = isAdmin ? (allTasks ?? teamTasks ?? []) : (myTasks ?? []);
 
   // Sync selectedTask with live Convex query data so attachments/comments update in real-time
   useEffect(() => {
@@ -265,7 +269,6 @@ export default function Tasks() {
         status: newStatus,
         userId: userId as Id<'users'>,
       });
-      Alert.alert('Success', `Task status updated to ${newStatus}`);
     } catch (e: any) {
       Alert.alert('Error', e?.message ?? 'Failed to update status');
     }
@@ -696,15 +699,24 @@ export default function Tasks() {
                   )}
 
                   {/* Status buttons */}
-                  {['pending', 'in_progress', 'review', 'completed'].map(status => (
-                    <TouchableOpacity key={status} style={[styles.statusBtn, { backgroundColor: colors.bg, borderColor: colors.border }]}
-                      onPress={() => handleStatusChange(selectedTask, status as TaskStatus)}>
-                      <Ionicons name={STATUS_ICONS[status as TaskStatus] as any} size={14} color={STATUS_COLORS[status as TaskStatus]} />
-                      <Text style={[styles.statusBtnText, { color: STATUS_COLORS[status as TaskStatus] }]}>
-                        Mark as {status.replace('_', ' ')}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                  {['pending', 'in_progress', 'review', 'completed'].map(status => {
+                    const isActive = selectedTask?.status === status;
+                    const statusColor = STATUS_COLORS[status as TaskStatus];
+                    return (
+                      <TouchableOpacity key={status} style={[styles.statusBtn, {
+                        backgroundColor: isActive ? statusColor + '20' : colors.bg,
+                        borderColor: isActive ? statusColor : colors.border,
+                        borderWidth: isActive ? 1.5 : 1,
+                      }]}
+                        onPress={() => handleStatusChange(selectedTask, status as TaskStatus)}>
+                        <Ionicons name={STATUS_ICONS[status as TaskStatus] as any} size={14} color={statusColor} />
+                        <Text style={[styles.statusBtnText, { color: statusColor, fontWeight: isActive ? '700' : '500' }]}>
+                          {isActive ? status.replace('_', ' ') : `Mark as ${status.replace('_', ' ')}`}
+                        </Text>
+                        {isActive && <Ionicons name="checkmark" size={14} color={statusColor} style={{ marginLeft: 2 }} />}
+                      </TouchableOpacity>
+                    );
+                  })}
 
                   {/* Add Attachment in Detail */}
                   <Text style={[styles.fieldLabel, { marginTop: 16, color: colors.textMuted }]}>Add More Attachments</Text>

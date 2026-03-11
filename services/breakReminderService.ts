@@ -1,16 +1,21 @@
-import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Configure notification behavior
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    priority: Notifications.AndroidNotificationPriority.HIGH,
-  }),
-});
+// Lazy-load expo-notifications only on native
+const Notifications: typeof import('expo-notifications') | null =
+  Platform.OS !== 'web' ? require('expo-notifications') : null;
+
+// Configure notification behavior (native only)
+if (Notifications) {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+      priority: Notifications.AndroidNotificationPriority.HIGH,
+    }),
+  });
+}
 
 interface BreakReminderConfig {
   enabled: boolean;
@@ -30,6 +35,7 @@ class BreakReminderService {
 
   // Request notification permissions
   async requestPermissions(): Promise<boolean> {
+    if (!Notifications) return false;
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
 
@@ -56,6 +62,7 @@ class BreakReminderService {
 
   // Schedule break reminder notification
   async scheduleBreakReminder(): Promise<void> {
+    if (!Notifications) return;
     // Cancel existing notification if any
     if (this.notificationIdentifier) {
       await Notifications.cancelScheduledNotificationAsync(this.notificationIdentifier);
@@ -165,7 +172,7 @@ class BreakReminderService {
 
   // Stop break reminders
   async stop(): Promise<void> {
-    if (this.notificationIdentifier) {
+    if (this.notificationIdentifier && Notifications) {
       await Notifications.cancelScheduledNotificationAsync(this.notificationIdentifier);
       this.notificationIdentifier = null;
       console.log('Break reminders stopped');
@@ -177,12 +184,14 @@ class BreakReminderService {
 
   // Cancel all scheduled notifications
   async cancelAll(): Promise<void> {
+    if (!Notifications) return;
     await Notifications.cancelAllScheduledNotificationsAsync();
     console.log('All scheduled notifications cancelled');
   }
 
   // Get all scheduled notifications
-  async getScheduledNotifications(): Promise<Notifications.NotificationRequest[]> {
+  async getScheduledNotifications(): Promise<any[]> {
+    if (!Notifications) return [];
     return await Notifications.getAllScheduledNotificationsAsync();
   }
 }
@@ -190,8 +199,43 @@ class BreakReminderService {
 // Export singleton instance
 export const breakReminderService = new BreakReminderService();
 
+// Map notification type to route
+export function getRouteForNotificationType(type: string): string | null {
+  switch (type) {
+    case 'leave_request':
+    case 'leave_approved':
+    case 'leave_rejected':
+      return '/(tabs)/leaves';
+    case 'task':
+    case 'task_assigned':
+    case 'task_completed':
+      return '/(tabs)/tasks';
+    case 'attendance':
+      return '/(tabs)/attendance';
+    case 'message':
+      return '/(tabs)/chat';
+    case 'rating':
+      return '/(tabs)/analytics';
+    case 'join_request':
+    case 'user_approved':
+      return '/(tabs)/admin';
+    case 'security_alert':
+      return '/(tabs)/settings/security';
+    case 'pomodoro_complete':
+    case 'break_complete':
+    case 'long_break_complete':
+      return '/(tabs)/pomodoro';
+    case 'break-reminder':
+      return null; // stay on current screen
+    case 'system':
+    default:
+      return '/(tabs)/notifications';
+  }
+}
+
 // Setup notification listeners
 export function setupNotificationListeners() {
+  if (!Notifications) return;
   // Handle notification received while app is in foreground
   Notifications.addNotificationReceivedListener(notification => {
     console.log('Notification received:', notification);
@@ -201,10 +245,11 @@ export function setupNotificationListeners() {
   Notifications.addNotificationResponseReceivedListener(response => {
     console.log('Notification tapped:', response);
     const data = response.notification.request.content.data;
-    
-    if (data.type === 'break-reminder') {
-      // Navigate to break screen or show break modal
-      console.log('User tapped break reminder');
+    const route = getRouteForNotificationType(data?.type);
+
+    if (route) {
+      const { router } = require('expo-router');
+      router.push(route);
     }
   });
 }

@@ -8,6 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Typography, Spacing, Radius } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
+import { GoogleSignInButton } from '@/components/GoogleSignInButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
@@ -312,6 +313,16 @@ export default function Register() {
             </LinearGradient>
           </TouchableOpacity>
 
+          {/* Divider */}
+          <View style={styles.divider}>
+            <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
+            <Text style={[styles.dividerText, { color: colors.textMuted }]}>or</Text>
+            <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
+          </View>
+
+          {/* Google Sign-In */}
+          <GoogleSignInButton colors={colors} isDark={isDark} />
+
           {/* Sign in link */}
           <View style={styles.signinRow}>
             <Text style={[styles.signinText, { color: subtitleColor }]}>Already have an account? </Text>
@@ -423,6 +434,11 @@ const styles = StyleSheet.create({
   },
   btnGrad: { paddingVertical: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   btnText: { ...Typography.bodySemiBold, fontSize: 16, color: '#fff' },
+
+  // Divider
+  divider: { flexDirection: 'row', alignItems: 'center', marginVertical: 20, gap: 12 },
+  dividerLine: { flex: 1, height: 1 },
+  dividerText: { ...Typography.caption },
 
   // Sign in
   signinRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 20 },

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -12,6 +12,8 @@ import { api } from '../convex/_generated/api';
 import type { Id } from '../convex/_generated/dataModel';
 import { PomodoroNotificationListener } from '@/components/PomodoroNotificationListener';
 import { Platform } from 'react-native';
+import { getRouteForNotificationType } from '@/services/breakReminderService';
+const Notifications = Platform.OS !== 'web' ? require('expo-notifications') : null;
 
 const convex = new ConvexReactClient(CONVEX_URL);
 
@@ -64,12 +66,36 @@ function NotificationWatcher() {
   return null;
 }
 
+// Handle notification tap when app was killed (cold start) — native only
+function NotificationNavigator() {
+  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
+  const lastResponse = Platform.OS !== 'web' ? Notifications?.useLastNotificationResponse() : null;
+  const handledRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!lastResponse || isLoading || !isAuthenticated) return;
+    const responseId = lastResponse.notification.request.identifier;
+    if (handledRef.current === responseId) return;
+    handledRef.current = responseId;
+
+    const data = lastResponse.notification.request.content.data;
+    const route = getRouteForNotificationType(data?.type);
+    if (route) {
+      router.push(route as any);
+    }
+  }, [lastResponse, isLoading, isAuthenticated]);
+
+  return null;
+}
+
 function AppStack() {
   const { colors, isDark } = useTheme();
   return (
     <>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <NotificationWatcher />
+      <NotificationNavigator />
       <PomodoroNotificationListener />
       <Stack screenOptions={{ 
         headerShown: false, 

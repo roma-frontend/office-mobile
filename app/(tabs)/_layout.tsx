@@ -277,6 +277,7 @@ export default function TabLayout() {
       <Tabs.Screen name="reports" options={{ title: 'Reports', href: null }} />
       <Tabs.Screen name="pomodoro" options={{ title: 'Pomodoro', href: null }} />
       <Tabs.Screen name="sla" options={{ title: 'SLA', href: null }} />
+      <Tabs.Screen name="drivers" options={{ title: 'Drivers', href: null }} />
       
       {/* Settings routes - hidden from tab bar, managed by settings/_layout.tsx */}
       <Tabs.Screen 

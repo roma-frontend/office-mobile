@@ -364,7 +364,7 @@ function AdminOverviewTab({ userId, colors }: { userId: string; colors: any }) {
 
 // ── Admin Departments Tab ──────────────────────────────────────────────
 function AdminDepartmentsTab({ userId, colors }: { userId: string; colors: any }) {
-  const deptData = useQuery(api.analytics.getDepartmentStats);
+  const deptData = useQuery(api.analytics.getDepartmentStats, {});
 
   if (!deptData) return <ActivityIndicator color={colors.primary} size="large" />;
 
@@ -379,7 +379,7 @@ function AdminDepartmentsTab({ userId, colors }: { userId: string; colors: any }
 
 // ── Admin Trends Tab ───────────────────────────────────────────────────
 function AdminTrendsTab({ userId, colors }: { userId: string; colors: any }) {
-  const trendsData = useQuery(api.analytics.getLeaveTrends);
+  const trendsData = useQuery(api.analytics.getLeaveTrends, {});
 
   if (!trendsData) return <ActivityIndicator color={colors.primary} size="large" />;
 
@@ -549,9 +549,20 @@ function RatingsTab({ userId, colors }: { userId: string; colors: any }) {
 // ── Tab Button ─────────────────────────────────────────────────────────
 function TabButton({ label, active, onPress, colors }: { label: string; active: boolean; onPress: () => void; colors: any }) {
   return (
-    <TouchableOpacity onPress={onPress} style={[styles.tabButton, active && { backgroundColor: colors.bgElevated + '44' }]}>
-      <Text style={[styles.tabButtonText, { color: active ? colors.primary : colors.textMuted }, active && { fontWeight: '600' }]}>{label}</Text>
-      {active && <View style={[styles.tabButtonUnderline, { backgroundColor: colors.primary }]} />}
+    <TouchableOpacity 
+      onPress={onPress} 
+      style={[
+        styles.tabButton, 
+        { 
+          minWidth: 110,
+          paddingHorizontal: Spacing.lg,
+          backgroundColor: active ? colors.bgElevated : 'transparent',
+          paddingVertical: Spacing.md + 4,
+        }
+      ]}
+    >
+      <Text style={[styles.tabButtonText, { color: active ? colors.primary : colors.textMuted }, { fontWeight: active ? '700' : '500' }]}>{label}</Text>
+      {active && <View style={[styles.tabButtonUnderline, { backgroundColor: colors.primary, width: '60%' }]} />}
     </TouchableOpacity>
   );
 }
@@ -603,7 +614,12 @@ export default function Analytics() {
       {isAdminOrSupervisor ? (
         <>
           {/* Admin Tab Switcher */}
-          <View style={[styles.tabSwitcher, { borderBottomColor: colors.border, backgroundColor: colors.bgCard }]}>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            style={[styles.tabSwitcher, { borderBottomColor: colors.border, backgroundColor: colors.bgCard }]}
+            contentContainerStyle={{ flexGrow: 1 }}
+          >
             <TabButton
               label="Overview"
               active={activeTab === 'overview'}
@@ -628,7 +644,7 @@ export default function Analytics() {
               onPress={() => setActiveTab('ratings')}
               colors={colors}
             />
-          </View>
+          </ScrollView>
 
           {/* Tab Content */}
           {activeTab === 'overview' && <AdminOverviewTab userId={userId} colors={colors} />}
@@ -680,24 +696,23 @@ const styles = StyleSheet.create({
     ...Typography.h1,
   },
   tabSwitcher: {
-    flexDirection: 'row',
+    flexDirection: 'row' as const,
     borderBottomWidth: 1,
+    flexGrow: 0,
   },
   tabButton: {
-    flex: 1,
     paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.sm,
     alignItems: 'center',
-    position: 'relative',
+    justifyContent: 'center',
+    position: 'relative' as const,
   },
   tabButtonText: {
     ...Typography.bodyMedium,
   },
   tabButtonUnderline: {
-    position: 'absolute',
+    position: 'absolute' as const,
     bottom: 0,
     height: 3,
-    width: '80%',
     borderRadius: 2,
   },
   sectionHeader: {

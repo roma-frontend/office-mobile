@@ -135,7 +135,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={value}>
       {children}
       {/* Toast Container — sits on top of everything */}
-      <View style={[styles.container, { top: insets.top + 8 }]} pointerEvents="box-none">
+      <View style={[styles.container, { top: insets.top + 8 }]} pointerEvents="box-none" collapsable={false}>
         {toasts.map(t => (
           <ToastItem key={t.id} toast={t} onDismiss={dismiss} />
         ))}

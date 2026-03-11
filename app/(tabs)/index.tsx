@@ -500,6 +500,7 @@ function EmployeeDashboard({ userId, userName, bottomOffset }: { userId: string;
           { icon: 'calendar-outline',        label: 'Calendar',     color: colors.success,  onPress: () => router.push('/(tabs)/calendar') },
           { icon: 'timer-outline',          label: 'Pomodoro',     color: '#f59e0b',       onPress: () => router.push('/(tabs)/pomodoro') },
           { icon: 'bar-chart-outline',      label: 'Analytics',    color: '#8b5cf6',       onPress: () => router.push('/(tabs)/analytics') },
+          { icon: 'car-sport-outline',      label: 'My Trips',    color: '#3b82f6',       onPress: () => router.push('/(tabs)/drivers') },
           { icon: 'person-outline',         label: 'My Profile',   color: colors.primary,     onPress: () => router.push('/(tabs)/profile') },
         ].map((a, i) => (
           <TouchableOpacity key={i} style={styles.quickAction} onPress={a.onPress}>
@@ -692,7 +693,8 @@ function AdminDashboard({ userId, userName, bottomOffset }: { userId: string; us
   const todayStr = today.toISOString().split('T')[0];
   const firstName = userName.split(' ')[0] || 'Admin';
 
-  const totalEmployees = allUsers?.length ?? 0;
+  // Exclude superadmin and inactive users from total count
+  const totalEmployees = allUsers?.filter(u => (u as any).role !== 'superadmin' && (u as any).isActive !== false)?.length ?? 0;
   const pendingCount = allLeaves?.filter(l => l.status === 'pending').length ?? 0;
   const onLeaveNow = allLeaves?.filter(l => l.status === 'approved' && l.startDate <= todayStr && l.endDate >= todayStr).length ?? 0;
   const approvedThisMonth = allLeaves?.filter(l => l.status === 'approved' && l.startDate.startsWith(today.toISOString().slice(0, 7))).length ?? 0;
@@ -920,6 +922,7 @@ function AdminDashboard({ userId, userName, bottomOffset }: { userId: string; us
           { icon: 'document-text-outline', label: 'Reports', subtitle: 'Leave reports', color: '#f59e0b', onPress: () => router.push('/(tabs)/reports') },
           { icon: 'shield-checkmark-outline', label: 'Admin', subtitle: 'User mgmt', color: '#8b5cf6', onPress: () => router.push('/(tabs)/admin') },
           { icon: 'speedometer-outline', label: 'SLA', subtitle: 'Metrics', color: '#06b6d4', onPress: () => router.push('/(tabs)/sla') },
+          { icon: 'car-sport-outline', label: 'Drivers', subtitle: 'Trips & routes', color: '#3b82f6', onPress: () => router.push('/(tabs)/drivers') },
         ].map((a, i) => (
           <TouchableOpacity key={i} style={{ width: '31%', flexGrow: 1, backgroundColor: colors.bgCard, borderRadius: Radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, alignItems: 'center', gap: 6 }} onPress={a.onPress}>
             <LinearGradient colors={[`${a.color}33`, `${a.color}11`]} style={{ width: 48, height: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center' }}>

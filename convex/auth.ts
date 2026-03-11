@@ -516,3 +516,159 @@ export const loginWebauthn = mutation({
     };
   },
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GOOGLE OAUTH LOGIN — for mobile app
+// Finds existing user by email, creates session. If user doesn't exist,
+// creates a new user (pending approval unless first in org).
+// ─────────────────────────────────────────────────────────────────────────────
+export const googleOAuthLogin = mutation({
+  args: {
+    email: v.string(),
+    name: v.string(),
+    avatarUrl: v.optional(v.string()),
+    googleId: v.string(),
+    sessionToken: v.string(),
+    sessionExpiry: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const email = args.email.toLowerCase().trim();
+
+    // ── 1. Find existing user ──────────────────────────────────────────────
+    let user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .unique();
+
+    if (user) {
+      // Existing user — validate
+      if (!user.isActive) throw new Error("Your account has been deactivated. Contact your administrator.");
+      if (!user.isApproved) throw new Error("Your account is pending approval from your organization administrator.");
+
+      const org = await ctx.db.get(user.organizationId);
+      if (!org || !org.isActive) throw new Error("Your organization account is inactive. Contact support.");
+
+      // Update avatar if not set, and update session
+      const patch: Record<string, any> = {
+        sessionToken: args.sessionToken,
+        sessionExpiry: args.sessionExpiry,
+        lastLoginAt: Date.now(),
+      };
+      if (!user.avatarUrl && args.avatarUrl) {
+        patch.avatarUrl = args.avatarUrl;
+      }
+      await ctx.db.patch(user._id, patch);
+
+      return {
+        isNewUser: false,
+        needsApproval: false,
+        userId: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        organizationId: user.organizationId,
+        organizationName: org.name,
+        organizationSlug: org.slug,
+        organizationPlan: org.plan,
+        department: user.department,
+        position: user.position,
+        employeeType: user.employeeType,
+        avatarUrl: user.avatarUrl ?? args.avatarUrl,
+        travelAllowance: user.travelAllowance,
+        isApproved: user.isApproved,
+        phone: user.phone,
+        paidLeaveBalance: user.paidLeaveBalance,
+        sickLeaveBalance: user.sickLeaveBalance,
+        familyLeaveBalance: user.familyLeaveBalance,
+      };
+    }
+
+    // ── 2. New user — create account ───────────────────────────────────────
+    const allOrgs = await ctx.db.query("organizations").filter((q) => q.eq(q.field("isActive"), true)).collect();
+    if (allOrgs.length === 0) {
+      throw new Error("No active organizations found. Please contact administrator.");
+    }
+
+    const org = allOrgs[0];
+    const organizationId = org._id;
+
+    // Check if first member → admin
+    const orgMembers = await ctx.db
+      .query("users")
+      .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
+      .collect();
+
+    const isFirstMember = orgMembers.length === 0;
+    const role = isFirstMember ? "admin" : "employee";
+    const isApproved = isFirstMember;
+
+    const userId = await ctx.db.insert("users", {
+      organizationId,
+      name: args.name || email.split("@")[0],
+      email,
+      passwordHash: "",
+      avatarUrl: args.avatarUrl,
+      role,
+      employeeType: "staff",
+      isActive: true,
+      isApproved,
+      approvedAt: isApproved ? Date.now() : undefined,
+      travelAllowance: 20000,
+      paidLeaveBalance: 24,
+      sickLeaveBalance: 10,
+      familyLeaveBalance: 5,
+      sessionToken: isApproved ? args.sessionToken : undefined,
+      sessionExpiry: isApproved ? args.sessionExpiry : undefined,
+      lastLoginAt: Date.now(),
+      createdAt: Date.now(),
+    });
+
+    // Notify admins if needs approval
+    if (!isApproved) {
+      const admins = await ctx.db
+        .query("users")
+        .withIndex("by_org_role", (q) =>
+          q.eq("organizationId", organizationId).eq("role", "admin")
+        )
+        .collect();
+
+      for (const admin of admins) {
+        await ctx.db.insert("notifications", {
+          organizationId,
+          userId: admin._id,
+          type: "join_request",
+          title: "🙋 New Google Sign-Up",
+          message: `${args.name} (${email}) signed up with Google and wants to join ${org.name}.`,
+          isRead: false,
+          relatedId: userId,
+          createdAt: Date.now(),
+        });
+      }
+
+      throw new Error("Your account has been created and is pending approval from your organization administrator.");
+    }
+
+    return {
+      isNewUser: true,
+      needsApproval: false,
+      userId,
+      name: args.name || email.split("@")[0],
+      email,
+      role,
+      organizationId,
+      organizationName: org.name,
+      organizationSlug: org.slug,
+      organizationPlan: org.plan,
+      department: undefined,
+      position: undefined,
+      employeeType: "staff",
+      avatarUrl: args.avatarUrl,
+      travelAllowance: 20000,
+      isApproved: true,
+      phone: undefined,
+      paidLeaveBalance: 24,
+      sickLeaveBalance: 10,
+      familyLeaveBalance: 5,
+    };
+  },
+});

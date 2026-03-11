@@ -178,6 +178,7 @@ export const getConversationInfo = query({
       participants: enrichedParticipants,
       myRole: membership.role,
       isMuted: membership.isMuted,
+      isReadOnly: conv.isReadOnly ?? false,
     };
   },
 });
@@ -463,6 +464,76 @@ export const createGroupConversation = mutation({
       senderId: creatorId,
       type: "system",
       content: `${creator?.name ?? "Someone"} created the group "${name}"`,
+      createdAt: now,
+    });
+
+    return convId;
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CREATE SERVICE MAINTENANCE CONVERSATION (read-only broadcast channel)
+// ─────────────────────────────────────────────────────────────────────────────
+export const createServiceMaintenanceConversation = mutation({
+  args: {
+    adminId: v.id("users"),
+    name: v.string(),
+  },
+  handler: async (ctx, { adminId, name }) => {
+    const admin = await ctx.db.get(adminId);
+    if (!admin || (admin.role !== "admin" && admin.role !== "superadmin")) {
+      throw new Error("Only admins can create service maintenance channels");
+    }
+
+    const orgId = admin.organizationId;
+    const now = Date.now();
+
+    // Check if already exists
+    const existing = await ctx.db
+      .query("chatConversations")
+      .withIndex("by_org", (q) => q.eq("organizationId", orgId))
+      .collect()
+      .find((c) => c.type === "system" && c.isReadOnly);
+
+    if (existing) return existing._id;
+
+    const convId = await ctx.db.insert("chatConversations", {
+      organizationId: orgId,
+      type: "system",
+      name,
+      createdBy: adminId,
+      isReadOnly: true,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    // Add all active users from the organization
+    const allUsers = await ctx.db
+      .query("users")
+      .withIndex("by_org", (q) => q.eq("organizationId", orgId))
+      .filter((q) => q.eq(q.field("isActive"), true))
+      .collect();
+
+    for (const user of allUsers) {
+      await ctx.db.insert("chatMembers", {
+        conversationId: convId,
+        userId: user._id,
+        organizationId: orgId,
+        role: user.role === "admin" || user.role === "superadmin" ? "admin" : "member",
+        unreadCount: 0,
+        isMuted: false,
+        joinedAt: now,
+      });
+    }
+
+    // Initial system message
+    await ctx.db.insert("chatMessages", {
+      conversationId: convId,
+      organizationId: orgId,
+      senderId: adminId,
+      type: "system",
+      content: `Service Maintenance channel created by ${admin.name}. This is a read-only broadcast channel for important announcements.`,
+      isServiceBroadcast: true,
       createdAt: now,
     });
 
@@ -1148,6 +1219,74 @@ export const getActiveCall = query({
       status: activeCall.callStatus,
       createdAt: activeCall.createdAt,
     };
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PIN CONVERSATION
+// ─────────────────────────────────────────────────────────────────────────────
+export const pinConversation = mutation({
+  args: {
+    conversationId: v.id("chatConversations"),
+    userId: v.id("users"),
+    pin: v.boolean(),
+  },
+  handler: async (ctx, { conversationId, userId, pin }) => {
+    const membership = await ctx.db
+      .query("chatMembers")
+      .withIndex("by_conversation_user", (q) =>
+        q.eq("conversationId", conversationId).eq("userId", userId)
+      )
+      .first();
+    if (!membership) throw new Error("Not a member");
+
+    await ctx.db.patch(conversationId, { isPinned: pin });
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ARCHIVE CONVERSATION
+// ─────────────────────────────────────────────────────────────────────────────
+export const archiveConversation = mutation({
+  args: {
+    conversationId: v.id("chatConversations"),
+    userId: v.id("users"),
+    archive: v.boolean(),
+  },
+  handler: async (ctx, { conversationId, userId, archive }) => {
+    const membership = await ctx.db
+      .query("chatMembers")
+      .withIndex("by_conversation_user", (q) =>
+        q.eq("conversationId", conversationId).eq("userId", userId)
+      )
+      .first();
+    if (!membership) throw new Error("Not a member");
+
+    await ctx.db.patch(conversationId, { isArchived: archive });
+  },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DELETE CONVERSATION (soft delete)
+// ─────────────────────────────────────────────────────────────────────────────
+export const deleteConversation = mutation({
+  args: {
+    conversationId: v.id("chatConversations"),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, { conversationId, userId }) => {
+    const membership = await ctx.db
+      .query("chatMembers")
+      .withIndex("by_conversation_user", (q) =>
+        q.eq("conversationId", conversationId).eq("userId", userId)
+      )
+      .first();
+    if (!membership) throw new Error("Not a member");
+
+    await ctx.db.patch(membership._id, {
+      isDeleted: true,
+      deletedAt: Date.now(),
+    });
   },
 });
 

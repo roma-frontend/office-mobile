@@ -17,6 +17,7 @@ import type * as chat from "../chat.js";
 import type * as chatAction from "../chatAction.js";
 import type * as clearOldData from "../clearOldData.js";
 import type * as crons from "../crons.js";
+import type * as drivers from "../drivers.js";
 import type * as employeeNotes from "../employeeNotes.js";
 import type * as employeeProfiles from "../employeeProfiles.js";
 import type * as faceRecognition from "../faceRecognition.js";
@@ -52,6 +53,7 @@ declare const fullApi: ApiFromModules<{
   chatAction: typeof chatAction;
   clearOldData: typeof clearOldData;
   crons: typeof crons;
+  drivers: typeof drivers;
   employeeNotes: typeof employeeNotes;
   employeeProfiles: typeof employeeProfiles;
   faceRecognition: typeof faceRecognition;

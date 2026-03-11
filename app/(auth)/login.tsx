@@ -11,6 +11,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+import { GoogleSignInButton } from '@/components/GoogleSignInButton';
 // import { FaceLogin } from '@/components/FaceLogin'; // Disabled for Expo Go
 
 export default function Login() {
@@ -201,14 +202,8 @@ export default function Login() {
             <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
           </View>
 
-          {/* Disabled for Expo Go */}
-          {/* <TouchableOpacity
-            style={[styles.faceIdButton, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
-            onPress={() => setShowFaceLogin(true)}
-          >
-            <Ionicons name="scan-outline" size={24} color={colors.primary} />
-            <Text style={[styles.faceIdText, { color: colors.textPrimary }]}>Login with Face ID</Text>
-          </TouchableOpacity> */}
+          {/* Google Sign-In */}
+          <GoogleSignInButton colors={colors} isDark={isDark} />
 
           {/* Register link */}
           <View style={styles.registerRow}>

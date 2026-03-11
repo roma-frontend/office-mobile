@@ -1,11 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput,
-  ActivityIndicator, Image, Platform, RefreshControl,
+  ActivityIndicator, Image, Platform, RefreshControl, Alert, Modal,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useQuery } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import { Typography, Radius } from '@/constants/theme';
@@ -32,6 +31,15 @@ function formatTime(ts?: number): string {
   return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
+type FilterTab = 'all' | 'chat' | 'group' | 'archived';
+
+const TABS: { key: FilterTab; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'chat', label: 'Chat' },
+  { key: 'group', label: 'Group' },
+  { key: 'archived', label: 'Archived' },
+];
+
 interface ConversationListProps {
   userId: Id<"users">;
   bottomOffset: number;
@@ -40,11 +48,17 @@ interface ConversationListProps {
 export default function ConversationList({ userId, bottomOffset }: ConversationListProps) {
   const { colors } = useTheme();
   const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<FilterTab>('all');
   const [selectedConv, setSelectedConv] = useState<Id<"chatConversations"> | null>(null);
   const [showNewChat, setShowNewChat] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [actionSheetConv, setActionSheetConv] = useState<any>(null);
 
   const conversations = useQuery(api.messenger.getMyConversations, userId ? { userId } : 'skip');
+
+  const pinConversation = useMutation(api.messenger.pinConversation);
+  const archiveConversation = useMutation(api.messenger.archiveConversation);
+  const deleteConversation = useMutation(api.messenger.deleteConversation);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -53,19 +67,66 @@ export default function ConversationList({ userId, bottomOffset }: ConversationL
 
   const filtered = useMemo(() => {
     if (!conversations) return [];
-    if (!search) return conversations;
-    const q = search.toLowerCase();
-    return conversations.filter((c: any) => {
-      const name = c.type === 'personal' ? c.otherUser?.name : c.name;
-      return (name ?? '').toLowerCase().includes(q) ||
-        (c.lastMessagePreview ?? '').toLowerCase().includes(q);
-    });
-  }, [conversations, search]);
+    let list = conversations;
+
+    // Tab filter
+    switch (activeTab) {
+      case 'all':
+        list = list.filter((c: any) => !c.isArchived);
+        break;
+      case 'chat':
+        list = list.filter((c: any) => !c.isArchived && (c.type === 'direct' || c.type === 'personal'));
+        break;
+      case 'group':
+        list = list.filter((c: any) => !c.isArchived && c.type === 'group');
+        break;
+      case 'archived':
+        list = list.filter((c: any) => c.isArchived);
+        break;
+    }
+
+    // Search filter
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter((c: any) => {
+        const name = (c.type === 'personal' || c.type === 'direct') ? c.otherUser?.name : c.name;
+        return (name ?? '').toLowerCase().includes(q) ||
+          (c.lastMessagePreview ?? '').toLowerCase().includes(q);
+      });
+    }
+
+    return list;
+  }, [conversations, search, activeTab]);
 
   const handleConversationCreated = (convId: Id<"chatConversations">) => {
     setShowNewChat(false);
     setSelectedConv(convId);
   };
+
+  const handlePin = useCallback(async (conv: any) => {
+    setActionSheetConv(null);
+    await pinConversation({ conversationId: conv._id, userId, pin: !conv.isPinned });
+  }, [pinConversation, userId]);
+
+  const handleArchive = useCallback(async (conv: any) => {
+    setActionSheetConv(null);
+    await archiveConversation({ conversationId: conv._id, userId, archive: !conv.isArchived });
+  }, [archiveConversation, userId]);
+
+  const handleDelete = useCallback((conv: any) => {
+    setActionSheetConv(null);
+    Alert.alert(
+      'Delete Conversation',
+      'Are you sure you want to delete this conversation? It will be hidden from your list.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete', style: 'destructive',
+          onPress: () => deleteConversation({ conversationId: conv._id, userId }),
+        },
+      ]
+    );
+  }, [deleteConversation, userId]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -86,6 +147,25 @@ export default function ConversationList({ userId, bottomOffset }: ConversationL
         ) : null}
       </View>
 
+      {/* Filter Tabs */}
+      <View style={styles.tabRow}>
+        {TABS.map((tab) => {
+          const active = activeTab === tab.key;
+          return (
+            <TouchableOpacity
+              key={tab.key}
+              style={[
+                styles.tab,
+                { borderColor: active ? colors.primary : colors.border, backgroundColor: active ? colors.primary + '18' : 'transparent' },
+              ]}
+              onPress={() => setActiveTab(tab.key)}
+            >
+              <Text style={[styles.tabText, { color: active ? colors.primary : colors.textMuted }]}>{tab.label}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
       {/* Conversation list */}
       {conversations === undefined ? (
         <View style={styles.centered}>
@@ -95,10 +175,10 @@ export default function ConversationList({ userId, bottomOffset }: ConversationL
         <View style={styles.centered}>
           <Ionicons name="chatbubbles-outline" size={48} color={colors.textMuted} />
           <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-            {search ? 'No conversations found' : 'No conversations yet'}
+            {search ? 'No conversations found' : activeTab === 'archived' ? 'No archived conversations' : 'No conversations yet'}
           </Text>
           <Text style={[styles.emptySubtext, { color: colors.textMuted }]}>
-            Start a new chat with your team
+            {activeTab === 'archived' ? 'Long-press a conversation to archive it' : 'Start a new chat with your team'}
           </Text>
         </View>
       ) : (
@@ -123,6 +203,7 @@ export default function ConversationList({ userId, bottomOffset }: ConversationL
                 style={[styles.convRow, { borderBottomColor: colors.border }]}
                 activeOpacity={0.7}
                 onPress={() => setSelectedConv(conv._id)}
+                onLongPress={() => setActionSheetConv(conv)}
               >
                 {/* Avatar */}
                 {avatarUrl ? (
@@ -137,9 +218,12 @@ export default function ConversationList({ userId, bottomOffset }: ConversationL
                 {/* Info */}
                 <View style={{ flex: 1 }}>
                   <View style={styles.convTopRow}>
-                    <Text style={[styles.convName, { color: colors.textPrimary }, hasUnread && styles.convNameBold]} numberOfLines={1}>
-                      {name}
-                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 8 }}>
+                      {conv.isPinned && <Text style={{ marginRight: 4 }}>📌</Text>}
+                      <Text style={[styles.convName, { color: colors.textPrimary }, hasUnread && styles.convNameBold]} numberOfLines={1}>
+                        {name}
+                      </Text>
+                    </View>
                     <Text style={[styles.convTime, { color: hasUnread ? colors.primary : colors.textMuted }]}>
                       {formatTime(conv.lastMessageAt)}
                     </Text>
@@ -176,6 +260,51 @@ export default function ConversationList({ userId, bottomOffset }: ConversationL
         <Ionicons name="create-outline" size={24} color="#fff" />
       </TouchableOpacity>
 
+      {/* Action Sheet Modal */}
+      <Modal
+        visible={!!actionSheetConv}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setActionSheetConv(null)}
+      >
+        <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={() => setActionSheetConv(null)}>
+          <View style={[styles.actionSheet, { backgroundColor: colors.bgCard }]}>
+            {actionSheetConv && (
+              <>
+                <Text style={[styles.actionTitle, { color: colors.textPrimary }]} numberOfLines={1}>
+                  {(actionSheetConv.type === 'direct' || actionSheetConv.type === 'personal')
+                    ? actionSheetConv.otherUser?.name ?? 'User'
+                    : actionSheetConv.name ?? 'Group'}
+                </Text>
+
+                <TouchableOpacity style={styles.actionItem} onPress={() => handlePin(actionSheetConv)}>
+                  <Ionicons name={actionSheetConv.isPinned ? 'pin-outline' : 'pin'} size={20} color={colors.textPrimary} />
+                  <Text style={[styles.actionLabel, { color: colors.textPrimary }]}>
+                    {actionSheetConv.isPinned ? 'Unpin' : 'Pin'}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.actionItem} onPress={() => handleArchive(actionSheetConv)}>
+                  <Ionicons name={actionSheetConv.isArchived ? 'arrow-undo-outline' : 'archive-outline'} size={20} color={colors.textPrimary} />
+                  <Text style={[styles.actionLabel, { color: colors.textPrimary }]}>
+                    {actionSheetConv.isArchived ? 'Unarchive' : 'Archive'}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.actionItem} onPress={() => handleDelete(actionSheetConv)}>
+                  <Ionicons name="trash-outline" size={20} color="#ef4444" />
+                  <Text style={[styles.actionLabel, { color: '#ef4444' }]}>Delete</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={[styles.actionItem, { marginTop: 8, borderTopWidth: 0.5, borderTopColor: colors.border, paddingTop: 12 }]} onPress={() => setActionSheetConv(null)}>
+                  <Text style={[styles.actionLabel, { color: colors.textMuted, textAlign: 'center', flex: 1 }]}>Cancel</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
       {/* Conversation Screen */}
       <ConversationScreen
         visible={!!selectedConv}
@@ -203,6 +332,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 8,
   },
   searchInput: { flex: 1, ...Typography.body },
+  tabRow: {
+    flexDirection: 'row', gap: 8,
+    marginHorizontal: 16, marginBottom: 12,
+  },
+  tab: {
+    paddingHorizontal: 14, paddingVertical: 6,
+    borderRadius: 16, borderWidth: 1,
+  },
+  tabText: { ...Typography.label, fontWeight: '600' },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, paddingTop: 60 },
   emptyText: { ...Typography.bodyMedium },
   emptySubtext: { ...Typography.caption },
@@ -214,7 +352,7 @@ const styles = StyleSheet.create({
   avatar: { width: 48, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   avatarText: { fontSize: 16, fontWeight: '700', color: '#fff' },
   convTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  convName: { ...Typography.bodyMedium, flex: 1, marginRight: 8 },
+  convName: { ...Typography.bodyMedium, flex: 1 },
   convNameBold: { fontWeight: '700' },
   convTime: { ...Typography.label },
   convBottomRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
@@ -228,4 +366,21 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3, shadowRadius: 6, elevation: 8,
   },
+  overlay: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  actionSheet: {
+    borderTopLeftRadius: 16, borderTopRightRadius: 16,
+    padding: 20, paddingBottom: 34,
+  },
+  actionTitle: {
+    ...Typography.bodyMedium, fontWeight: '700',
+    marginBottom: 16, textAlign: 'center',
+  },
+  actionItem: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    paddingVertical: 12,
+  },
+  actionLabel: { ...Typography.body },
 });
