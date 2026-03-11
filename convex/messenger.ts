@@ -1,6 +1,7 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+
 import type { Id } from "./_generated/dataModel";
+import { mutation, query } from "./_generated/server";
 
 const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
 
@@ -121,7 +122,7 @@ export const getConversationMessages = query({
           ...m,
           senderName: sender?.name ?? "Unknown",
           senderAvatarUrl: sender?.avatarUrl,
-          readBy: (m.readBy as Array<{ userId: string; readAt: number }> | undefined) ?? [],
+          readBy: (m.readBy as { userId: string; readAt: number }[] | undefined) ?? [],
         };
       })
     );
@@ -735,7 +736,7 @@ export const markConversationRead = mutation({
 
     for (const msg of recent) {
       if (msg.senderId === userId) continue;
-      const readBy: Array<{ userId: string; readAt: number }> = (msg.readBy as any) ?? [];
+      const readBy: { userId: string; readAt: number }[] = (msg.readBy as any) ?? [];
       const existing = readBy.find((r) => r.userId === userId);
       if (existing && existing.readAt > 0) continue; // Already read
       // Update delivered (-1) to read, or add new entry

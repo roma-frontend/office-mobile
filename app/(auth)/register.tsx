@@ -1,16 +1,17 @@
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useMutation } from 'convex/react';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator,
 } from 'react-native';
-import { router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+
+import { GoogleSignInButton } from '@/components/GoogleSignInButton';
 import { Typography, Spacing, Radius } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
-import { GoogleSignInButton } from '@/components/GoogleSignInButton';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 
 // ── Password strength helper ────────────────────────────────────────────────

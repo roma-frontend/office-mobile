@@ -1,35 +1,25 @@
-import { useState, useMemo, useCallback } from 'react';
-import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput,
-  ActivityIndicator, Image, Platform, RefreshControl, Alert, Modal,
-} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
-import type { Id } from '../../convex/_generated/dataModel';
+import { useState, useMemo, useCallback, memo } from 'react';
+import {
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput,
+  ActivityIndicator, Image, Platform, RefreshControl, Alert, Modal, Animated,
+} from 'react-native';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
+
+import { AVATAR_COLORS } from '@/constants/messengerConfig';
 import { Typography, Radius } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
+import { useConversationActions, useHaptics } from '@/hooks';
+import { getInitials, formatTime } from '@/utils/helpers';
+
+import { api } from '../../convex/_generated/api';
+import type { Id } from '../../convex/_generated/dataModel';
+
 import ConversationScreen from './ConversationScreen';
 import NewConversationModal from './NewConversationModal';
 
-const AVATAR_COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#60a5fa'];
 
-function getInitials(name: string) {
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-}
-
-function formatTime(ts?: number): string {
-  if (!ts) return '';
-  const d = new Date(ts);
-  const now = new Date();
-  const diffMs = now.getTime() - d.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  if (diffDays === 1) return 'Yesterday';
-  if (diffDays < 7) return d.toLocaleDateString([], { weekday: 'short' });
-  return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
-}
 
 type FilterTab = 'all' | 'chat' | 'group' | 'archived';
 
@@ -45,7 +35,7 @@ interface ConversationListProps {
   bottomOffset: number;
 }
 
-export default function ConversationList({ userId, bottomOffset }: ConversationListProps) {
+function ConversationList({ userId, bottomOffset }: ConversationListProps) {
   const { colors } = useTheme();
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<FilterTab>('all');
@@ -54,16 +44,16 @@ export default function ConversationList({ userId, bottomOffset }: ConversationL
   const [refreshing, setRefreshing] = useState(false);
   const [actionSheetConv, setActionSheetConv] = useState<any>(null);
 
+  // Используем кастомные хуки
+  const { handlePin: pinConv, handleArchive: archiveConv, handleDelete: deleteConv } = useConversationActions(userId);
+  const { impactLight } = useHaptics();
+
   const conversations = useQuery(api.messenger.getMyConversations, userId ? { userId } : 'skip');
 
-  const pinConversation = useMutation(api.messenger.pinConversation);
-  const archiveConversation = useMutation(api.messenger.archiveConversation);
-  const deleteConversation = useMutation(api.messenger.deleteConversation);
-
-  const onRefresh = () => {
+  const onRefresh = useCallback(() => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 800);
-  };
+  }, []);
 
   const filtered = useMemo(() => {
     if (!conversations) return [];
@@ -105,13 +95,15 @@ export default function ConversationList({ userId, bottomOffset }: ConversationL
 
   const handlePin = useCallback(async (conv: any) => {
     setActionSheetConv(null);
-    await pinConversation({ conversationId: conv._id, userId, pin: !conv.isPinned });
-  }, [pinConversation, userId]);
+    await impactLight();
+    await pinConv(conv._id, !conv.isPinned);
+  }, [pinConv, impactLight]);
 
   const handleArchive = useCallback(async (conv: any) => {
     setActionSheetConv(null);
-    await archiveConversation({ conversationId: conv._id, userId, archive: !conv.isArchived });
-  }, [archiveConversation, userId]);
+    await impactLight();
+    await archiveConv(conv._id, !conv.isArchived);
+  }, [archiveConv, impactLight]);
 
   const handleDelete = useCallback((conv: any) => {
     setActionSheetConv(null);
@@ -122,11 +114,51 @@ export default function ConversationList({ userId, bottomOffset }: ConversationL
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Delete', style: 'destructive',
-          onPress: () => deleteConversation({ conversationId: conv._id, userId }),
+          onPress: () => deleteConv(conv._id),
         },
       ]
     );
-  }, [deleteConversation, userId]);
+  }, [deleteConv]);
+
+  // Render right actions (Archive, Delete) - swipe left
+  const renderRightActions = useCallback((progress: any, dragX: any, conv: any) => {
+    const scale = progress.interpolate({ inputRange: [0, 1], outputRange: [0, 1], extrapolate: 'clamp' });
+    const isArchived = conv.isArchived;
+
+    return (
+      <View style={styles.rightActions}>
+        <Animated.View style={[styles.actionButton, { backgroundColor: isArchived ? '#f59e0b' : '#6b7280' }, { transform: [{ scale }] }]}>
+          <TouchableOpacity style={styles.actionButtonInner} onPress={() => handleArchive(conv)}>
+            <Ionicons name={isArchived ? 'arrow-undo' : 'archive'} size={22} color="#fff" />
+            <Text style={styles.actionButtonText}>{isArchived ? 'Unarchive' : 'Archive'}</Text>
+          </TouchableOpacity>
+        </Animated.View>
+        <Animated.View style={[styles.actionButton, styles.deleteButton, { transform: [{ scale }] }]}>
+          <TouchableOpacity style={styles.actionButtonInner} onPress={() => handleDelete(conv)}>
+            <Ionicons name="trash" size={22} color="#fff" />
+            <Text style={styles.actionButtonText}>Delete</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      </View>
+    );
+  }, [handleArchive, handleDelete]);
+
+  // Render left actions (Pin) - swipe right
+  const renderLeftActions = useCallback((progress: any, dragX: any, conv: any) => {
+    const scale = progress.interpolate({ inputRange: [0, 1], outputRange: [0, 1], extrapolate: 'clamp' });
+    const isPinned = conv.isPinned;
+
+    return (
+      <View style={styles.leftActions}>
+        <Animated.View style={[styles.actionButton, styles.pinButton, { transform: [{ scale }] }]}>
+          <TouchableOpacity style={styles.actionButtonInner} onPress={() => handlePin(conv)}>
+            <Ionicons name={isPinned ? 'pin' : 'pin-outline'} size={22} color="#fff" />
+            <Text style={styles.actionButtonText}>{isPinned ? 'Unpin' : 'Pin'}</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      </View>
+    );
+  }, [handlePin]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -198,54 +230,68 @@ export default function ConversationList({ userId, bottomOffset }: ConversationL
             const hasUnread = conv.unreadCount > 0;
 
             return (
-              <TouchableOpacity
+              <Swipeable
                 key={conv._id}
-                style={[styles.convRow, { borderBottomColor: colors.border }]}
-                activeOpacity={0.7}
-                onPress={() => setSelectedConv(conv._id)}
-                onLongPress={() => setActionSheetConv(conv)}
+                renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, conv)}
+                renderLeftActions={(progress, dragX) => renderLeftActions(progress, dragX, conv)}
+                rightThreshold={80}
+                leftThreshold={80}
+                overshootRight={false}
+                overshootLeft={false}
+                containerStyle={{ backgroundColor: 'transparent' }}
+                animationType="timing"
+                animationOptions={{ duration: 50 }}
               >
-                {/* Avatar */}
-                {avatarUrl ? (
-                  <Image source={{ uri: avatarUrl }} style={styles.avatar} />
-                ) : (
-                  <View style={[styles.avatar, { backgroundColor: avatarColor }]}>
-                    {!isPersonal && <Ionicons name="people" size={18} color="#fff" />}
-                    {isPersonal && <Text style={styles.avatarText}>{initials}</Text>}
-                  </View>
-                )}
+                <TouchableOpacity
+                  style={[styles.convRow, { borderBottomColor: colors.border }]}
+                  activeOpacity={0.7}
+                  onPress={() => setSelectedConv(conv._id)}
+                  onLongPress={() => {
+                    setActionSheetConv(conv);
+                  }}
+                >
+                  {/* Avatar */}
+                  {avatarUrl ? (
+                    <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+                  ) : (
+                    <View style={[styles.avatar, { backgroundColor: avatarColor }]}>
+                      {!isPersonal && <Ionicons name="people" size={18} color="#fff" />}
+                      {isPersonal && <Text style={styles.avatarText}>{initials}</Text>}
+                    </View>
+                  )}
 
-                {/* Info */}
-                <View style={{ flex: 1 }}>
-                  <View style={styles.convTopRow}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 8 }}>
-                      {conv.isPinned && <Text style={{ marginRight: 4 }}>📌</Text>}
-                      <Text style={[styles.convName, { color: colors.textPrimary }, hasUnread && styles.convNameBold]} numberOfLines={1}>
-                        {name}
+                  {/* Info */}
+                  <View style={{ flex: 1 }}>
+                    <View style={styles.convTopRow}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 8 }}>
+                        {conv.isPinned && <Text style={{ marginRight: 4 }}>📌</Text>}
+                        <Text style={[styles.convName, { color: colors.textPrimary }, hasUnread && styles.convNameBold]} numberOfLines={1}>
+                          {name}
+                        </Text>
+                      </View>
+                      <Text style={[styles.convTime, { color: hasUnread ? colors.primary : colors.textMuted }]}>
+                        {formatTime(conv.lastMessageAt)}
                       </Text>
                     </View>
-                    <Text style={[styles.convTime, { color: hasUnread ? colors.primary : colors.textMuted }]}>
-                      {formatTime(conv.lastMessageAt)}
-                    </Text>
+                    <View style={styles.convBottomRow}>
+                      <Text
+                        style={[styles.convPreview, { color: hasUnread ? colors.textPrimary : colors.textMuted }]}
+                        numberOfLines={1}
+                      >
+                        {conv.lastMessagePreview ?? 'No messages'}
+                      </Text>
+                      {hasUnread && (
+                        <View style={[styles.unreadBadge, { backgroundColor: colors.primary }]}>
+                          <Text style={styles.unreadText}>{conv.unreadCount > 99 ? '99+' : conv.unreadCount}</Text>
+                        </View>
+                      )}
+                      {conv.isMuted && (
+                        <Ionicons name="notifications-off" size={12} color={colors.textMuted} style={{ marginLeft: 4 }} />
+                      )}
+                    </View>
                   </View>
-                  <View style={styles.convBottomRow}>
-                    <Text
-                      style={[styles.convPreview, { color: hasUnread ? colors.textPrimary : colors.textMuted }]}
-                      numberOfLines={1}
-                    >
-                      {conv.lastMessagePreview ?? 'No messages'}
-                    </Text>
-                    {hasUnread && (
-                      <View style={[styles.unreadBadge, { backgroundColor: colors.primary }]}>
-                        <Text style={styles.unreadText}>{conv.unreadCount > 99 ? '99+' : conv.unreadCount}</Text>
-                      </View>
-                    )}
-                    {conv.isMuted && (
-                      <Ionicons name="notifications-off" size={12} color={colors.textMuted} style={{ marginLeft: 4 }} />
-                    )}
-                  </View>
-                </View>
-              </TouchableOpacity>
+                </TouchableOpacity>
+              </Swipeable>
             );
           })}
         </ScrollView>
@@ -383,4 +429,43 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   actionLabel: { ...Typography.body },
+  // Swipe actions
+  rightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  leftActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  actionButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+    height: '100%',
+    borderRadius: 12,
+    marginRight: 8,
+    overflow: 'hidden',
+  },
+  pinButton: {
+    backgroundColor: '#3b82f6',
+    marginLeft: 8,
+    marginRight: 0,
+  },
+  deleteButton: {
+    backgroundColor: '#ef4444',
+  },
+  actionButtonInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
 });
+
+// Экспортируем обернутый в memo компонент
+export default memo(ConversationList);

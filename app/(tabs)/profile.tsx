@@ -1,16 +1,20 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useQuery, useMutation } from 'convex/react';
+import * as ImagePicker from 'expo-image-picker';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Pressable, Switch, Modal, TextInput, Platform, ActivityIndicator, Image, RefreshControl, Alert, ActionSheetIOS } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import { useState, useEffect, useMemo } from 'react';
-import { useQuery, useMutation } from 'convex/react';
+
+import { Typography, Radius } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
+
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
-import { Typography, Radius } from '@/constants/theme';
-import { useTheme } from '@/context/ThemeContext';
-import { useAuth } from '@/context/AuthContext';
-import { router } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
+
+
 // import { FaceRegistration } from '@/components/FaceRegistration'; // Disabled for Expo Go
 
 const PRESENCE_OPTIONS = [

@@ -1,14 +1,16 @@
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Platform, Animated,
   Easing, Vibration, Alert, ScrollView,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+
 import { Typography, Spacing, Radius } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
-import { router } from 'expo-router';
+
 
 type TimerState = 'idle' | 'running' | 'paused' | 'break';
 

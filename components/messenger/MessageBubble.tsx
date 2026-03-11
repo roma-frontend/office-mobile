@@ -1,11 +1,14 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Modal } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+
 import { Typography, Radius } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
+
 import type { Id } from '../../convex/_generated/dataModel';
-import PollView from './PollView';
+
 import FileAttachment from './FileAttachment';
+import PollView from './PollView';
 
 const AVATAR_COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#60a5fa'];
 const QUICK_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🔥'];
@@ -43,7 +46,7 @@ interface MessageBubbleProps {
     isEdited?: boolean;
     replyToContent?: string;
     replyToSenderName?: string;
-    readBy?: Array<{ userId: string; readAt: number }>;
+    readBy?: { userId: string; readAt: number }[];
     parentMessageId?: Id<"chatMessages">;
     isServiceBroadcast?: boolean;
     broadcastTitle?: string;
@@ -51,7 +54,7 @@ interface MessageBubbleProps {
   };
   isOwn: boolean;
   showSender: boolean;
-  participants: Array<{ userId: Id<"users">; userName: string }>;
+  participants: { userId: Id<"users">; userName: string }[];
   userId: Id<"users">;
   isDirect?: boolean;
   onReaction?: (messageId: Id<"chatMessages">, emoji: string) => void;
@@ -63,7 +66,7 @@ interface MessageBubbleProps {
 
 function parseMentions(
   content: string,
-  participants: Array<{ userId: Id<"users">; userName: string }>,
+  participants: { userId: Id<"users">; userName: string }[],
 ) {
   const parts: { text: string; isMention: boolean }[] = [];
   const regex = /@\[([^\]]+)\]/g;
@@ -87,7 +90,7 @@ function parseMentions(
   return parts.length > 0 ? parts : [{ text: content, isMention: false }];
 }
 
-function ReadReceipt({ readBy, isOwn, isDirect }: { readBy?: Array<{ userId: string; readAt: number }>; isOwn: boolean; isDirect?: boolean }) {
+function ReadReceipt({ readBy, isOwn, isDirect }: { readBy?: { userId: string; readAt: number }[]; isOwn: boolean; isDirect?: boolean }) {
   if (!isOwn) return null;
   const entries = readBy ?? [];
   const seenEntries = entries.filter((r) => r.readAt > 0);

@@ -1,5 +1,6 @@
-import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+
 import { Typography, Radius } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 

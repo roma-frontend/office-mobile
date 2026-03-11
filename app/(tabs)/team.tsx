@@ -1,19 +1,25 @@
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useQuery, useMutation } from 'convex/react';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput,
-  Modal, ActivityIndicator, Platform, Image, RefreshControl, Alert,
+  Modal, ActivityIndicator, Platform, Image, RefreshControl, Alert, Animated,
 } from 'react-native';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { SafeAreaView, useSafeAreaInsets, SafeAreaProvider } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
-import type { Id } from '../../convex/_generated/dataModel';
-import { Typography, Radius } from '@/constants/theme';
-import { useTheme } from '@/context/ThemeContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import ConversationList from '@/components/messenger/ConversationList';
 import OrgPicker from '@/components/messenger/OrgPicker';
+import { Typography, Radius } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
+
+import { api } from '../../convex/_generated/api';
+import type { Id } from '../../convex/_generated/dataModel';
+
+
+
 
 const ROLE_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
   admin:      { label: 'Admin',      color: '#3b82f6', icon: 'shield'        },
@@ -210,6 +216,41 @@ function EmployeeProfileModal({ employee, allUsers, onClose }: {
   );
 }
 
+// Swipe action components for team members
+function renderRightActions(
+  progress: any,
+  _dragX: any,
+  member: any,
+  userId: string | null,
+  isAdmin: boolean,
+  onEdit: (m: any) => void,
+  onDelete: (m: any) => void,
+  colors: any
+) {
+  const scale = progress.interpolate({ inputRange: [0, 1], outputRange: [0, 1], extrapolate: 'clamp' });
+
+  // Can't edit/delete superadmin or yourself
+  const isDisabled = !isAdmin || member.role === 'superadmin' || member._id === userId;
+  if (isDisabled) return null;
+
+  return (
+    <View style={teamSwipeStyles.rightActions}>
+      <Animated.View style={[teamSwipeStyles.actionButton, teamSwipeStyles.editButton, { transform: [{ scale }] }]}>
+        <TouchableOpacity style={teamSwipeStyles.actionButtonInner} onPress={() => onEdit(member)}>
+          <Ionicons name="create" size={20} color="#fff" />
+          <Text style={teamSwipeStyles.actionButtonText}>Edit</Text>
+        </TouchableOpacity>
+      </Animated.View>
+      <Animated.View style={[teamSwipeStyles.actionButton, teamSwipeStyles.deleteButton, { transform: [{ scale }] }]}>
+        <TouchableOpacity style={teamSwipeStyles.actionButtonInner} onPress={() => onDelete(member)}>
+          <Ionicons name="trash" size={20} color="#fff" />
+          <Text style={teamSwipeStyles.actionButtonText}>Delete</Text>
+        </TouchableOpacity>
+      </Animated.View>
+    </View>
+  );
+}
+
 export default function Team() {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
@@ -230,6 +271,39 @@ export default function Team() {
 
   const updateUserMut = useMutation(api.users.updateUser);
   const deleteUserMut = useMutation(api.users.deleteUser);
+
+  const handleEditMember = useCallback((member: any) => {
+    setEditEmployee(member);
+    setEditFields({
+      name: member.name || '',
+      department: member.department || '',
+      position: member.position || '',
+      phone: member.phone || '',
+    });
+    setShowEditModal(true);
+  }, []);
+
+  const handleDeleteMember = useCallback((member: any) => {
+    Alert.alert(
+      'Delete Employee',
+      `Are you sure you want to deactivate ${member.name}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteUserMut({ adminId: userId as Id<'users'>, userId: member._id });
+              Alert.alert('Done', `${member.name} has been deactivated.`);
+            } catch (e: any) {
+              Alert.alert('Error', e?.message || 'Failed to delete');
+            }
+          },
+        },
+      ]
+    );
+  }, [deleteUserMut, userId]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -426,86 +500,70 @@ export default function Team() {
               const typeConf = TYPE_CONFIG[m.employeeType] ?? { label: m.employeeType, color: colors.primary };
               const presConf = PRESENCE_CONFIG[m.presenceStatus ?? 'available'] ?? PRESENCE_CONFIG.available;
               const supervisor = (users as any[])?.find((u: any) => u._id === m.supervisorId);
+
+              // Can edit/delete?
+              const canEditDelete = isAdmin && m.role !== 'superadmin' && m._id !== userId;
+
               return (
-                <TouchableOpacity key={m._id} style={[styles.memberCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
-                  activeOpacity={0.75} onPress={() => setSelectedEmployee(m)}
-                  onLongPress={() => {
-                    if (!isAdmin) return;
-                    // Cannot edit/delete superadmin or yourself
-                    if (m.role === 'superadmin' || m._id === userId) return;
-                    
-                    Alert.alert(
-                      m.name,
-                      'Choose an action',
-                      [
-                        {
-                          text: 'Edit',
-                          onPress: () => {
-                            setEditEmployee(m);
-                            setEditFields({
-                              name: m.name || '',
-                              department: m.department || '',
-                              position: m.position || '',
-                              phone: m.phone || '',
-                            });
-                            setShowEditModal(true);
+                <Swipeable
+                  key={m._id}
+                  renderRightActions={(progress, dragX) =>
+                    renderRightActions(progress, dragX, m, userId, isAdmin, handleEditMember, handleDeleteMember, colors)
+                  }
+                  rightThreshold={80}
+                  overshootRight={false}
+                >
+                  <TouchableOpacity
+                    style={[styles.memberCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+                    activeOpacity={0.75}
+                    onPress={() => setSelectedEmployee(m)}
+                    onLongPress={() => {
+                      if (!canEditDelete) return;
+                      Alert.alert(
+                        m.name,
+                        'Choose an action',
+                        [
+                          {
+                            text: 'Edit',
+                            onPress: () => handleEditMember(m),
                           },
-                        },
-                        {
-                          text: 'Delete',
-                          style: 'destructive',
-                          onPress: () => {
-                            Alert.alert(
-                              'Delete Employee',
-                              `Are you sure you want to deactivate ${m.name}?`,
-                              [
-                                { text: 'Cancel', style: 'cancel' },
-                                {
-                                  text: 'Delete',
-                                  style: 'destructive',
-                                  onPress: async () => {
-                                    try {
-                                      await deleteUserMut({ adminId: userId as Id<'users'>, userId: m._id });
-                                      Alert.alert('Done', `${m.name} has been deactivated.`);
-                                    } catch (e: any) {
-                                      Alert.alert('Error', e?.message || 'Failed to delete');
-                                    }
-                                  },
-                                },
-                              ]
-                            );
+                          {
+                            text: 'Delete',
+                            style: 'destructive',
+                            onPress: () => handleDeleteMember(m),
                           },
-                        },
-                        { text: 'Cancel', style: 'cancel' },
-                      ]
-                    );
-                  }}>
-                  {/* Avatar */}
-                  <Avatar name={m.name} avatarUrl={m.avatarUrl} size={46} index={i} />
+                          { text: 'Cancel', style: 'cancel' },
+                        ]
+                      );
+                    }}
+                  >
+                    {/* Avatar */}
+                    <Avatar name={m.name} avatarUrl={m.avatarUrl} size={46} index={i} />
 
-                  {/* Info */}
-                  <View style={{ flex: 1 }}>
-                    <Text style={[styles.memberName, { color: colors.textPrimary }]}>{m.name}</Text>
-                    <Text style={[styles.memberRole, { color: colors.textMuted }]}>
-                      {m.position ?? roleConf.label}{m.department ? ` · ${m.department}` : ''}
-                    </Text>
-                    {supervisor && (
-                      <Text style={[styles.supervisorText, { color: colors.textMuted }]}>↑ {supervisor.name}</Text>
-                    )}
-                  </View>
+                    {/* Info */}
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.memberName, { color: colors.textPrimary }]}>{m.name}</Text>
+                      <Text style={[styles.memberRole, { color: colors.textMuted }]}>
+                        {m.position ?? roleConf.label}{m.department ? ` · ${m.department}` : ''}
+                      </Text>
+                      {supervisor && (
+                        <Text style={[styles.supervisorText, { color: colors.textMuted }]}>↑ {supervisor.name}</Text>
+                      )}
+                    </View>
 
-                  {/* Right side */}
-                  <View style={styles.cardRight}>
-                    <View style={[styles.statusPill, { backgroundColor: presConf.color + '22' }]}>
-                      <Ionicons name={presConf.icon as any} size={10} color={presConf.color} />
-                      <Text style={[styles.statusText, { color: presConf.color }]}>{presConf.label}</Text>
+                    {/* Right side */}
+                    <View style={styles.cardRight}>
+                      <View style={[styles.statusPill, { backgroundColor: presConf.color + '22' }]}>
+                        <Ionicons name={presConf.icon as any} size={10} color={presConf.color} />
+                        <Text style={[styles.statusText, { color: presConf.color }]}>{presConf.label}</Text>
+                      </View>
+                      <View style={[styles.typePill, { backgroundColor: typeConf.color + '22' }]}>
+                        <Text style={[styles.typeText, { color: typeConf.color }]}>{typeConf.label}</Text>
+                      </View>
+                      <Ionicons name="chevron-forward" size={14} color={colors.textMuted} style={{ marginTop: 2 }} />
                     </View>
-                    <View style={[styles.typePill, { backgroundColor: typeConf.color + '22' }]}>
-                      <Text style={[styles.typeText, { color: typeConf.color }]}>{typeConf.label}</Text>
-                    </View>
-                    <Ionicons name="chevron-forward" size={14} color={colors.textMuted} style={{ marginTop: 2 }} />
-                  </View>
-                </TouchableOpacity>
+                  </TouchableOpacity>
+                </Swipeable>
               );
             })}
           </View>
@@ -678,6 +736,39 @@ const profileStyles = StyleSheet.create({
   statusText: { ...Typography.label, fontSize: 10 },
   emptyLeaves: { alignItems: 'center', gap: 8, paddingVertical: 24 },
   emptyText: { ...Typography.caption },
+});
+
+// Swipe action styles for team members
+const teamSwipeStyles = StyleSheet.create({
+  rightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  actionButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+    height: '100%',
+    borderRadius: 12,
+    marginRight: 8,
+  },
+  editButton: {
+    backgroundColor: '#3b82f6',
+  },
+  deleteButton: {
+    backgroundColor: '#ef4444',
+  },
+  actionButtonInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
 });
 
 

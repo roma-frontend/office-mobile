@@ -5,6 +5,11 @@
  * openAuthSessionAsync intercepts the return URL before Expo Router processes it.
  */
 
+import { Ionicons } from '@expo/vector-icons';
+import { useMutation } from 'convex/react';
+import * as Linking from 'expo-linking';
+import { router } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import React, { useState } from 'react';
 import {
   TouchableOpacity,
@@ -14,13 +19,10 @@ import {
   View,
   Alert,
 } from 'react-native';
-import * as WebBrowser from 'expo-web-browser';
-import * as Linking from 'expo-linking';
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
+
 import { useAuth } from '@/context/AuthContext';
-import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { api } from '@/convex/_generated/api';
+
 
 WebBrowser.maybeCompleteAuthSession();
 

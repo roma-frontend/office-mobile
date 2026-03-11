@@ -1,12 +1,14 @@
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 import {
   View, Text, StyleSheet, Animated, TouchableOpacity, Platform,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Haptics from 'expo-haptics';
-import { useTheme } from './ThemeContext';
+
 import { Radius, Typography } from '@/constants/theme';
+
+import { useTheme } from './ThemeContext';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type ToastType = 'success' | 'error' | 'warning' | 'info';

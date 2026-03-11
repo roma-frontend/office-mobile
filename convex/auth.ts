@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+
 import { mutation, query } from "./_generated/server";
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -535,7 +536,7 @@ export const googleOAuthLogin = mutation({
     const email = args.email.toLowerCase().trim();
 
     // ── 1. Find existing user ──────────────────────────────────────────────
-    let user = await ctx.db
+    const user = await ctx.db
       .query("users")
       .withIndex("by_email", (q) => q.eq("email", email))
       .unique();

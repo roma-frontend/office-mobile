@@ -1,19 +1,23 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useQuery, useMutation } from 'convex/react';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as Linking from 'expo-linking';
+import { router } from 'expo-router';
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator,
   Platform, Modal, Alert, Image, TextInput, Keyboard,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import { useQuery, useMutation } from 'convex/react';
+
+import CallModal from '@/components/messenger/CallModal';
+import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
+
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
-import { useTheme } from '@/context/ThemeContext';
-import { useAuth } from '@/context/AuthContext';
-import { router } from 'expo-router';
-import * as Linking from 'expo-linking';
-import CallModal from '@/components/messenger/CallModal';
+
+
 
 // ── Types ────────────────────────────────────────────────────────────────────
 

@@ -1,17 +1,18 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useMutation } from 'convex/react';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator,
 } from 'react-native';
-import { router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import { Typography, Spacing, Radius } from '@/constants/theme';
-import { useTheme } from '@/context/ThemeContext';
-import { useAuth } from '@/context/AuthContext';
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
+
 import { GoogleSignInButton } from '@/components/GoogleSignInButton';
+import { Typography, Spacing, Radius } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
+import { api } from '@/convex/_generated/api';
 // import { FaceLogin } from '@/components/FaceLogin'; // Disabled for Expo Go
 
 export default function Login() {

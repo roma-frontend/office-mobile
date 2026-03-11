@@ -1,15 +1,18 @@
-import { useState } from 'react';
-import {
-  View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView,
-  Alert, Image, TextInput, Switch,
-} from 'react-native';
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
-import type { Id } from '../../convex/_generated/dataModel';
+import { useState, useRef } from 'react';
+import {
+  View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView,
+  Alert, Image, TextInput, Switch, PanResponder,
+} from 'react-native';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
+
 import { Typography, Radius } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
+
+import { api } from '../../convex/_generated/api';
+import type { Id } from '../../convex/_generated/dataModel';
+
 import OrgPicker from './OrgPicker';
 
 const AVATAR_COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#60a5fa'];
@@ -28,6 +31,18 @@ export default function ConversationInfoModal({ visible, onClose, conversationId
   const [newName, setNewName] = useState('');
   const [selectedOrgId, setSelectedOrgId] = useState<Id<"organizations"> | null>(null);
   const [search, setSearch] = useState('');
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dy) > 10 && Math.abs(gestureState.dx) < 10,
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy > 100 && gestureState.vy > 0.5) {
+          onClose();
+        }
+      },
+    })
+  ).current;
 
   const convInfo = useQuery(api.messenger.getConversationInfo, { conversationId, userId });
   const orgUsers = useQuery(
@@ -111,7 +126,7 @@ export default function ConversationInfoModal({ visible, onClose, conversationId
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={onClose}>
       <SafeAreaProvider>
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]} edges={['top']}>
+        <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]} edges={['top']} {...panResponder.panHandlers}>
           {/* Header */}
           <View style={[styles.header, { borderBottomColor: colors.border }]}>
             <TouchableOpacity onPress={onClose}>

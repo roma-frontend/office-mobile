@@ -1,9 +1,11 @@
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useTheme } from '@/context/ThemeContext';
-import { router } from 'expo-router';
+
 
 type SettingsSection = 
   | 'profile'
@@ -17,13 +19,13 @@ type SettingsSection =
   | 'privacy'
   | 'about';
 
-const SETTINGS_SECTIONS: Array<{
+const SETTINGS_SECTIONS: {
   id: SettingsSection;
   title: string;
   icon: string;
   color: string;
   description: string;
-}> = [
+}[] = [
   {
     id: 'profile',
     title: 'Profile & Account',

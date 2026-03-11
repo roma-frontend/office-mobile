@@ -1,6 +1,7 @@
 import { v } from "convex/values";
-import { query } from "./_generated/server";
+
 import type { Id } from "./_generated/dataModel";
+import { query } from "./_generated/server";
 
 /**
  * Get user statistics including leave usage, attendance, and productivity metrics
@@ -42,7 +43,7 @@ export const getUserStats = query({
       .collect();
 
     // Get attendance records if available
-    let attendanceStats = {
+    const attendanceStats = {
       presentDays: 0,
       absentDays: 0,
       leaveDays: totalDaysUsed,

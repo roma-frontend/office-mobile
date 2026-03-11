@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation, useQuery } from 'convex/react';
+import { useState, useEffect } from 'react';
+
+import { useAuth } from '@/context/AuthContext';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export interface UserSettings {
   // Productivity

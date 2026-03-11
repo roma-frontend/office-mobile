@@ -1,15 +1,18 @@
-import { useState, useMemo } from 'react';
-import {
-  View, Text, StyleSheet, TouchableOpacity, TextInput, Modal,
-  ScrollView, ActivityIndicator, Alert, Image,
-} from 'react-native';
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
-import type { Id } from '../../convex/_generated/dataModel';
+import { useState, useMemo, useRef } from 'react';
+import {
+  View, Text, StyleSheet, TouchableOpacity, TextInput, Modal,
+  ScrollView, ActivityIndicator, Alert, Image, PanResponder,
+} from 'react-native';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
+
 import { Typography, Radius } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
+
+import { api } from '../../convex/_generated/api';
+import type { Id } from '../../convex/_generated/dataModel';
+
 import OrgPicker from './OrgPicker';
 
 const AVATAR_COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#60a5fa'];
@@ -30,6 +33,23 @@ export default function NewConversationModal({ visible, onClose, userId, onConve
   const [selectedOrgId, setSelectedOrgId] = useState<Id<"organizations"> | null>(null);
   const [loading, setLoading] = useState(false);
   const [showAllOrgs, setShowAllOrgs] = useState(false);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dy) > 10 && Math.abs(gestureState.dx) < 10,
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dy > 0) {
+          // Swipe down - close modal
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy > 100 && gestureState.vy > 0.5) {
+          resetAndClose();
+        }
+      },
+    })
+  ).current;
 
   // Get current user to check if superadmin
   const currentUser = useQuery(api.users.getUserById, { userId, requesterId: userId });
@@ -127,7 +147,7 @@ export default function NewConversationModal({ visible, onClose, userId, onConve
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={resetAndClose}>
       <SafeAreaProvider>
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]} edges={['top']}>
+        <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]} edges={['top']} {...panResponder.panHandlers}>
           {/* Header */}
           <View style={[styles.header, { borderBottomColor: colors.border }]}>
             <TouchableOpacity onPress={resetAndClose}>

@@ -1,11 +1,13 @@
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet, Switch, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/context/ThemeContext';
-import { router } from 'expo-router';
-import { useBreakReminder } from '@/hooks/useBreakReminder';
 import { TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { useTheme } from '@/context/ThemeContext';
+import { useBreakReminder } from '@/hooks/useBreakReminder';
+
 
 export default function ProductivitySettings() {
   const { colors } = useTheme();

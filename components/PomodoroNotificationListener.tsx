@@ -1,14 +1,15 @@
-import { useEffect, useRef } from 'react';
 import { useQuery } from 'convex/react';
-import { api } from '../convex/_generated/api';
+import { useEffect, useRef } from 'react';
+
 import { useAuth } from '../context/AuthContext';
+import { api } from '../convex/_generated/api';
+import type { Id } from '../convex/_generated/dataModel';
 import { 
   notifyPomodoroComplete, 
   notifyBreakComplete, 
   notifyLongBreakComplete,
   registerForPushNotifications 
 } from '../lib/notifications';
-import type { Id } from '../convex/_generated/dataModel';
 
 /**
  * Background listener for Pomodoro timer completions

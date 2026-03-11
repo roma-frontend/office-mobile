@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+
 import { query } from "./_generated/server";
 
 /**
@@ -105,14 +106,14 @@ export const detectConflicts = query({
     const userMap = new Map(users.map(u => [u._id, u]));
     
     // Group by department and date
-    const conflicts: Array<{
+    const conflicts: {
       id: string;
       department: string;
       date: string;
       employeesOut: string[];
       severity: "critical" | "warning" | "info";
       recommendation: string;
-    }> = [];
+    }[] = [];
     
     // Group leaves by department
     const deptLeaves = new Map<string, typeof leaves>();
@@ -192,13 +193,13 @@ export const detectConflicts = query({
 export const getSmartSuggestions = query({
   args: {},
   handler: async (ctx) => {
-    const suggestions: Array<{
+    const suggestions: {
       id: string;
       title: string;
       description: string;
       impact: "high" | "medium" | "low";
       category: "optimization" | "cost" | "conflict" | "policy";
-    }> = [];
+    }[] = [];
     
     // Get all users and leaves
     const users = await ctx.db.query("users").collect();

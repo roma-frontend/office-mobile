@@ -1,16 +1,20 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useQuery } from 'convex/react';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { useState, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Platform,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import { useQuery } from 'convex/react';
-import { api } from '../../convex/_generated/api';
+
 import { Typography, Spacing, Radius } from '@/constants/theme';
-import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
-import { router } from 'expo-router';
+import { useTheme } from '@/context/ThemeContext';
+
+import { api } from '../../convex/_generated/api';
+
+
 
 function MetricCard({ icon, label, value, suffix, color, colors }: {
   icon: string; label: string; value: string | number; suffix?: string; color: string; colors: any;

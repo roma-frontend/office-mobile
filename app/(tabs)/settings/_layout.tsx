@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
-import { useTheme } from '@/context/ThemeContext';
 import { Platform } from 'react-native';
+
+import { useTheme } from '@/context/ThemeContext';
 
 export default function SettingsLayout() {
   const { colors } = useTheme();

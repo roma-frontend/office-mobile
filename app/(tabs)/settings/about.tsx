@@ -1,10 +1,12 @@
+import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
+import { router } from 'expo-router';
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useTheme } from '@/context/ThemeContext';
-import { router } from 'expo-router';
-import Constants from 'expo-constants';
+
 
 export default function AboutSettings() {
   const { colors } = useTheme();

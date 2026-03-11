@@ -1,13 +1,16 @@
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useQuery } from 'convex/react';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useState, useEffect, useMemo } from 'react';
 import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Platform, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import { useQuery } from 'convex/react';
-import { api } from '../../convex/_generated/api';
+
 import { Typography, Spacing, Radius } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { api } from '../../convex/_generated/api';
+
 
 type LeaveType = 'paid' | 'sick' | 'family' | 'doctor' | 'unpaid';
 type LeaveStatus = 'pending' | 'approved' | 'rejected';

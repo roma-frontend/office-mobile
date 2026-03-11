@@ -1,18 +1,20 @@
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+
 import { Typography, Radius } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
+
 import type { Id } from '../../convex/_generated/dataModel';
 
 const AVATAR_COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#60a5fa'];
 
 interface MentionDropdownProps {
   query: string;
-  participants: Array<{
+  participants: {
     userId: Id<"users">;
     userName: string;
     userAvatarUrl?: string;
     userDepartment?: string;
-  }>;
+  }[];
   onSelect: (userId: Id<"users">, userName: string) => void;
 }
 

@@ -1,15 +1,16 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useMutation } from 'convex/react';
+import * as LocalAuthentication from 'expo-local-authentication';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch,
   Alert, Modal, TextInput, ActivityIndicator, Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/context/ThemeContext';
+
 import { useAuth } from '@/context/AuthContext';
-import { router } from 'expo-router';
-import * as LocalAuthentication from 'expo-local-authentication';
-import { useMutation } from 'convex/react';
+import { useTheme } from '@/context/ThemeContext';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 

@@ -1,13 +1,17 @@
-import { Tabs, useRouter } from 'expo-router';
-import { View, Text, StyleSheet, Platform, Animated, Easing } from 'react-native';
-import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme } from '@/context/ThemeContext';
-import { useAuth } from '@/context/AuthContext';
 import { useQuery } from 'convex/react';
-import { api } from '../../convex/_generated/api';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Tabs, useRouter } from 'expo-router';
 import { useEffect, useRef, useCallback } from 'react';
+import { View, Text, StyleSheet, Platform, Animated, Easing } from 'react-native';
+
+import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
+
+
+import { api } from '../../convex/_generated/api';
+
 
 function TabBarIcon({ name, color, focused, primaryColor }: { name: any; color: string; focused: boolean; primaryColor: string }) {
   return (

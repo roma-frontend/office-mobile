@@ -1,20 +1,23 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useQuery, useMutation } from 'convex/react';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator,
   KeyboardAvoidingView, Platform, Modal, TextInput, Alert,
 } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
-import type { Id } from '../../convex/_generated/dataModel';
+
 import { Typography, Radius } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
+
+import { api } from '../../convex/_generated/api';
+import type { Id } from '../../convex/_generated/dataModel';
+
+import CallModal from './CallModal';
+import ConversationInfoModal from './ConversationInfoModal';
 import MessageBubble from './MessageBubble';
 import MessageInput from './MessageInput';
-import ConversationInfoModal from './ConversationInfoModal';
 import ThreadModal from './ThreadModal';
-import CallModal from './CallModal';
 
 interface ConversationScreenProps {
   visible: boolean;

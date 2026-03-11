@@ -1,25 +1,26 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useMutation, useAction } from 'convex/react';
 import { Audio } from 'expo-av';
-// Expo Go compatibility: Speech recognition disabled
-const ExpoSpeechRecognitionModule = null as any;
-const useSpeechRecognitionEvent = (event: string, handler: any) => {};
-import * as Speech from 'expo-speech';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams } from 'expo-router';
+import * as Speech from 'expo-speech';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
   FlatList, KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
   Modal, Animated, ScrollView,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+
 import { Typography, Radius } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
-import { useMutation, useAction } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import type { Id } from '@/convex/_generated/dataModel';
 import { chatMicState } from '@/lib/chatMicState';
+// Expo Go compatibility: Speech recognition disabled
+const ExpoSpeechRecognitionModule = null as any;
+const useSpeechRecognitionEvent = (event: string, handler: any) => {};
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface LeaveEntry {

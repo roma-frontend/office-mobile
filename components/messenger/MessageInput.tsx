@@ -1,15 +1,18 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useMutation } from 'convex/react';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
 import { useState, useRef, useCallback } from 'react';
 import {
   View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, Platform,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
-import { useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
-import type { Id } from '../../convex/_generated/dataModel';
+
 import { Typography, Radius } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
+
+import { api } from '../../convex/_generated/api';
+import type { Id } from '../../convex/_generated/dataModel';
+
 import MentionDropdown from './MentionDropdown';
 import PollCreator from './PollCreator';
 import SchedulePicker from './SchedulePicker';
@@ -17,12 +20,12 @@ import SchedulePicker from './SchedulePicker';
 interface MessageInputProps {
   conversationId: Id<"chatConversations">;
   userId: Id<"users">;
-  participants: Array<{
+  participants: {
     userId: Id<"users">;
     userName: string;
     userAvatarUrl?: string;
     userDepartment?: string;
-  }>;
+  }[];
   replyTo?: any;
   onClearReply?: () => void;
 }

@@ -1,18 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { ConvexProvider, ConvexReactClient, useQuery } from 'convex/react';
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect, useRef, useState } from 'react';
+import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { ConvexProvider, ConvexReactClient, useQuery } from 'convex/react';
+
+import { PomodoroNotificationListener } from '@/components/PomodoroNotificationListener';
 import { CONVEX_URL } from '@/constants/config';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { ThemeProvider, useTheme } from '@/context/ThemeContext';
 import { ToastProvider, useToast } from '@/context/ToastContext';
-import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { getRouteForNotificationType } from '@/services/breakReminderService';
+
 import { api } from '../convex/_generated/api';
 import type { Id } from '../convex/_generated/dataModel';
-import { PomodoroNotificationListener } from '@/components/PomodoroNotificationListener';
-import { Platform } from 'react-native';
-import { getRouteForNotificationType } from '@/services/breakReminderService';
+
 const Notifications = Platform.OS !== 'web' ? require('expo-notifications') : null;
 
 const convex = new ConvexReactClient(CONVEX_URL);

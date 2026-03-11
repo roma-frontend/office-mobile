@@ -1,14 +1,16 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import {
-  View, Text, StyleSheet, Modal, TouchableOpacity, ActivityIndicator, Platform,
-} from 'react-native';
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery } from 'convex/react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  View, Text, StyleSheet, Modal, TouchableOpacity, ActivityIndicator, Platform, PanResponder,
+} from 'react-native';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
+
+import { Typography, Radius } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
+
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
-import { useTheme } from '@/context/ThemeContext';
-import { Typography, Radius } from '@/constants/theme';
 
 // Import WebRTC if available (will be available after native build)
 let RTCPeerConnection: any = null;
@@ -110,6 +112,18 @@ export default function CallModal({
   const remoteUser = convInfo?.participants?.find((p) => p.userId !== currentUserId);
   const displayName = remoteUserName || remoteUser?.userName || 'Unknown';
   const displayAvatar = remoteUserAvatar || remoteUser?.userAvatarUrl;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dy) > 10 && Math.abs(gestureState.dx) < 10,
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy > 100 && gestureState.vy > 0.5) {
+          handleEnd();
+        }
+      },
+    })
+  ).current;
 
   // Initialize call
   useEffect(() => {
@@ -326,7 +340,7 @@ export default function CallModal({
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="fullScreen">
       <SafeAreaProvider>
-        <SafeAreaView style={[styles.container, { backgroundColor: isDark ? '#0f172a' : '#1a1a2e' }]}>
+        <SafeAreaView style={[styles.container, { backgroundColor: isDark ? '#0f172a' : '#1a1a2e' }]} {...panResponder.panHandlers}>
           {/* Video area for video calls */}
           {callType === 'video' && (
             <View style={styles.videoContainer}>

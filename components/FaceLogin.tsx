@@ -1,3 +1,7 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useMutation, useQuery } from 'convex/react';
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as FaceDetector from 'expo-face-detector';
 import { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -8,14 +12,11 @@ import {
   Alert,
   Modal,
 } from 'react-native';
-import { CameraView, useCameraPermissions } from 'expo-camera';
-import * as FaceDetector from 'expo-face-detector';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/context/ThemeContext';
-import { useAuth } from '@/context/AuthContext';
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '@/convex/_generated/api';
+
 import { Typography, Spacing, Radius } from '@/constants/theme';
+import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
+import { api } from '@/convex/_generated/api';
 
 interface FaceLoginProps {
   visible: boolean;

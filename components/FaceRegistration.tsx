@@ -1,3 +1,8 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useMutation } from 'convex/react';
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as FaceDetector from 'expo-face-detector';
+import * as FileSystem from 'expo-file-system';
 import { useState, useRef } from 'react';
 import {
   View,
@@ -9,14 +14,10 @@ import {
   Modal,
   Image,
 } from 'react-native';
-import { CameraView, useCameraPermissions } from 'expo-camera';
-import * as FaceDetector from 'expo-face-detector';
-import * as FileSystem from 'expo-file-system';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/context/ThemeContext';
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
+
 import { Typography, Spacing, Radius } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
+import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 
 interface FaceRegistrationProps {

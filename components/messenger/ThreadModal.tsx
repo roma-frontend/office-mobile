@@ -1,15 +1,17 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useQuery, useMutation } from 'convex/react';
 import { useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity,
-  Modal, KeyboardAvoidingView, Platform, Image, Alert,
+  Modal, KeyboardAvoidingView, Platform, Image, Alert, PanResponder,
 } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
-import type { Id } from '../../convex/_generated/dataModel';
+
 import { Typography, Radius } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
+
+import { api } from '../../convex/_generated/api';
+import type { Id } from '../../convex/_generated/dataModel';
 
 const AVATAR_COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#60a5fa'];
 
@@ -35,6 +37,18 @@ export default function ThreadModal({
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dy) > 10 && Math.abs(gestureState.dx) < 10,
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy > 100 && gestureState.vy > 0.5) {
+          onClose();
+        }
+      },
+    })
+  ).current;
 
   const replies = useQuery(
     api.messenger.getThreadReplies,
@@ -65,7 +79,7 @@ export default function ThreadModal({
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={onClose}>
       <SafeAreaProvider>
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]} edges={['top']}>
+        <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]} edges={['top']} {...panResponder.panHandlers}>
           <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             {/* Header */}
             <View style={[styles.header, { borderBottomColor: colors.border }]}>

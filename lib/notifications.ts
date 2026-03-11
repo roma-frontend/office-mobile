@@ -1,5 +1,5 @@
-import { Platform } from 'react-native';
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 
 // Lazy-load expo-notifications only on native — it crashes on web
 const Notifications: typeof import('expo-notifications') | null =

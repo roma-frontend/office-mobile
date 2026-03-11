@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { router } from 'expo-router';
-import { useTheme } from '@/context/ThemeContext';
+import { useEffect } from 'react';
+
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function AuthLayout() {
   const { colors } = useTheme();

@@ -9,8 +9,9 @@
  */
 
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+
 import type { Id } from "./_generated/dataModel";
+import { mutation, query } from "./_generated/server";
 
 const SUPERADMIN_EMAIL = "romangulanyan@gmail.com";
 
@@ -1438,7 +1439,7 @@ export const getFilteredDrivers = query({
       })
     );
 
-    let result = enriched.filter(Boolean) as NonNullable<typeof enriched[number]>[];
+    const result = enriched.filter(Boolean) as NonNullable<typeof enriched[number]>[];
 
     // Sort
     if (sortBy === "rating") {
